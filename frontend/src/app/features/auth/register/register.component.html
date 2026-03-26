@@ -1,0 +1,79 @@
+<div class="login-page">
+    <div class="login-decorations">
+        <div class="glow-blue"></div>
+        <div class="glow-orange"></div>
+        <div class="glow-white"></div>
+    </div>
+
+    <div class="login-card-container fade-in">
+        <div class="login-card glass-card">
+
+            <!-- ── Registration Success State ──────────────── -->
+            <div *ngIf="isSuccess" class="success-content fade-in">
+                <div class="success-icon-wrap">
+                    <mat-icon class="check-icon">check_circle</mat-icon>
+                </div>
+                <h2>Account Created!</h2>
+                <p>Welcome to <strong>STEM Sheetz</strong>.</p>
+                <p class="sub-text">Redirecting you to the sign-in page...</p>
+
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+            </div>
+
+            <!-- ── Registration Form View ─────────────────── -->
+            <ng-container *ngIf="!isSuccess">
+                <div class="login-header">
+                    <div class="logo-circle">
+                        <mat-icon ripple>person_add</mat-icon>
+                    </div>
+                    <h1>Join the Team</h1>
+                    <p>Register for <strong>STEM Sheetz</strong></p>
+                </div>
+
+                <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="login-form">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Username</mat-label>
+                        <input matInput formControlName="username" placeholder="Pick a username">
+                        <mat-icon matSuffix>person</mat-icon>
+                        <mat-error *ngIf="registerForm.get('username')?.hasError('required')">Username is
+                            required</mat-error>
+                        <mat-error *ngIf="registerForm.get('username')?.hasError('minlength')">Too short</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Email</mat-label>
+                        <input matInput type="email" formControlName="email" placeholder="Your email address">
+                        <mat-icon matSuffix>email</mat-icon>
+                        <mat-error *ngIf="registerForm.get('email')?.hasError('email')">Invalid email</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Password</mat-label>
+                        <input matInput type="password" formControlName="password"
+                            placeholder="Choose a strong password">
+                        <mat-icon matSuffix>lock</mat-icon>
+                        <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">Minimum 6
+                            characters</mat-error>
+                    </mat-form-field>
+
+                    <button mat-flat-button color="primary" type="submit" [disabled]="registerForm.invalid || isLoading"
+                        class="login-btn">
+                        <span *ngIf="!isLoading">CREATE ACCOUNT</span>
+                        <span *ngIf="isLoading">PROCESSING...</span>
+                    </button>
+                </form>
+
+                <div class="register-link">
+                    Already a member? <a routerLink="/login">Sign In Instead</a>
+                </div>
+
+                <div class="login-footer">
+                    <p>STEM SHEETZ — SOLID & STEADY</p>
+                </div>
+            </ng-container>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,239 @@
+.jobs-container {
+  padding: 36px;
+  max-width: 1400px;
+  margin: 0 auto;
+  animation: fadeInUp 0.5s both;
+}
+
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+// ── Page Header ────────────────────────────────────────────────────────────
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .header-left {
+    h1 {
+      font-size: 2.8rem;
+      margin: 0 0 10px;
+      background: linear-gradient(135deg, #fff 0%, #4dabff 60%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1.5px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+    }
+
+    .record-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.04);
+      padding: 4px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.08);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      font-weight: 700;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    button {
+      border-radius: 14px !important;
+      padding: 10px 22px !important;
+      font-weight: 700 !important;
+      font-family: 'Outfit', sans-serif !important;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(255,107,0,0.3) !important;
+      transition: all 0.25s cubic-bezier(0.4,0,0.2,1) !important;
+
+      &:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,107,0,0.4) !important; }
+    }
+  }
+}
+
+// ── Filters Bar ────────────────────────────────────────────────────────────
+.filters-bar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+
+  .filter-field {
+    min-width: 260px;
+
+    ::ng-deep {
+      .mat-mdc-text-field-wrapper {
+        background: rgba(255,255,255,0.03) !important;
+        border-radius: 14px !important;
+      }
+      .mdc-text-field--outlined .mdc-notched-outline__leading,
+      .mdc-text-field--outlined .mdc-notched-outline__notch,
+      .mdc-text-field--outlined .mdc-notched-outline__trailing {
+        border-color: rgba(255,255,255,0.08) !important;
+      }
+      .mat-mdc-text-field-wrapper:hover .mdc-notched-outline > * {
+        border-color: rgba(255,255,255,0.2) !important;
+      }
+      .mdc-floating-label { color: rgba(255,255,255,0.4) !important; }
+      input, .mat-mdc-select-value { color: rgba(255,255,255,0.85) !important; }
+    }
+  }
+}
+
+// ── Table Container ────────────────────────────────────────────────────────
+.table-container {
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.07);
+  overflow: hidden;
+  position: relative;
+
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(2,6,15,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  table {
+    width: 100%;
+    background: transparent !important;
+  }
+
+  th {
+    background: rgba(0,89,179,0.07) !important;
+    color: rgba(100,181,246,0.85) !important;
+    font-weight: 800 !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 1.8px !important;
+    text-transform: uppercase !important;
+    padding: 20px 18px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    font-family: 'Outfit', sans-serif !important;
+  }
+
+  td {
+    padding: 18px 18px !important;
+    color: rgba(255,255,255,0.72) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+    vertical-align: middle;
+  }
+
+  tr.data-row {
+    transition: background 0.15s ease;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255,255,255,0.025) !important;
+
+      td { color: rgba(255,255,255,0.95) !important; }
+    }
+
+    &:last-child td { border-bottom: none !important; }
+  }
+}
+
+// ── Cell Content ───────────────────────────────────────────────────────────
+.primary-text {
+  font-weight: 600;
+  color: white !important;
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.secondary-text {
+  color: rgba(255,255,255,0.45) !important;
+  font-size: 0.875rem;
+}
+
+// ── Status Badges ──────────────────────────────────────────────────────────
+.status-badge {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: inline-block;
+  min-width: 100px;
+  text-align: center;
+  font-family: 'Outfit', sans-serif;
+  border: 1px solid transparent;
+
+  &.applied       { color: #64b5f6; background:rgba(100,181,246,0.1);  border-color:rgba(100,181,246,0.2); }
+  &.interviewing,
+  &.screening     { color: #4ade80; background:rgba(74,222,128,0.1);   border-color:rgba(74,222,128,0.2); }
+  &.offer         { color: #fbbf24; background:rgba(251,191,36,0.12);  border-color:rgba(251,191,36,0.3); box-shadow:0 0 14px rgba(251,191,36,0.1); }
+  &.rejected      { color: #f87171; background:rgba(248,113,113,0.1);  border-color:rgba(248,113,113,0.2); }
+  &.onhold,
+  &.rtrsent,
+  &.rtrpending,
+  &.submitted     { color: #c084fc; background:rgba(192,132,252,0.1);  border-color:rgba(192,132,252,0.2); }
+  &.active        { color: #fbbf24; background:rgba(251,191,36,0.1);   border-color:rgba(251,191,36,0.2); }
+}
+
+// ── Action Buttons ─────────────────────────────────────────────────────────
+.action-buttons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  button {
+    opacity: 0;
+    transform: scale(0.85);
+    transition: all 0.2s ease !important;
+  }
+}
+
+tr.data-row:hover .action-buttons button {
+  opacity: 1;
+  transform: scale(1);
+}
+
+// ── Paginator ──────────────────────────────────────────────────────────────
+::ng-deep .mat-mdc-paginator {
+  background: transparent !important;
+  border-top: 1px solid rgba(255,255,255,0.05) !important;
+  padding: 8px 0 !important;
+
+  .mat-mdc-paginator-container {
+    color: rgba(255,255,255,0.4) !important;
+    font-size: 0.8rem !important;
+    justify-content: flex-end !important;
+    padding: 0 24px !important;
+  }
+
+  .mat-mdc-icon-button {
+    color: rgba(255,255,255,0.4) !important;
+    &:hover { color: white !important; background: rgba(255,255,255,0.06) !important; }
+    &:disabled { color: rgba(255,255,255,0.15) !important; }
+  }
+
+  .mat-mdc-select-value { color: rgba(255,255,255,0.55) !important; }
+}

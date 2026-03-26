@@ -1,0 +1,143 @@
+<div class="dashboard-container">
+
+  <!-- Welcome Header -->
+  <div class="welcome-header fade-in-up">
+    <div class="welcome-left">
+      <div class="greeting-tag">
+        <span class="greeting-dot"></span>
+        {{ getGreeting() }}
+      </div>
+      <h1 class="dashboard-title">Command <span class="title-accent">Center</span></h1>
+      <p class="dashboard-subtitle">{{ today | date:'EEEE, MMMM d, y' }} · Your career at a glance</p>
+    </div>
+    <div class="welcome-right">
+      <a routerLink="/jobs" class="quick-link-btn">
+        <mat-icon>add_circle</mat-icon>
+        <span>Add Job</span>
+      </a>
+      <a routerLink="/reminders" class="quick-link-btn secondary">
+        <mat-icon>alarm</mat-icon>
+        <span>Reminders</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <ng-template #loadingState>
+    <div class="loading-screen">
+      <div class="loading-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+      </div>
+      <mat-spinner diameter="44" class="custom-spinner"></mat-spinner>
+      <h3>Syncing Command Center...</h3>
+      <p>Loading your career data</p>
+    </div>
+  </ng-template>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error">
+    <mat-icon>cloud_off</mat-icon>
+    <h3>Backend Offline</h3>
+    <p>Start the Spring Boot server and refresh</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading && !error; else loadingState">
+
+    <!-- Stat Cards Grid -->
+    <div class="stats-grid">
+      <ng-container *ngFor="let card of statCards; let i = index">
+        <div
+          *ngIf="!card.isAdmin || isAdmin()"
+          class="stat-card fade-in-up"
+          [class]="'stat-card--' + card.colorClass"
+          [style.animation-delay]="(i * 70) + 'ms'"
+          [routerLink]="card.link"
+        >
+          <div class="stat-card__glow"></div>
+          <div class="stat-card__top">
+            <div class="stat-card__icon">
+              <mat-icon>{{ card.icon }}</mat-icon>
+            </div>
+            </div>
+          <div class="stat-card__value">{{ getDisplayValue(card.key) }}</div>
+          <div class="stat-card__label">{{ card.label }}</div>
+          <div class="stat-card__bar">
+            <div class="stat-card__bar-fill"></div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-row">
+
+      <!-- Pipeline Donut -->
+      <div class="chart-card fade-in-up stagger-1">
+        <div class="chart-card__header">
+          <div>
+            <h2>Application Pipeline</h2>
+            <p>Status breakdown of all applications</p>
+          </div>
+          <div class="chart-card__badge">
+            <mat-icon>donut_large</mat-icon>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <canvas baseChart
+            [data]="pieChartData"
+            [options]="pieChartOptions"
+            [type]="pieChartType">
+          </canvas>
+        </div>
+      </div>
+
+      <!-- Study Trend Bar -->
+      <div class="chart-card fade-in-up stagger-2">
+        <div class="chart-card__header">
+          <div>
+            <h2>Weekly Study Effort</h2>
+            <p>Minutes studied per day</p>
+          </div>
+          <span class="chart-tag">Last 7 Days</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas baseChart
+            [data]="barChartData"
+            [options]="barChartOptions"
+            [type]="barChartType">
+          </canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions fade-in-up stagger-3">
+      <div class="quick-actions__title">Quick Actions</div>
+      <div class="quick-actions__grid">
+        <a class="qa-btn qa-btn--blue"   routerLink="/jobs/add">
+          <mat-icon>work</mat-icon><span>Log Job</span>
+        </a>
+        <a class="qa-btn qa-btn--orange" routerLink="/rtr">
+          <mat-icon>assignment_turned_in</mat-icon><span>New RTR</span>
+        </a>
+        <a class="qa-btn qa-btn--green"  routerLink="/study">
+          <mat-icon>school</mat-icon><span>Study Log</span>
+        </a>
+        <a class="qa-btn qa-btn--purple" routerLink="/analytics">
+          <mat-icon>insights</mat-icon><span>Analytics</span>
+        </a>
+        <a class="qa-btn qa-btn--yellow" routerLink="/reminders">
+          <mat-icon>notifications_active</mat-icon><span>Reminder</span>
+        </a>
+        <a class="qa-btn qa-btn--teal"   routerLink="/resume-builder">
+          <mat-icon>auto_fix_high</mat-icon><span>Resume</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
