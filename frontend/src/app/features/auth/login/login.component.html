@@ -1,0 +1,61 @@
+<div class="login-page">
+    <div class="login-decorations">
+        <div class="glow-blue"></div>
+        <div class="glow-orange"></div>
+        <div class="glow-white"></div>
+    </div>
+
+    <div class="split-container fade-in">
+        <!-- ── Custom Brand Section ──────────────── -->
+        <div class="brand-section">
+            <div class="brand-logo-wrap">
+                <img src="assets/logo.png" alt="STEM Sheetz Logo" class="large-logo">
+            </div>
+            <div class="brand-text">
+                <h2>STEM Sheetz</h2>
+                <p>The Ultimate Command Center for Your Career Journey</p>
+            </div>
+        </div>
+
+        <!-- ── Sign In Card Section ───────────────── -->
+        <div class="login-card-container">
+            <div class="login-card glass-card">
+                <div class="login-header">
+                    <div class="logo-circle">
+                        <mat-icon ripple>security</mat-icon>
+                    </div>
+                    <h1>Sign In</h1>
+                    <p>Access your solid database</p>
+                </div>
+
+                <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="login-form">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Username</mat-label>
+                        <input matInput formControlName="username" placeholder="Enter your username">
+                        <mat-icon matSuffix>person</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Password</mat-label>
+                        <input matInput type="password" formControlName="password" placeholder="Enter your password">
+                        <mat-icon matSuffix>lock</mat-icon>
+                    </mat-form-field>
+
+                    <button mat-flat-button color="primary" type="submit" [disabled]="loginForm.invalid || isLoading"
+                        class="login-btn">
+                        <span *ngIf="!isLoading">SIGN IN</span>
+                        <span *ngIf="isLoading">AUTHENTICATING...</span>
+                    </button>
+                </form>
+
+                <div class="register-link">
+                    Don't have an account? <a routerLink="/register">Create One</a>
+                </div>
+
+                <div class="login-footer">
+                    <p>PERSISTENT & SOLID</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

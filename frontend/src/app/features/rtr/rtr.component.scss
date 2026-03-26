@@ -1,0 +1,244 @@
+.rtr-container {
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+
+    .header-left {
+        h1 {
+            font-size: 2.8rem;
+            margin: 0;
+            background: linear-gradient(135deg, white 0%, var(--india-blue) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .record-count {
+            margin-top: 8px;
+            display: inline-block;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+}
+
+.view-toggle {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+
+    button {
+        border-radius: 8px;
+        color: rgba(255, 255, 255, 0.4);
+
+        &.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--india-orange);
+        }
+    }
+}
+
+/* Form Panel */
+.form-panel {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 40px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+
+    .form-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+
+        h2 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--india-orange);
+        }
+    }
+}
+
+.rtr-form {
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-bottom: 8px;
+
+        mat-form-field {
+            width: 100%;
+        }
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 16px;
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid var(--glass-border);
+    }
+}
+
+.status-option-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+
+    &.submitted {
+        background: var(--india-blue);
+    }
+
+    &.interview {
+        background: #4caf50;
+    }
+
+    &.rejected {
+        background: #f44336;
+    }
+
+    &.onhold {
+        background: var(--india-orange);
+    }
+}
+
+/* Filters Bar */
+.filters-bar {
+    margin-bottom: 32px;
+
+    .vendor-filter {
+        width: 300px;
+    }
+}
+
+/* Table View */
+.table-container {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    overflow: hidden;
+
+    table {
+        width: 100%;
+        background: transparent !important;
+
+        th {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--india-blue);
+            font-weight: 700;
+            padding: 16px;
+        }
+
+        td {
+            padding: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid var(--glass-border);
+        }
+    }
+}
+
+/* Vendor Groups */
+.vendor-group {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    margin-bottom: 24px;
+    overflow: hidden;
+
+    .vendor-header {
+        padding: 24px 32px;
+        background: rgba(255, 255, 255, 0.02);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--glass-border);
+
+        .vendor-header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .vendor-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--india-blue), var(--india-navy));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .vendor-name {
+            margin: 0;
+            font-size: 1.3rem;
+            color: white;
+        }
+    }
+}
+
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.05);
+
+    &.submitted {
+        color: var(--india-blue);
+        background: rgba(0, 89, 179, 0.1);
+    }
+
+    &.interview {
+        color: #4caf50;
+        background: rgba(76, 175, 80, 0.1);
+    }
+
+    &.rejected {
+        color: #f44336;
+        background: rgba(244, 67, 54, 0.1);
+    }
+
+    &.onhold {
+        color: var(--india-orange);
+        background: rgba(255, 107, 0, 0.1);
+    }
+}
+
+.mini-badge {
+    @extend .status-badge;
+    padding: 4px 10px;
+    margin-left: 8px;
+}

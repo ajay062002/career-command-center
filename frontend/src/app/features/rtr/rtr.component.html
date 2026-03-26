@@ -1,0 +1,339 @@
+<div class="rtr-container">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <h1>RTR Tracker</h1>
+            <span class="record-count">{{ filteredRTRs.length }} of {{ allRTRs.length }} records</span>
+        </div>
+        <div class="header-actions">
+            <!-- View Toggle -->
+            <div class="view-toggle">
+                <button [class.active]="viewMode === 'table'" (click)="viewMode = 'table'" mat-icon-button
+                    matTooltip="Table View">
+                    <mat-icon>table_rows</mat-icon>
+                </button>
+                <button [class.active]="viewMode === 'grouped'" (click)="viewMode = 'grouped'" mat-icon-button
+                    matTooltip="Group by Vendor">
+                    <mat-icon>view_agenda</mat-icon>
+                </button>
+            </div>
+            <button mat-raised-button color="primary" (click)="openAddForm()" *ngIf="!showForm" id="add-rtr-btn">
+                <mat-icon>add</mat-icon> Add RTR
+            </button>
+        </div>
+    </div>
+
+    <!-- Inline Add/Edit Form -->
+    <div class="form-panel" *ngIf="showForm" id="rtr-form-top">
+        <div class="form-panel-header">
+            <h2>{{ isEdit ? '✏️ Edit RTR' : '➕ New RTR Entry' }}</h2>
+            <button mat-icon-button (click)="cancelForm()" matTooltip="Close form">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+        <form [formGroup]="rtrForm" class="rtr-form">
+            <div class="form-row">
+                <mat-form-field appearance="outline">
+                    <mat-label>Date *</mat-label>
+                    <input matInput [matDatepicker]="datePicker" formControlName="date">
+                    <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+                    <mat-datepicker #datePicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Vendor Name</mat-label>
+                    <input matInput formControlName="vendorName" placeholder="e.g. John Smith">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Vendor Company *</mat-label>
+                    <input matInput formControlName="vendorCompany" placeholder="e.g. Apex Systems">
+                </mat-form-field>
+            </div>
+
+            <div class="form-row">
+                <mat-form-field appearance="outline">
+                    <mat-label>Client Name</mat-label>
+                    <input matInput formControlName="clientName" placeholder="e.g. Google">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Vendor Phone</mat-label>
+                    <input matInput formControlName="vendorPhone" placeholder="e.g. 555-1234">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Vendor Email</mat-label>
+                    <input matInput formControlName="vendorEmail" placeholder="e.g. john@apex.com">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Rate ($/hr)</mat-label>
+                    <input matInput type="number" formControlName="rate" placeholder="e.g. 85">
+                </mat-form-field>
+            </div>
+
+            <div class="form-row">
+                <mat-form-field appearance="outline">
+                    <mat-label>Role *</mat-label>
+                    <input matInput formControlName="role" placeholder="e.g. Senior Java Developer">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Location</mat-label>
+                    <input matInput formControlName="location" placeholder="e.g. Mountain View, CA">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Status *</mat-label>
+                    <mat-select formControlName="status">
+                        @for (s of statuses; track s) {
+                        <mat-option [value]="s">
+                            <span class="status-option-dot" [ngClass]="statusClass(s)"></span>
+                            {{ s }}
+                        </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div class="form-actions">
+                <button mat-button (click)="cancelForm()">Cancel</button>
+                <button mat-raised-button color="primary" [disabled]="rtrForm.invalid" (click)="saveRTR()"
+                    id="save-rtr-btn">
+                    <mat-icon>save</mat-icon> {{ isEdit ? 'Update RTR' : 'Save RTR' }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="filters-bar">
+        <mat-form-field appearance="outline" class="vendor-filter">
+            <mat-label><mat-icon>business</mat-icon> Filter by Vendor</mat-label>
+            <mat-select [(ngModel)]="selectedVendor" (selectionChange)="onVendorChange()" id="vendor-filter">
+                <mat-option value="All">All Vendors ({{ allRTRs.length }})</mat-option>
+                @for (vendor of vendorList; track vendor) {
+                <mat-option [value]="vendor">{{ vendor }} ({{ countByVendor(vendor) }})</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <div class="active-filter-chip" *ngIf="selectedVendor !== 'All'">
+            <span>Vendor: <strong>{{ selectedVendor }}</strong></span>
+            <button mat-icon-button (click)="selectedVendor = 'All'; onVendorChange()" class="clear-filter">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- TABLE VIEW                                                    -->
+    <!-- ============================================================ -->
+    <ng-container *ngIf="viewMode === 'table'">
+        <div class="table-container mat-elevation-z4">
+            <div class="loading-overlay" *ngIf="isLoading"><span>Loading...</span></div>
+
+            <table mat-table [dataSource]="filteredRTRs" class="full-width">
+
+                <ng-container matColumnDef="date">
+                    <th mat-header-cell *matHeaderCellDef>Date</th>
+                    <td mat-cell *matCellDef="let rtr">{{ rtr.date | date:'MM/dd/yyyy' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="vendorName">
+                    <th mat-header-cell *matHeaderCellDef>Vendor Name</th>
+                    <td mat-cell *matCellDef="let rtr">{{ rtr.vendorName || '-' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="vendorCompany">
+                    <th mat-header-cell *matHeaderCellDef>Vendor Company</th>
+                    <td mat-cell *matCellDef="let rtr">
+                        <span class="vendor-tag" (click)="filterByVendor(rtr.vendorCompany)">
+                            {{ rtr.vendorCompany || '-' }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="clientName">
+                    <th mat-header-cell *matHeaderCellDef>Client Name</th>
+                    <td mat-cell *matCellDef="let rtr">{{ rtr.clientName || '-' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="vendorPhone">
+                    <th mat-header-cell *matHeaderCellDef>Vendor Phone</th>
+                    <td mat-cell *matCellDef="let rtr">{{ rtr.vendorPhone || '-' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="vendorEmail">
+                    <th mat-header-cell *matHeaderCellDef>Vendor Email</th>
+                    <td mat-cell *matCellDef="let rtr">{{ rtr.vendorEmail || '-' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="rate">
+                    <th mat-header-cell *matHeaderCellDef>Rate</th>
+                    <td mat-cell *matCellDef="let rtr">{{ rtr.rate ? '$' + rtr.rate + '/hr' : '-' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="role">
+                    <th mat-header-cell *matHeaderCellDef>Role</th>
+                    <td mat-cell *matCellDef="let rtr">{{ rtr.role || '-' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="location">
+                    <th mat-header-cell *matHeaderCellDef>Location</th>
+                    <td mat-cell *matCellDef="let rtr">{{ rtr.location || '-' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let rtr">
+                        <span class="status-badge" [ngClass]="statusClass(rtr.status)">{{ rtr.status }}</span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let rtr">
+                        <button mat-icon-button color="primary" (click)="openEditForm(rtr)"
+                            matTooltip="Edit"><mat-icon>edit</mat-icon></button>
+                        <button mat-icon-button color="warn" (click)="deleteRTR(rtr)"
+                            matTooltip="Delete"><mat-icon>delete_outline</mat-icon></button>
+                        <button mat-icon-button [color]="isPushed(rtr) ? '' : 'accent'"
+                            [class.pushed-btn]="isPushed(rtr)" (click)="pushToSubmission(rtr)"
+                            [disabled]="isPushed(rtr)"
+                            [matTooltip]="isPushed(rtr) ? 'Already pushed to Submissions' : 'Push to Submissions'">
+                            <mat-icon>{{ isPushed(rtr) ? 'check_circle' : 'send' }}</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+
+                <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" [attr.colspan]="displayedColumns.length"
+                        style="text-align:center; padding: 48px 24px;">
+                        <mat-icon
+                            style="font-size:48px;width:48px;height:48px;color:#bdbdbd;display:block;margin:0 auto 8px;">receipt_long</mat-icon>
+                        <p style="color:#757575;margin:0;">No RTR records found. Click <strong>Add RTR</strong> to get
+                            started.</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </ng-container>
+
+    <!-- ============================================================ -->
+    <!-- GROUPED BY VENDOR VIEW                                        -->
+    <!-- ============================================================ -->
+    <ng-container *ngIf="viewMode === 'grouped'">
+        <div class="groups-container" *ngIf="!isLoading">
+
+            <div *ngIf="vendorGroups.length === 0" class="empty-state">
+                <mat-icon>receipt_long</mat-icon>
+                <p>No RTR records found. Click <strong>Add RTR</strong> to get started.</p>
+            </div>
+
+            @for (group of vendorGroups; track group.vendorName) {
+            <div class="vendor-group">
+
+                <!-- Vendor Card Header -->
+                <div class="vendor-header">
+                    <div class="vendor-header-left">
+                        <div class="vendor-avatar">{{ group.vendorName.charAt(0).toUpperCase() }}</div>
+                        <div>
+                            <h3 class="vendor-name">{{ group.vendorName }}</h3>
+                            <span class="vendor-count">{{ group.rtrs.length }} RTR{{ group.rtrs.length !== 1 ? 's' : ''
+                                }}</span>
+                        </div>
+                    </div>
+                    <div class="vendor-stats">
+                        @for (stat of getVendorStatuses(group.rtrs); track stat.label) {
+                        <span class="mini-badge" [ngClass]="statusClass(stat.label)">
+                            {{ stat.label }}: {{ stat.count }}
+                        </span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Per-Vendor RTR Table -->
+                <div class="vendor-table-container">
+                    <table mat-table [dataSource]="group.rtrs" class="vendor-table">
+
+                        <ng-container matColumnDef="date">
+                            <th mat-header-cell *matHeaderCellDef>Date</th>
+                            <td mat-cell *matCellDef="let rtr">{{ rtr.date | date:'MM/dd/yyyy' }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="vendorName">
+                            <th mat-header-cell *matHeaderCellDef>Contact</th>
+                            <td mat-cell *matCellDef="let rtr">{{ rtr.vendorName || '-' }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="clientName">
+                            <th mat-header-cell *matHeaderCellDef>Client</th>
+                            <td mat-cell *matCellDef="let rtr">{{ rtr.clientName || '-' }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="vendorPhone">
+                            <th mat-header-cell *matHeaderCellDef>Vendor Phone</th>
+                            <td mat-cell *matCellDef="let rtr">{{ rtr.vendorPhone || '-' }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="vendorEmail">
+                            <th mat-header-cell *matHeaderCellDef>Vendor Email</th>
+                            <td mat-cell *matCellDef="let rtr">{{ rtr.vendorEmail || '-' }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="rate">
+                            <th mat-header-cell *matHeaderCellDef>Rate</th>
+                            <td mat-cell *matCellDef="let rtr">{{ rtr.rate ? '$' + rtr.rate + '/hr' : '-' }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="role">
+                            <th mat-header-cell *matHeaderCellDef>Role</th>
+                            <td mat-cell *matCellDef="let rtr">{{ rtr.role || '-' }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="location">
+                            <th mat-header-cell *matHeaderCellDef>Location</th>
+                            <td mat-cell *matCellDef="let rtr">{{ rtr.location || '-' }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef>Status</th>
+                            <td mat-cell *matCellDef="let rtr">
+                                <span class="status-badge" [ngClass]="statusClass(rtr.status)">{{ rtr.status }}</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef>Actions</th>
+                            <td mat-cell *matCellDef="let rtr">
+                                <button mat-icon-button color="primary" (click)="openEditForm(rtr)"
+                                    matTooltip="Edit"><mat-icon>edit</mat-icon></button>
+                                <button mat-icon-button color="warn" (click)="deleteRTR(rtr)"
+                                    matTooltip="Delete"><mat-icon>delete_outline</mat-icon></button>
+                                <button mat-icon-button [color]="isPushed(rtr) ? '' : 'accent'"
+                                    [class.pushed-btn]="isPushed(rtr)" (click)="pushToSubmission(rtr)"
+                                    [disabled]="isPushed(rtr)"
+                                    [matTooltip]="isPushed(rtr) ? 'Already pushed to Submissions' : 'Push to Submissions'">
+                                    <mat-icon>{{ isPushed(rtr) ? 'check_circle' : 'send' }}</mat-icon>
+                                </button>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="groupDisplayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: groupDisplayedColumns;" class="data-row"></tr>
+                    </table>
+                </div>
+
+            </div>
+            }
+        </div>
+        <div class="loading-overlay" *ngIf="isLoading"><span>Loading...</span></div>
+    </ng-container>
+
+</div>

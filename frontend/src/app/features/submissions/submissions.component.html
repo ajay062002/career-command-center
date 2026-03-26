@@ -1,0 +1,310 @@
+<div class="submissions-container">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <h1>Submissions</h1>
+            <span class="record-count">{{ filteredSubmissions.length }} of {{ allSubmissions.length }} records</span>
+        </div>
+        <div class="header-actions">
+            <div class="view-toggle">
+                <button [class.active]="viewMode === 'table'" (click)="viewMode = 'table'" mat-icon-button
+                    matTooltip="Table View">
+                    <mat-icon>table_rows</mat-icon>
+                </button>
+                <button [class.active]="viewMode === 'grouped'" (click)="viewMode = 'grouped'" mat-icon-button
+                    matTooltip="Grouped View">
+                    <mat-icon>view_agenda</mat-icon>
+                </button>
+            </div>
+            <button mat-raised-button color="primary" (click)="openAddForm()" *ngIf="!showForm" id="add-submission-btn">
+                <mat-icon>add</mat-icon> Add Submission
+            </button>
+        </div>
+    </div>
+
+    <!-- Inline Add/Edit Form -->
+    <div class="form-panel" *ngIf="showForm" id="submission-form-top">
+        <div class="form-panel-header">
+            <h2>{{ isEdit ? '✏️ Edit Submission' : '➕ New Submission' }}</h2>
+            <button mat-icon-button (click)="cancelForm()" matTooltip="Close">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+        <form [formGroup]="submissionForm" class="submission-form">
+            <div class="form-row">
+                <mat-form-field appearance="outline">
+                    <mat-label>Vendor / Company *</mat-label>
+                    <input matInput formControlName="submittedByVendor" [matAutocomplete]="autoVendor"
+                        placeholder="e.g. Apex Systems">
+                    <mat-autocomplete #autoVendor="matAutocomplete">
+                        @for (vendor of vendorList; track vendor) {
+                        <mat-option [value]="vendor">{{vendor}}</mat-option>
+                        }
+                    </mat-autocomplete>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Submission Date *</mat-label>
+                    <input matInput [matDatepicker]="subDatePicker" formControlName="submissionDate">
+                    <mat-datepicker-toggle matSuffix [for]="subDatePicker"></mat-datepicker-toggle>
+                    <mat-datepicker #subDatePicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Status *</mat-label>
+                    <mat-select formControlName="submissionStatus">
+                        @for (s of statuses; track s) {
+                        <mat-option [value]="s">{{ s | titlecase }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div class="form-row">
+                <mat-form-field appearance="outline">
+                    <mat-label>Rate Submitted</mat-label>
+                    <input matInput formControlName="rateSubmitted" placeholder="e.g. 85/hr">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Follow-up Date</mat-label>
+                    <input matInput [matDatepicker]="followUpPicker" formControlName="followUpDate">
+                    <mat-datepicker-toggle matSuffix [for]="followUpPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #followUpPicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Notes</mat-label>
+                    <input matInput formControlName="notes" placeholder="Any notes...">
+                </mat-form-field>
+            </div>
+
+            <div class="form-actions">
+                <button mat-button (click)="cancelForm()">Cancel</button>
+                <button mat-raised-button color="primary" [disabled]="submissionForm.invalid" (click)="saveSubmission()"
+                    id="save-submission-btn">
+                    <mat-icon>save</mat-icon> {{ isEdit ? 'Update' : 'Save' }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="filters-bar">
+        <div class="filters-group">
+            <mat-form-field appearance="outline" class="filter-field">
+                <mat-label><mat-icon>business</mat-icon> Filter by Vendor</mat-label>
+                <mat-select [(ngModel)]="selectedVendor" (selectionChange)="onVendorChange()" id="vendor-filter">
+                    <mat-option value="All">All Vendors ({{ allSubmissions.length }})</mat-option>
+                    @for (vendor of vendorList; track vendor) {
+                    <mat-option [value]="vendor">{{ vendor }} ({{ countByVendor(vendor) }})</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field">
+                <mat-label><mat-icon>filter_list</mat-icon> Filter by Status</mat-label>
+                <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onStatusChange()" id="status-filter">
+                    <mat-option value="All">All Statuses</mat-option>
+                    @for (s of allStatuses.slice(1); track s) {
+                    <mat-option [value]="s">{{ s | titlecase }} ({{ countByStatus(s) }})</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <button mat-button color="warn" *ngIf="hasActiveFilter" (click)="clearFilters()">
+                <mat-icon>filter_alt_off</mat-icon> Clear Filters
+            </button>
+        </div>
+
+        <div class="active-chips" *ngIf="hasActiveFilter">
+            <mat-chip-row *ngIf="selectedVendor !== 'All'" (removed)="selectedVendor = 'All'; onVendorChange()">
+                Vendor: {{ selectedVendor }}
+                <button matChipRemove><mat-icon>cancel</mat-icon></button>
+            </mat-chip-row>
+            <mat-chip-row *ngIf="selectedStatus !== 'All'" (removed)="selectedStatus = 'All'; onStatusChange()">
+                Status: {{ selectedStatus | titlecase }}
+                <button matChipRemove><mat-icon>cancel</mat-icon></button>
+            </mat-chip-row>
+        </div>
+    </div>
+
+    <!-- Flat Table View -->
+    <div class="table-container mat-elevation-z4" *ngIf="viewMode === 'table' && !isLoading">
+        <table mat-table [dataSource]="filteredSubmissions" class="full-width">
+            <ng-container matColumnDef="submissionDate">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let sub">{{ sub.submissionDate | date:'MM/dd/yyyy' }}</td>
+            </ng-container>
+
+            <!-- Vendor Column for Flat View -->
+            <ng-container matColumnDef="submittedByVendor">
+                <th mat-header-cell *matHeaderCellDef>Vendor</th>
+                <td mat-cell *matCellDef="let sub">{{ sub.submittedByVendor || '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="submissionStatus">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let sub">
+                    <span class="status-badge" [ngClass]="sub.submissionStatus?.toLowerCase()">{{ sub.submissionStatus |
+                        titlecase }}</span>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="rtrContext">
+                <th mat-header-cell *matHeaderCellDef>Role / Client</th>
+                <td mat-cell *matCellDef="let sub">{{ getRtrContext(sub) || '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="rateSubmitted">
+                <th mat-header-cell *matHeaderCellDef>Rate</th>
+                <td mat-cell *matCellDef="let sub">{{ sub.rateSubmitted || '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="followUpDate">
+                <th mat-header-cell *matHeaderCellDef>Follow-up</th>
+                <td mat-cell *matCellDef="let sub">{{ sub.followUpDate | date:'MM/dd/yyyy' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="notes">
+                <th mat-header-cell *matHeaderCellDef>Notes</th>
+                <td mat-cell *matCellDef="let sub">
+                    <span class="truncate-notes">{{ sub.notes || '-' }}</span>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let sub">
+                    <button mat-icon-button color="primary"
+                        (click)="openEditForm(sub)"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button color="warn"
+                        (click)="deleteSubmission(sub)"><mat-icon>delete_outline</mat-icon></button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row
+                *matHeaderRowDef="['submissionDate', 'submittedByVendor', 'submissionStatus', 'rtrContext', 'rateSubmitted', 'followUpDate', 'notes', 'actions']">
+            </tr>
+            <tr mat-row
+                *matRowDef="let row; columns: ['submissionDate', 'submittedByVendor', 'submissionStatus', 'rtrContext', 'rateSubmitted', 'followUpDate', 'notes', 'actions'];"
+                class="data-row"></tr>
+        </table>
+    </div>
+
+    <!-- Vendor Groups (Grouped View) -->
+    <div class="groups-container" *ngIf="viewMode === 'grouped' && !isLoading">
+        <!-- ... existing groups code ... -->
+
+        <div *ngIf="vendorGroups.length === 0" class="empty-state">
+            <mat-icon>send</mat-icon>
+            <p>No submissions matching your filters. Click <strong>Add Submission</strong> to get started.</p>
+        </div>
+
+        @for (group of vendorGroups; track group.vendorName) {
+        <div class="vendor-group">
+            <!-- Vendor Header -->
+            <div class="vendor-header">
+                <div class="vendor-header-left">
+                    <div class="vendor-avatar">{{ group.vendorName.charAt(0).toUpperCase() }}</div>
+                    <div>
+                        <h3 class="vendor-name">{{ group.vendorName }}</h3>
+                        <span class="vendor-count">{{ group.submissions.length }} submission{{ group.submissions.length
+                            !== 1 ? 's' : '' }}</span>
+                    </div>
+                </div>
+                <div class="vendor-stats">
+                    @for (status of getVendorStatuses(group.submissions); track status.label) {
+                    <span class="mini-badge" [ngClass]="status.label.toLowerCase().replace('_', '')">
+                        {{ status.label | titlecase }}: {{ status.count }}
+                    </span>
+                    }
+                </div>
+            </div>
+
+            <!-- Submissions Table for this Vendor -->
+            <div class="vendor-table-container">
+                <table mat-table [dataSource]="group.submissions" class="vendor-table">
+
+                    <ng-container matColumnDef="submissionDate">
+                        <th mat-header-cell *matHeaderCellDef>Date</th>
+                        <td mat-cell *matCellDef="let sub">
+                            <div class="date-cell">
+                                {{ sub.submissionDate | date:'MM/dd/yyyy' }}
+                                <span *ngIf="isFromRtr(sub)" class="rtr-origin-badge"
+                                    matTooltip="Pushed from RTR">RTR</span>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="submissionStatus">
+                        <th mat-header-cell *matHeaderCellDef>Status</th>
+                        <td mat-cell *matCellDef="let sub">
+                            <span class="status-badge" [ngClass]="sub.submissionStatus?.toLowerCase().replace('_', '')">
+                                {{ sub.submissionStatus | titlecase }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="rtrContext">
+                        <th mat-header-cell *matHeaderCellDef>Role / Client</th>
+                        <td mat-cell *matCellDef="let sub">
+                            <span class="rtr-context-text" [matTooltip]="sub.notes || ''">
+                                {{ getRtrContext(sub) || '-' }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="rateSubmitted">
+                        <th mat-header-cell *matHeaderCellDef>Rate</th>
+                        <td mat-cell *matCellDef="let sub">{{ sub.rateSubmitted || '-' }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="followUpDate">
+                        <th mat-header-cell *matHeaderCellDef>Follow-up</th>
+                        <td mat-cell *matCellDef="let sub">
+                            <div class="follow-up-cell">
+                                <span>{{ sub.followUpDate ? (sub.followUpDate | date:'MM/dd/yyyy') : '-' }}</span>
+                                <span *ngIf="getFollowUpBadge(sub.followUpDate, sub.submissionStatus)"
+                                    class="follow-up-badge"
+                                    [ngClass]="getFollowUpBadge(sub.followUpDate, sub.submissionStatus)">
+                                    {{ getFollowUpBadge(sub.followUpDate, sub.submissionStatus) === 'overdue' ?
+                                    'Overdue' : 'Today' }}
+                                </span>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="notes">
+                        <th mat-header-cell *matHeaderCellDef>Notes</th>
+                        <td mat-cell *matCellDef="let sub">
+                            <span class="truncate-notes" [matTooltip]="sub.notes || ''">{{ sub.notes || '-' }}</span>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef>Actions</th>
+                        <td mat-cell *matCellDef="let sub">
+                            <button mat-icon-button color="primary" (click)="openEditForm(sub)" matTooltip="Edit">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button mat-icon-button color="warn" (click)="deleteSubmission(sub)" matTooltip="Delete">
+                                <mat-icon>delete_outline</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+                </table>
+            </div>
+        </div>
+        }
+    </div>
+
+    <div class="loading-overlay" *ngIf="isLoading">
+        <span>Loading submissions...</span>
+    </div>
+
+</div>

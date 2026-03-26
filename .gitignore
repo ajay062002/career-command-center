@@ -1,0 +1,43 @@
+# Angular / Node
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.cache/
+
+# Python virtualenv
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+
+# Django
+db.sqlite3
+*.log
+
+# Java / Maven
+backend/target/
+backend/*.class
+
+# IDE
+.idea/
+.vscode/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Env / secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Build artifacts
+*.jar
+*.war
+*.ear

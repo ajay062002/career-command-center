@@ -1,0 +1,97 @@
+.admin-container {
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+
+    h1 {
+        font-size: 2.8rem;
+        margin: 0;
+        background: linear-gradient(135deg, white 0%, #0059b3 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -1px;
+    }
+}
+
+.admin-stats {
+    display: flex;
+    gap: 24px;
+}
+
+.stat-bubble {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    padding: 12px 24px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+
+    .bubble-val {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #ffb74d; // Saffron
+    }
+
+    .bubble-lbl {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+}
+
+.table-container {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    overflow: hidden;
+
+    .admin-table {
+        width: 100%;
+        background: transparent !important;
+
+        th {
+            color: rgba(255, 255, 255, 0.4) !important;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 24px !important;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        td {
+            color: white !important;
+            padding: 24px !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+    }
+}
+
+.role-badge {
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+
+    &.admin {
+        background: rgba(0, 89, 179, 0.2);
+        color: #64b5f6;
+    }
+}

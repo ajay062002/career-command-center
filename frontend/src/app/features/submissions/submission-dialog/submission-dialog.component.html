@@ -1,0 +1,52 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit Submission' : 'Add Submission' }}</h2>
+<mat-dialog-content>
+    <form [formGroup]="submissionForm" class="submission-form">
+        <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="submissionStatus" required>
+                @for (status of submissionStatuses; track status) {
+                <mat-option [value]="status">{{ status }}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <div class="row">
+            <mat-form-field appearance="outline">
+                <mat-label>Submission Date</mat-label>
+                <input matInput [matDatepicker]="subPicker" formControlName="submissionDate">
+                <mat-datepicker-toggle matIconSuffix [for]="subPicker"></mat-datepicker-toggle>
+                <mat-datepicker #subPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Follow-up Date</mat-label>
+                <input matInput [matDatepicker]="followPicker" formControlName="followUpDate">
+                <mat-datepicker-toggle matIconSuffix [for]="followPicker"></mat-datepicker-toggle>
+                <mat-datepicker #followPicker></mat-datepicker>
+            </mat-form-field>
+        </div>
+
+        <div class="row">
+            <mat-form-field appearance="outline">
+                <mat-label>Submitted By Vendor</mat-label>
+                <input matInput formControlName="submittedByVendor" placeholder="e.g. Teksystems">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Rate Submitted</mat-label>
+                <input matInput formControlName="rateSubmitted" placeholder="e.g. $60/hr">
+            </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Notes</mat-label>
+            <textarea matInput formControlName="notes" rows="3" placeholder="Additional details..."></textarea>
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-raised-button color="primary" [disabled]="submissionForm.invalid" (click)="onSave()">
+        {{ isEdit ? 'Update' : 'Save' }}
+    </button>
+</mat-dialog-actions>

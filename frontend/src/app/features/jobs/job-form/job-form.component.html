@@ -1,0 +1,69 @@
+<div class="form-container">
+    <h1>{{ isEditMode ? 'Edit Job' : 'Add New Job' }}</h1>
+
+    <form [formGroup]="jobForm" (ngSubmit)="onSubmit()" class="job-form">
+        <div class="form-row">
+            <mat-form-field appearance="outline">
+                <mat-label>Job Title</mat-label>
+                <input matInput formControlName="jobTitle" placeholder="e.g. Senior Angular Developer" required>
+                <mat-error *ngIf="jobForm.get('jobTitle')?.hasError('required')">
+                    Job title is required
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Company Name</mat-label>
+                <input matInput formControlName="companyName" placeholder="e.g. Acme Corp" required>
+                <mat-error *ngIf="jobForm.get('companyName')?.hasError('required')">
+                    Company name is required
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="form-row">
+            <mat-form-field appearance="outline">
+                <mat-label>Vendor Company</mat-label>
+                <input matInput formControlName="vendorCompany" placeholder="e.g. Staffing Agency">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Work Mode</mat-label>
+                <mat-select formControlName="workMode" required>
+                    @for (mode of workModes; track mode) {
+                    <mat-option [value]="mode">{{ mode }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="form-row">
+            <mat-form-field appearance="outline">
+                <mat-label>Status</mat-label>
+                <mat-select formControlName="status" required>
+                    @for (status of jobStatuses; track status) {
+                    <mat-option [value]="status">{{ status }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Applied Date</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="appliedDate">
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Notes</mat-label>
+            <textarea matInput formControlName="notes" rows="4" placeholder="Additional details..."></textarea>
+        </mat-form-field>
+
+        <div class="actions">
+            <button mat-button type="button" (click)="cancel()">Cancel</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="jobForm.invalid">
+                {{ isEditMode ? 'Update Job' : 'Save Job' }}
+            </button>
+        </div>
+    </form>
+</div>

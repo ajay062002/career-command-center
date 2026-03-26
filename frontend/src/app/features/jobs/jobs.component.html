@@ -1,0 +1,103 @@
+<div class="jobs-container">
+    <div class="page-header">
+        <div class="header-left">
+            <h1>Job Tracker</h1>
+            <span class="record-count">{{ filteredDataSource.length }} of {{ totalElements }} records</span>
+        </div>
+        <div class="header-actions">
+            <button mat-raised-button color="accent" (click)='addJob()' id="add-job-btn">
+                <mat-icon>add</mat-icon> Register Job
+            </button>
+        </div>
+    </div>
+
+    <div class="filters-bar">
+        <mat-form-field appearance="outline" class="filter-field">
+            <mat-label><mat-icon>search</mat-icon> Search</mat-label>
+            <input matInput [(ngModel)]="searchTerm" (keyup)="applyFilter()" placeholder="Company or Title">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+            <mat-label><mat-icon>filter_list</mat-icon> Status</mat-label>
+            <mat-select [(ngModel)]="statusFilter" (selectionChange)="applyFilter()">
+                <mat-option value="">All</mat-option>
+                @for (status of jobStatuses; track status) {
+                <mat-option [value]="status">{{ status }}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+    </div>
+
+    <div class="table-container mat-elevation-z4">
+        <div class="loading-overlay" *ngIf="isLoading">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span>Updating list...</span>
+        </div>
+
+        <table mat-table [dataSource]="filteredDataSource" class="full-width">
+            <ng-container matColumnDef="jobTitle">
+                <th mat-header-cell *matHeaderCellDef>Job Title</th>
+                <td mat-cell *matCellDef="let job">
+                    <div class="primary-text">{{ job.jobTitle }}</div>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="companyName">
+                <th mat-header-cell *matHeaderCellDef>Company</th>
+                <td mat-cell *matCellDef="let job">
+                    <div class="secondary-text">{{ job.companyName }}</div>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="vendorCompany">
+                <th mat-header-cell *matHeaderCellDef>Vendor</th>
+                <td mat-cell *matCellDef="let job">{{ job.vendorCompany || '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let job">
+                    <span class="status-badge" [ngClass]="job.status.toLowerCase().split(' ').join('')">
+                        {{ job.status }}
+                    </span>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="appliedDate">
+                <th mat-header-cell *matHeaderCellDef>Applied Date</th>
+                <td mat-cell *matCellDef="let job">{{ job.appliedDate | date:'MM/dd/yyyy' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let job">
+                    <div class="action-buttons">
+                        <button mat-icon-button color="primary" (click)="editJob(job)" matTooltip="Edit">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="deleteJob(job)" matTooltip="Delete">
+                            <mat-icon>delete_outline</mat-icon>
+                        </button>
+                    </div>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+
+            <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" [attr.colspan]="displayedColumns.length"
+                    style="text-align:center; padding: 48px 24px;">
+                    <mat-icon
+                        style="font-size:48px;width:48px;height:48px;color:#bdbdbd;display:block;margin:0 auto 8px;">work_outline</mat-icon>
+                    <p style="color:#757575;margin:0;">No jobs found. Click <strong>Add Job</strong> to track your first
+                        lead.</p>
+                </td>
+            </tr>
+        </table>
+
+        <mat-paginator [length]="totalElements" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100]"
+            (page)="onPageChange($event)" aria-label="Select page of jobs">
+        </mat-paginator>
+    </div>
+</div>

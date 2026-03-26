@@ -1,0 +1,50 @@
+<h2 mat-dialog-title>Create Reminder</h2>
+<mat-dialog-content>
+    <form [formGroup]="reminderForm" class="reminder-form">
+        <mat-form-field appearance="outline">
+            <mat-label>Related Job (Optional)</mat-label>
+            <mat-select formControlName="jobId">
+                <mat-option [value]="null">-- None --</mat-option>
+                @for (job of jobs; track job.id) {
+                <mat-option [value]="job.id">
+                    {{ job.jobTitle }} - {{ job.companyName }}
+                </mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <div class="row">
+            <mat-form-field appearance="outline">
+                <mat-label>Type</mat-label>
+                <mat-select formControlName="type" required>
+                    @for (type of reminderTypes; track type) {
+                    <mat-option [value]="type">{{ type }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Due Date</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="dueDate" required>
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Title</mat-label>
+            <input matInput formControlName="title" placeholder="e.g. Follow up with recruiter" required>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Notes</mat-label>
+            <textarea matInput formControlName="notes" rows="3" placeholder="Additional instructions..."></textarea>
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-raised-button color="primary" [disabled]="reminderForm.invalid" (click)="onSave()">
+        Save Reminder
+    </button>
+</mat-dialog-actions>

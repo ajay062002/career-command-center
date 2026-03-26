@@ -1,0 +1,175 @@
+<div class="analytics-container">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Analytics</h1>
+            <p class="page-subtitle">Vendor & RTR performance at a glance</p>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-state">
+        <mat-icon class="spin">autorenew</mat-icon>
+        <span>Loading analytics...</span>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="error && !loading" class="error-state">
+        <mat-icon>error_outline</mat-icon>
+        <span>Could not load analytics. Make sure the backend is running.</span>
+    </div>
+
+    <ng-container *ngIf="!loading && !error">
+
+        <!-- ── Summary KPI Strip ─────────────────────────────────── -->
+        <div class="kpi-strip">
+            <div class="kpi">
+                <span class="kpi-value">{{ summary?.rtrPending || 0 }}</span>
+                <span class="kpi-label">Total RTRs</span>
+            </div>
+            <div class="kpi-divider"></div>
+            <div class="kpi accent">
+                <span class="kpi-value">{{ summary?.activeSubmissions || 0 }}</span>
+                <span class="kpi-label">Submissions</span>
+            </div>
+            <div class="kpi-divider"></div>
+            <div class="kpi blue">
+                <span class="kpi-value">{{ summary?.totalVendors || 0 }}</span>
+                <span class="kpi-label">Vendors</span>
+            </div>
+            <div class="kpi-divider"></div>
+            <div class="kpi">
+                <span class="kpi-value">{{ summary?.submissionRate || 0 }}%</span>
+                <span class="kpi-label">Sub Rate</span>
+            </div>
+            <div class="kpi-divider"></div>
+            <div class="kpi offers">
+                <span class="kpi-value">{{ summary?.interviewConversions || 0 }}</span>
+                <span class="kpi-label">Interviews</span>
+            </div>
+            <div class="kpi-divider"></div>
+            <div class="kpi">
+                <span class="kpi-value">{{ summary?.totalJobs || 0 }}</span>
+                <span class="kpi-label">Total Jobs</span>
+            </div>
+            <div class="kpi-divider"></div>
+            <div class="kpi offers">
+                <span class="kpi-value">{{ summary?.offers || 0 }}</span>
+                <span class="kpi-label">Offers</span>
+            </div>
+            <div class="kpi-divider"></div>
+            <div class="kpi rejected">
+                <span class="kpi-value">{{ summary?.rejected || 0 }}</span>
+                <span class="kpi-label">Rejected</span>
+            </div>
+        </div>
+
+        <!-- ── Charts Row 1: Pie + RTR Timeline ───────────────────── -->
+        <div class="charts-row">
+
+            <mat-card class="chart-card">
+                <div class="chart-card-header">
+                    <mat-icon>pie_chart</mat-icon>
+                    <span>Vendor Conversion Rate</span>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas baseChart [data]="doughnutData" [options]="doughnutOptions" [type]="doughnutType">
+                    </canvas>
+                </div>
+                <div *ngIf="doughnutData.labels && doughnutData.labels.length === 0" class="chart-empty">
+                    No vendor data yet — add RTRs and Submissions to see conversion rates
+                </div>
+            </mat-card>
+
+            <mat-card class="chart-card">
+                <div class="chart-card-header">
+                    <mat-icon>timeline</mat-icon>
+                    <span>RTR & Submission Activity — Last 30 Days</span>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas baseChart [data]="rtrTimelineData" [options]="rtrTimelineOptions" [type]="rtrTimelineType">
+                    </canvas>
+                </div>
+                <div *ngIf="rtrTimelineData.labels && rtrTimelineData.labels.length === 0" class="chart-empty">
+                    No RTR or submission activity in the last 30 days
+                </div>
+            </mat-card>
+
+        </div>
+
+        <!-- ── Vendor Performance Chart ──────────────────────────── -->
+        <mat-card class="chart-card wide">
+            <div class="chart-card-header">
+                <mat-icon>groups</mat-icon>
+                <span>Vendor Performance Breakdown</span>
+            </div>
+            <div class="chart-canvas-wrap tall">
+                <canvas baseChart [data]="vendorBarData" [options]="vendorBarOptions" [type]="vendorBarType">
+                </canvas>
+            </div>
+            <div *ngIf="vendorData.length === 0" class="chart-empty">
+                No vendor data yet — RTRs and Submissions will populate this chart
+            </div>
+        </mat-card>
+
+        <!-- ── Vendor Performance Table ──────────────────────────── -->
+        <mat-card class="table-card" *ngIf="vendorData.length > 0">
+            <div class="chart-card-header">
+                <mat-icon>table_chart</mat-icon>
+                <span>Vendor Scorecard</span>
+            </div>
+            <table mat-table [dataSource]="vendorData" class="full-width">
+
+                <ng-container matColumnDef="vendorCompany">
+                    <th mat-header-cell *matHeaderCellDef>Vendor</th>
+                    <td mat-cell *matCellDef="let v">
+                        <div class="vendor-name">
+                            <span class="vendor-avatar">{{ v.vendorCompany.charAt(0) }}</span>
+                            {{ v.vendorCompany }}
+                        </div>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="totalRtrs">
+                    <th mat-header-cell *matHeaderCellDef>RTRs</th>
+                    <td mat-cell *matCellDef="let v">
+                        <span class="badge rtr">{{ v.totalRtrs }}</span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="totalSubmissions">
+                    <th mat-header-cell *matHeaderCellDef>Submissions</th>
+                    <td mat-cell *matCellDef="let v">
+                        <span class="badge sub">{{ v.totalSubmissions }}</span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="interviewsOrOffers">
+                    <th mat-header-cell *matHeaderCellDef>Interviews / Offers</th>
+                    <td mat-cell *matCellDef="let v">
+                        <span class="badge interview">{{ v.interviewsOrOffers }}</span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="rate">
+                    <th mat-header-cell *matHeaderCellDef>Conversion</th>
+                    <td mat-cell *matCellDef="let v">
+                        <div class="conversion-cell">
+                            <mat-progress-bar mode="determinate" [value]="conversionRate(v)"
+                                [class.high]="conversionRate(v) >= 50"
+                                [class.medium]="conversionRate(v) >= 25 && conversionRate(v) < 50"
+                                [class.low]="conversionRate(v) < 25">
+                            </mat-progress-bar>
+                            <span class="conversion-pct">{{ conversionRate(v) }}%</span>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="vendorColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: vendorColumns;" class="data-row"></tr>
+            </table>
+        </mat-card>
+
+    </ng-container>
+</div>

@@ -1,0 +1,153 @@
+<mat-toolbar color="primary" class="main-toolbar">
+  <button mat-icon-button (click)="sidenav.toggle()" class="menu-trigger">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <div class="brand">
+    <div class="brand-icon">
+      <mat-icon>bolt</mat-icon>
+    </div>
+    <span class="logo-text">STEM <span class="highlight">Sheetz</span></span>
+  </div>
+
+  <span class="spacer"></span>
+
+  <div class="toolbar-right">
+    <div class="live-badge">
+      <span class="live-dot"></span>
+      <span>LIVE</span>
+    </div>
+
+    <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-btn" matTooltip="Account">
+      <div class="user-avatar">
+        <mat-icon>person</mat-icon>
+      </div>
+    </button>
+
+    <mat-menu #userMenu="matMenu" xPosition="before">
+      <div class="menu-user-header">
+        <div class="menu-avatar">
+          <mat-icon>person</mat-icon>
+        </div>
+        <div>
+          <div class="menu-name">Career Tracker</div>
+          <div class="menu-role">{{ isAdmin() ? 'Administrator' : 'User' }}</div>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+      <button mat-menu-item routerLink="/admin" *ngIf="isAdmin()">
+        <mat-icon>admin_panel_settings</mat-icon> <span>Admin Portal</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()" class="logout-menu-item">
+        <mat-icon>logout</mat-icon> <span>Sign Out</span>
+      </button>
+    </mat-menu>
+  </div>
+</mat-toolbar>
+
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #sidenav mode="side" opened class="sidenav">
+
+    <!-- Nav Sections -->
+    <nav class="nav-list">
+
+      <!-- MAIN -->
+      <div class="nav-section">
+        <div class="nav-section-label">Main</div>
+        <a class="nav-item" routerLink="/dashboard" routerLinkActive="active" matRipple>
+          <div class="nav-icon-wrap icon-blue">
+            <mat-icon>dashboard</mat-icon>
+          </div>
+          <span class="nav-label">Dashboard</span>
+        </a>
+        <a class="nav-item" routerLink="/analytics" routerLinkActive="active" matRipple>
+          <div class="nav-icon-wrap icon-purple">
+            <mat-icon>insights</mat-icon>
+          </div>
+          <span class="nav-label">Analytics</span>
+        </a>
+      </div>
+
+      <!-- JOB TRACKER -->
+      <div class="nav-section">
+        <div class="nav-section-label">Job Tracker</div>
+        <a class="nav-item" routerLink="/jobs" routerLinkActive="active" matRipple>
+          <div class="nav-icon-wrap icon-orange">
+            <mat-icon>work</mat-icon>
+          </div>
+          <span class="nav-label">Jobs</span>
+        </a>
+        <a class="nav-item" routerLink="/job-discovery" routerLinkActive="active" matRipple>
+          <div class="nav-icon-wrap icon-green">
+            <mat-icon>travel_explore</mat-icon>
+          </div>
+          <span class="nav-label">Job Discovery</span>
+        </a>
+        <a class="nav-item" routerLink="/rtr" routerLinkActive="active" matRipple>
+          <div class="nav-icon-wrap icon-blue">
+            <mat-icon>assignment</mat-icon>
+          </div>
+          <span class="nav-label">RTR</span>
+        </a>
+        <a class="nav-item" routerLink="/submissions" routerLinkActive="active" matRipple>
+          <div class="nav-icon-wrap icon-orange">
+            <mat-icon>send</mat-icon>
+          </div>
+          <span class="nav-label">Submissions</span>
+        </a>
+      </div>
+
+      <!-- PRODUCTIVITY -->
+      <div class="nav-section">
+        <div class="nav-section-label">Productivity</div>
+        <a class="nav-item" routerLink="/study" routerLinkActive="active" matRipple>
+          <div class="nav-icon-wrap icon-green">
+            <mat-icon>school</mat-icon>
+          </div>
+          <span class="nav-label">Study</span>
+        </a>
+        <a class="nav-item" routerLink="/reminders" routerLinkActive="active" matRipple>
+          <div class="nav-icon-wrap icon-yellow">
+            <mat-icon>notifications</mat-icon>
+          </div>
+          <span class="nav-label">Reminders</span>
+        </a>
+        <a class="nav-item" routerLink="/resume-builder" routerLinkActive="active" matRipple>
+          <div class="nav-icon-wrap icon-purple">
+            <mat-icon>auto_fix_high</mat-icon>
+          </div>
+          <span class="nav-label">SARK Sambhavam</span>
+        </a>
+      </div>
+
+      <!-- ADMIN -->
+      <div class="nav-section" *ngIf="isAdmin()">
+        <div class="nav-section-label">Admin</div>
+        <a class="nav-item" routerLink="/admin" routerLinkActive="active" matRipple>
+          <div class="nav-icon-wrap icon-red">
+            <mat-icon>admin_panel_settings</mat-icon>
+          </div>
+          <span class="nav-label">User Management</span>
+        </a>
+      </div>
+
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidenav-footer">
+      <div class="footer-divider"></div>
+      <button class="nav-item logout-item" (click)="logout()" matRipple>
+        <div class="nav-icon-wrap icon-red">
+          <mat-icon>logout</mat-icon>
+        </div>
+        <span class="nav-label">Sign Out</span>
+      </button>
+    </div>
+
+  </mat-sidenav>
+
+  <mat-sidenav-content class="main-content">
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>
