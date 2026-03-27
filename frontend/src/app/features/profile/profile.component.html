@@ -1,0 +1,297 @@
+<div class="profile-page">
+
+  <!-- ── Hero Banner ──────────────────────────────────────────────────────── -->
+  <div class="profile-hero">
+    <div class="hero-bg-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+    </div>
+
+    <div class="hero-content">
+      <!-- Avatar -->
+      <div class="avatar-ring">
+        <div class="avatar" [style.background]="avatarGradient">
+          {{ initials }}
+        </div>
+        <div class="avatar-status" [class.admin]="isAdmin">
+          <mat-icon>{{ isAdmin ? 'shield' : 'person' }}</mat-icon>
+        </div>
+      </div>
+
+      <!-- Identity -->
+      <div class="hero-identity">
+        <div class="hero-badges">
+          <span class="role-badge" [class.admin]="isAdmin">
+            <mat-icon>{{ isAdmin ? 'admin_panel_settings' : 'person' }}</mat-icon>
+            {{ roleBadge }}
+          </span>
+          <span class="member-badge">
+            <mat-icon>calendar_today</mat-icon>
+            Member since {{ memberSince }}
+          </span>
+        </div>
+        <h1 class="hero-name">{{ user?.displayName || user?.username || 'Career Tracker' }}</h1>
+        <p class="hero-sub">
+          <span *ngIf="user?.targetRole">{{ user.targetRole }}</span>
+          <span class="dot" *ngIf="user?.targetRole && user?.location">·</span>
+          <span *ngIf="user?.location"><mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle">place</mat-icon> {{ user.location }}</span>
+          <span *ngIf="!user?.targetRole && !user?.location" style="opacity:.4">No target role set — edit your profile</span>
+        </p>
+        <p class="hero-bio" *ngIf="user?.bio">{{ user.bio }}</p>
+      </div>
+
+      <!-- Actions -->
+      <div class="hero-actions">
+        <button class="btn-edit" (click)="toggleEdit()">
+          <mat-icon>{{ editMode ? 'close' : 'edit' }}</mat-icon>
+          {{ editMode ? 'Cancel' : 'Edit Profile' }}
+        </button>
+        <a class="btn-ghost" routerLink="/dashboard">
+          <mat-icon>dashboard</mat-icon>
+          Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Stats Row ─────────────────────────────────────────────────────────── -->
+  <div class="stats-strip" *ngIf="!loading">
+    <a *ngFor="let s of statCards; let i = index"
+       class="strip-card fade-in-up"
+       [class]="'strip-card--' + s.color"
+       [style.animation-delay]="(i*60)+'ms'"
+       [routerLink]="s.link">
+      <div class="strip-icon">
+        <mat-icon>{{ s.icon }}</mat-icon>
+      </div>
+      <div class="strip-value">{{ get(s.key) }}</div>
+      <div class="strip-label">{{ s.label }}</div>
+    </a>
+  </div>
+
+  <div class="stats-strip" *ngIf="loading">
+    <div *ngFor="let _ of [1,2,3,4,5,6]" class="strip-card skeleton-card">
+      <div class="skeleton" style="width:36px;height:36px;border-radius:50%"></div>
+      <div class="skeleton" style="width:40px;height:28px;border-radius:6px;margin:8px auto 4px"></div>
+      <div class="skeleton" style="width:70px;height:10px;border-radius:4px;margin:0 auto"></div>
+    </div>
+  </div>
+
+  <!-- ── Main Grid ──────────────────────────────────────────────────────────── -->
+  <div class="profile-grid">
+
+    <!-- LEFT: Profile Info / Edit Form -->
+    <div class="profile-left">
+
+      <!-- View mode -->
+      <div class="info-card fade-in-up" *ngIf="!editMode">
+        <div class="card-header">
+          <mat-icon>person_outline</mat-icon>
+          <span>Profile Information</span>
+        </div>
+
+        <div class="info-row">
+          <mat-icon>badge</mat-icon>
+          <div>
+            <div class="info-label">Display Name</div>
+            <div class="info-value">{{ user?.displayName || user?.username || '—' }}</div>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <mat-icon>alternate_email</mat-icon>
+          <div>
+            <div class="info-label">Username</div>
+            <div class="info-value">{{ user?.username || '—' }}</div>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <mat-icon>mail_outline</mat-icon>
+          <div>
+            <div class="info-label">Email</div>
+            <div class="info-value">{{ user?.email || '—' }}</div>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <mat-icon>phone</mat-icon>
+          <div>
+            <div class="info-label">Phone</div>
+            <div class="info-value">{{ user?.phone || '—' }}</div>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <mat-icon>work_outline</mat-icon>
+          <div>
+            <div class="info-label">Target Role</div>
+            <div class="info-value">{{ user?.targetRole || '—' }}</div>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <mat-icon>place</mat-icon>
+          <div>
+            <div class="info-label">Location</div>
+            <div class="info-value">{{ user?.location || '—' }}</div>
+          </div>
+        </div>
+
+        <div class="info-row" *ngIf="user?.linkedin">
+          <mat-icon>link</mat-icon>
+          <div>
+            <div class="info-label">LinkedIn</div>
+            <div class="info-value linkedin">{{ user.linkedin }}</div>
+          </div>
+        </div>
+
+        <button class="btn-edit full-width" (click)="toggleEdit()">
+          <mat-icon>edit</mat-icon> Edit Profile
+        </button>
+      </div>
+
+      <!-- Edit mode -->
+      <div class="edit-card fade-in-up" *ngIf="editMode">
+        <div class="card-header">
+          <mat-icon>edit</mat-icon>
+          <span>Edit Profile</span>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="saveProfile()" class="edit-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Display Name</mat-label>
+              <input matInput formControlName="displayName">
+              <mat-icon matSuffix>badge</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" type="email">
+              <mat-icon matSuffix>mail_outline</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Phone</mat-label>
+              <input matInput formControlName="phone" placeholder="+1 (555) 000-0000">
+              <mat-icon matSuffix>phone</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Location</mat-label>
+              <input matInput formControlName="location" placeholder="City, State">
+              <mat-icon matSuffix>place</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Target Role</mat-label>
+            <input matInput formControlName="targetRole" placeholder="e.g. Senior Software Engineer">
+            <mat-icon matSuffix>work_outline</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>LinkedIn URL</mat-label>
+            <input matInput formControlName="linkedin" placeholder="https://linkedin.com/in/...">
+            <mat-icon matSuffix>link</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Bio</mat-label>
+            <textarea matInput formControlName="bio" rows="3"
+              placeholder="Tell your career story..."></textarea>
+            <mat-icon matSuffix>notes</mat-icon>
+          </mat-form-field>
+
+          <div class="form-actions">
+            <button type="button" class="btn-ghost" (click)="toggleEdit()">
+              <mat-icon>close</mat-icon> Cancel
+            </button>
+            <button type="submit" class="btn-save" [disabled]="saving || form.invalid">
+              <mat-spinner *ngIf="saving" diameter="16"></mat-spinner>
+              <mat-icon *ngIf="!saving">save</mat-icon>
+              {{ saving ? 'Saving...' : 'Save Profile' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Account Info + Quick Links -->
+    <div class="profile-right">
+
+      <!-- Account Card -->
+      <div class="info-card fade-in-up stagger-1">
+        <div class="card-header">
+          <mat-icon>manage_accounts</mat-icon>
+          <span>Account Details</span>
+        </div>
+
+        <div class="account-row">
+          <span class="acc-label">Username</span>
+          <span class="acc-value mono">{{ user?.username || '—' }}</span>
+        </div>
+        <div class="account-row">
+          <span class="acc-label">Role</span>
+          <span class="role-pill" [class.admin]="isAdmin">{{ roleBadge }}</span>
+        </div>
+        <div class="account-row">
+          <span class="acc-label">Status</span>
+          <span class="status-pill active">
+            <span class="status-dot"></span> Active
+          </span>
+        </div>
+        <div class="account-row">
+          <span class="acc-label">Member Since</span>
+          <span class="acc-value">{{ memberSince }}</span>
+        </div>
+      </div>
+
+      <!-- Quick Navigate -->
+      <div class="info-card fade-in-up stagger-2">
+        <div class="card-header">
+          <mat-icon>rocket_launch</mat-icon>
+          <span>Quick Navigate</span>
+        </div>
+        <div class="quick-links">
+          <a class="quick-link" routerLink="/jobs">
+            <div class="ql-icon icon-orange"><mat-icon>work</mat-icon></div>
+            <span>Jobs</span>
+            <mat-icon class="ql-arrow">chevron_right</mat-icon>
+          </a>
+          <a class="quick-link" routerLink="/submissions">
+            <div class="ql-icon icon-blue"><mat-icon>send</mat-icon></div>
+            <span>Submissions</span>
+            <mat-icon class="ql-arrow">chevron_right</mat-icon>
+          </a>
+          <a class="quick-link" routerLink="/study">
+            <div class="ql-icon icon-green"><mat-icon>school</mat-icon></div>
+            <span>Study Logs</span>
+            <mat-icon class="ql-arrow">chevron_right</mat-icon>
+          </a>
+          <a class="quick-link" routerLink="/analytics">
+            <div class="ql-icon icon-purple"><mat-icon>insights</mat-icon></div>
+            <span>Analytics</span>
+            <mat-icon class="ql-arrow">chevron_right</mat-icon>
+          </a>
+          <a class="quick-link" routerLink="/resume-builder">
+            <div class="ql-icon icon-teal"><mat-icon>auto_fix_high</mat-icon></div>
+            <span>Resume Builder</span>
+            <mat-icon class="ql-arrow">chevron_right</mat-icon>
+          </a>
+          <a class="quick-link admin-link" routerLink="/admin" *ngIf="isAdmin">
+            <div class="ql-icon icon-red"><mat-icon>admin_panel_settings</mat-icon></div>
+            <span>Admin Portal</span>
+            <mat-icon class="ql-arrow">chevron_right</mat-icon>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
