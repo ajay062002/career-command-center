@@ -13,6 +13,7 @@ import { RegisterComponent } from './features/auth/register/register.component';
 import { UserManagementComponent } from './features/admin/user-management/user-management.component';
 import { ResumeBuilderComponent } from './features/resume-builder/resume-builder.component';
 import { JobDiscoveryComponent } from './features/job-discovery/job-discovery.component';
+import { ProfileComponent } from './features/profile/profile.component';
 import { AuthGuard } from './auth/auth.guard';
 
 export const routes: Routes = [
@@ -39,6 +40,7 @@ export const routes: Routes = [
             { path: 'reminders', component: RemindersComponent },
             { path: 'analytics', component: AnalyticsComponent },
             { path: 'resume-builder', component: ResumeBuilderComponent },
+            { path: 'profile', component: ProfileComponent },
             { path: 'admin', component: UserManagementComponent },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
         ]

@@ -19,22 +19,25 @@
     </div>
 
     <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-btn" matTooltip="Account">
-      <div class="user-avatar">
-        <mat-icon>person</mat-icon>
+      <div class="user-avatar" [style.background]="avatarGradient">
+        {{ userInitials }}
       </div>
     </button>
 
     <mat-menu #userMenu="matMenu" xPosition="before">
       <div class="menu-user-header">
-        <div class="menu-avatar">
-          <mat-icon>person</mat-icon>
+        <div class="menu-avatar" [style.background]="avatarGradient">
+          {{ userInitials }}
         </div>
         <div>
-          <div class="menu-name">Career Tracker</div>
-          <div class="menu-role">{{ isAdmin() ? 'Administrator' : 'User' }}</div>
+          <div class="menu-name">{{ userDisplayName }}</div>
+          <div class="menu-role">{{ userRole }}</div>
         </div>
       </div>
       <mat-divider></mat-divider>
+      <button mat-menu-item routerLink="/profile">
+        <mat-icon>manage_accounts</mat-icon> <span>View Profile</span>
+      </button>
       <button mat-menu-item routerLink="/admin" *ngIf="isAdmin()">
         <mat-icon>admin_panel_settings</mat-icon> <span>Admin Portal</span>
       </button>

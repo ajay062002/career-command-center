@@ -95,12 +95,15 @@
 
 .user-avatar {
   width: 40px; height: 40px;
-  background: linear-gradient(135deg, #0059B3 0%, #001529 100%);
   display: flex; align-items: center; justify-content: center;
   border-radius: 12px;
-  border: 1px solid rgba(0,89,179,0.4);
-
-  mat-icon { font-size: 20px; color: rgba(255,255,255,0.9); }
+  border: 2px solid rgba(255,255,255,0.15);
+  font-size: 0.85rem;
+  font-weight: 900;
+  font-family: 'Outfit', sans-serif;
+  color: white;
+  letter-spacing: -0.5px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 // ── Menu User Header ─────────────────────────────────────────────────────────
@@ -111,12 +114,16 @@
   padding: 14px 16px;
 
   .menu-avatar {
-    width: 40px; height: 40px;
-    background: linear-gradient(135deg, #0059B3, #001529);
-    border-radius: 12px;
+    width: 44px; height: 44px;
+    border-radius: 13px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    mat-icon { font-size: 20px; color: white; }
+    font-size: 1rem;
+    font-weight: 900;
+    font-family: 'Outfit', sans-serif;
+    color: white;
+    letter-spacing: -0.5px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
 
   .menu-name {
