@@ -437,4 +437,26 @@
 .fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.4,0,0.2,1) both; }
 .stagger-1  { animation-delay: 80ms; }
 .stagger-2  { animation-delay: 160ms; }
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px 16px 32px;
+  }
+
+  .welcome-header {
+    margin-bottom: 24px;
+  }
+
+  .welcome-right {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .quick-link-btn {
+    flex: 1;
+    justify-content: center;
+    font-size: 0.8rem;
+    padding: 8px 12px;
+  }
+}
 .stagger-3  { animation-delay: 240ms; }
