@@ -48,3 +48,20 @@ replay_pid*.log
 output.txt
 token.txt
 staticfiles/
+
+# Claude Code
+.claude/
+
+# Build output logs
+frontend/build_*.txt
+frontend/serve_log.txt
+backend/compile_errors*.txt
+backend/startup_log*.txt
+
+# One-off scripts
+test_import.py
+migrate_to_prod.py
+build.log
+error.log
+frontend_error.log
+scraper.log
