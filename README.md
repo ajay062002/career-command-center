@@ -1,56 +1,85 @@
-# Career Command Center
+<div align="center">
 
-A full-stack career tracking web app — live at **[ajaylive.com](https://ajaylive.com)**
+# 🚀 Career Command Center
 
-Track job applications, RTR requests, submissions, reminders, and study sessions in one place.
+### Your all-in-one career tracking dashboard
+
+[![Live Site](https://img.shields.io/badge/Live%20Site-ajaylive.com-0059B3?style=for-the-badge&logo=vercel&logoColor=white)](https://ajaylive.com)
+[![Angular](https://img.shields.io/badge/Angular-17-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io)
+[![Django](https://img.shields.io/badge/Django-5-092E20?style=for-the-badge&logo=django&logoColor=white)](https://djangoproject.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Render-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://render.com)
+[![Vercel](https://img.shields.io/badge/Frontend-Vercel-000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
+
+Track job applications, RTR requests, submissions, reminders, and study sessions — all in one place.
+
+**[➡️ View Live Site](https://ajaylive.com)**
+
+</div>
 
 ---
 
-## Tech Stack
+## 📸 Screenshots
+
+> **Dashboard**
+
+![Dashboard](https://i.imgur.com/placeholder-dashboard.png)
+<!-- Replace with real screenshot: drag an image into this GitHub issue/PR edit box to get a URL, then paste here -->
+
+> **RTR Tracker**
+
+![RTR Tracker](https://i.imgur.com/placeholder-rtr.png)
+
+> **Submissions Pipeline**
+
+![Submissions](https://i.imgur.com/placeholder-submissions.png)
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---------|-------------|
+| 📊 **Dashboard** | Stats overview — total jobs, RTRs, submissions, reminders at a glance |
+| 💼 **Jobs** | Track job applications with status, company, and notes |
+| 📋 **RTR Tracker** | Right-to-represent tracker with vendor grouping and push-to-submission |
+| 📤 **Submissions** | Full submission pipeline with status tracking |
+| 🔔 **Reminders** | Date-based reminder system with priority levels |
+| 📚 **Study** | Log study sessions and topics |
+| 📈 **Analytics** | Charts and trends across your job search |
+| 👤 **Profile** | Editable user profile with stats |
+| 🔐 **Admin** | User management portal (admin role only) |
+
+---
+
+## 🛠 Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Frontend | Angular 17 (standalone components, Angular Material) |
 | Backend | Django 5 + Django REST Framework |
 | Database | PostgreSQL (Render) |
-| Auth | Token-based (DRF) |
+| Auth | Token-based (DRF Knox) |
 | Frontend host | Vercel |
-| Backend host | Render (free tier) |
+| Backend host | Render |
 | Domain | Namecheap → ajaylive.com |
 
 ---
 
-## Project Structure
-
-```
-career-command-center/
-├── frontend/                  # Angular 17 app
-│   ├── src/app/
-│   │   ├── core/              # Services, models, interceptors, guards
-│   │   ├── features/          # Page components (dashboard, jobs, rtr, etc.)
-│   │   └── layout/            # Main layout (sidenav, toolbar)
-│   ├── src/environments/      # environment.ts + environment.prod.ts
-│   └── angular.json
-│
-├── core/                      # Django app (models, views, serializers)
-│   └── management/commands/   # seed.py — creates admin user on deploy
-├── django_backend/            # Django project settings + urls + wsgi
-├── manage.py
-├── requirements.txt
-├── render.yaml                # Render.com deployment config
-└── docker-compose.yml         # Local dev with PostgreSQL
-```
-
----
-
-## Local Development
+## 🚀 Local Development
 
 ### Prerequisites
 - Node.js 18+
 - Python 3.11+
-- PostgreSQL (or use SQLite for quick dev)
+- PostgreSQL (optional — SQLite works for quick dev)
 
-### 1. Backend
+### 1. Clone
+
+```bash
+git clone https://github.com/ajay062002/career-command-center.git
+cd career-command-center
+```
+
+### 2. Backend
 
 ```bash
 # Create virtual environment
@@ -60,97 +89,72 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Set up environment variables (create a .env file)
-cp .env.example .env             # edit with your values
-
-# Run migrations and seed admin
-python manage.py migrate
-python manage.py seed
-
-# Start server
-python manage.py runserver
-```
-
-**.env variables needed:**
-```
-SECRET_KEY=your-secret-key
+# Create .env file
+SECRET_KEY=your-secret-key-here
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 CORS_ALLOWED_ORIGINS=http://localhost:4200
-DATABASE_URL=postgres://user:pass@localhost:5432/careerdb   # omit to use SQLite
-ADMIN_PASSWORD=your-admin-password
+ADMIN_PASSWORD=admin123
+
+# Run migrations and seed admin user
+python manage.py migrate
+python manage.py seed
+
+# Start server (runs on http://localhost:8000)
+python manage.py runserver
 ```
 
-### 2. Frontend
+### 3. Frontend
 
 ```bash
 cd frontend
 npm install
-ng serve          # runs on http://localhost:4200
+ng serve    # runs on http://localhost:4200
 ```
 
-The frontend talks to `http://localhost:8000/api` by default (`src/environments/environment.ts`).
+Login with: `admin` / whatever you set as `ADMIN_PASSWORD`
 
 ---
 
-## Production Deployment
+## ☁️ Production Deployment
 
-### Backend → Render
+### Backend → [Render.com](https://render.com)
 
-Configured via `render.yaml`. On each deploy Render runs:
+`render.yaml` handles everything. Set these env vars in Render dashboard:
+
 ```
-pip install -r requirements.txt
-python manage.py collectstatic --noinput
-python manage.py migrate
-python manage.py seed
-gunicorn django_backend.wsgi:application --bind 0.0.0.0:$PORT
+SECRET_KEY          → random 50-char string
+DEBUG               → false
+ALLOWED_HOSTS       → api.ajaylive.com,career-command-center-api.onrender.com
+CORS_ALLOWED_ORIGINS → https://ajaylive.com,https://www.ajaylive.com
+DATABASE_URL        → from Render PostgreSQL add-on
+ADMIN_PASSWORD      → your secure password
 ```
 
-**Required env vars on Render:**
-| Variable | Value |
-|----------|-------|
-| `SECRET_KEY` | random 50-char string |
-| `DEBUG` | `false` |
-| `ALLOWED_HOSTS` | `api.ajaylive.com,career-command-center-api.onrender.com` |
-| `CORS_ALLOWED_ORIGINS` | `https://ajaylive.com,https://www.ajaylive.com` |
-| `DATABASE_URL` | from Render PostgreSQL add-on |
-| `ADMIN_PASSWORD` | secure password for admin account |
+### Frontend → [Vercel](https://vercel.com)
 
-### Frontend → Vercel
-
-Configured via `frontend/vercel.json`:
-- Build: `npm run build -- --configuration production`
-- Output: `dist/career-command-center-frontend/browser`
-- SPA rewrites: all routes → `index.html`
-
-Production API URL is set in `frontend/src/environments/environment.prod.ts`.
+Connect the GitHub repo. `frontend/vercel.json` handles build config + SPA routing automatically.
 
 ### DNS (Namecheap)
 
-| Type | Host | Value |
-|------|------|-------|
+| Type | Host | Points to |
+|------|------|-----------|
 | A | `@` | `216.198.79.1` (Vercel) |
 | CNAME | `www` | Vercel DNS target |
 | CNAME | `api` | `career-command-center-api.onrender.com` |
 
 ---
 
-## Features
+## ⚠️ Important Notes
 
-- **Dashboard** — stats overview, quick actions
-- **Jobs** — job application tracker
-- **RTR** — right-to-represent tracker with vendor grouping
-- **Submissions** — submission pipeline tracking
-- **Reminders** — date-based reminder system
-- **Study** — study session logger
-- **Analytics** — charts and trends
-- **Profile** — user profile with editable info
-- **Admin** — user management (admin role only)
+- **Render free tier sleeps** after 15 min of inactivity — first request after sleep takes ~30 sec to wake up
+- **PostgreSQL on Render free tier expires April 26 2026** — upgrade or migrate the database before then
+- Admin account is auto-created on every deploy via `python manage.py seed` using the `ADMIN_PASSWORD` env var
 
 ---
 
-## Notes
+<div align="center">
 
-- Render free tier **sleeps after 15 min** of inactivity — first request after sleep takes ~30 sec
-- PostgreSQL on Render free tier **expires April 26 2026** — upgrade or migrate before then
-- Admin account is created automatically on deploy via `python manage.py seed` using `ADMIN_PASSWORD` env var
+Built by **Ajay** · Live at **[ajaylive.com](https://ajaylive.com)**
+
+</div>
