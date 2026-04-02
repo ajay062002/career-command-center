@@ -167,6 +167,14 @@ class CarPhysics {
     this.topSpeed = isPlayer ? 355 : 260 + Math.random()*70;
   }
 
+  // Only sync mesh visuals — called by AI to avoid running physics twice
+  syncMesh() {
+    this.mesh.position.set(this.x, 0.28 + Math.sin(performance.now() * 0.012) * Math.abs(this.speed) * 0.0001, this.z);
+    this.mesh.rotation.y = this.angle;
+    this.fWheels.forEach(f => f.children[0].rotation.x += this.speed * 0.016 * 0.8);
+    this.rWheels.forEach(r => r.children[0].rotation.x += this.speed * 0.016 * 0.8);
+  }
+
   update(dt, keys) {
     if(!keys) return;
     const td = this.getTrackDist();
@@ -255,9 +263,10 @@ class AIController {
     while(diff < -Math.PI) diff += Math.PI*2; while(diff > Math.PI) diff -= Math.PI*2;
     car.angle += diff * 4.5 * dt;
 
-    if (car.speed < this.speedTarget) car.speed += 170 * dt;
-    car.x += Math.sin(car.angle) * car.speed * dt; car.z += Math.cos(car.angle) * car.speed * dt;
-    car.update(dt, {}); // Reuse mesh anim logic
+    car.speed = Math.min(this.speedTarget, car.speed + 170 * dt);
+    car.x += Math.sin(car.angle) * car.speed * dt;
+    car.z += Math.cos(car.angle) * car.speed * dt;
+    car.syncMesh(); // visuals only — no double physics
   }
 }
 
@@ -308,10 +317,98 @@ class Game {
       this.aiList.push(new AIController(car, this.curve, i+1));
     });
 
+    this._setupMinimap(track.spline);
     this._setupAudio();
     this._setupControls();
     this._lastPos = 1; this._lastTime = performance.now();
+    this._inPit = false; this.bestLap = Infinity;
     this.animate();
+  }
+
+  _setupMinimap(spline) {
+    this._mmSpline = spline;
+    const xs = spline.map(p => p.x), zs = spline.map(p => p.z);
+    this._mmMinX = Math.min(...xs); this._mmMaxX = Math.max(...xs);
+    this._mmMinZ = Math.min(...zs); this._mmMaxZ = Math.max(...zs);
+    // inject canvas if not in HTML
+    let mc = document.getElementById('minimap-canvas');
+    if (!mc) {
+      mc = document.createElement('canvas');
+      mc.id = 'minimap-canvas'; mc.width = 160; mc.height = 160;
+      mc.style.cssText = 'position:fixed;bottom:22px;right:22px;z-index:12;border-radius:6px;border:1px solid #333;background:rgba(0,0,0,0.82);';
+      const hud = document.getElementById('hud'); if (hud) hud.appendChild(mc);
+    }
+    this._mmCtx = mc.getContext('2d');
+  }
+
+  _drawMinimap() {
+    if (!this._mmCtx) return;
+    const ctx = this._mmCtx, pts = this._mmSpline;
+    const range = Math.max(this._mmMaxX - this._mmMinX, this._mmMaxZ - this._mmMinZ) || 1;
+    const sc = 140 / range;
+    const tx = x => (x - this._mmMinX) * sc + 10;
+    const tz = z => (z - this._mmMinZ) * sc + 10;
+    ctx.clearRect(0, 0, 160, 160);
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 3;
+    ctx.beginPath();
+    pts.forEach((p, i) => i === 0 ? ctx.moveTo(tx(p.x), tz(p.z)) : ctx.lineTo(tx(p.x), tz(p.z)));
+    ctx.closePath(); ctx.stroke();
+    this.allCars.forEach(car => {
+      ctx.fillStyle = car === this.player ? '#fff' : car.team.color;
+      ctx.beginPath(); ctx.arc(tx(car.x), tz(car.z), car === this.player ? 5 : 3, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+
+  doPitStop() {
+    if (!this.racing || this._inPit) return;
+    const prog = this.player.progress;
+    if (prog > 0.06 && prog < 0.94) {
+      this._toast('APPROACH START LINE FOR PIT', '#e10600'); return;
+    }
+    if (Math.abs(this.player.speed) > 65) {
+      this._toast('SLOW DOWN FOR PIT ENTRY', '#ffd700'); return;
+    }
+    this._inPit = true; this.racing = false; this.player.speed = 0;
+    const note = document.createElement('div');
+    note.style.cssText = 'position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.88);z-index:50;font-family:Orbitron,sans-serif;color:#ffd700;gap:10px;';
+    note.innerHTML = '<div style="font-size:2.5rem;font-weight:900">PIT STOP</div><div style="color:#aaa;font-size:0.85rem">FRESH TIRES</div>' +
+      '<div style="width:260px;height:6px;background:#333;border-radius:3px;margin-top:8px"><div id="_pb" style="height:100%;width:0%;background:#e10600;border-radius:3px;transition:width 0.1s"></div></div>' +
+      '<div id="_pc" style="font-size:1.2rem;font-weight:700;color:#e10600">3.0s</div>';
+    document.body.appendChild(note);
+    let elapsed = 0;
+    const iv = setInterval(() => {
+      elapsed += 100;
+      const pb = document.getElementById('_pb'); if (pb) pb.style.width = Math.min(100, elapsed / 30) + '%';
+      const pc = document.getElementById('_pc'); if (pc) pc.innerText = ((3000 - elapsed) / 1000).toFixed(1) + 's';
+      if (elapsed >= 3000) {
+        clearInterval(iv); this.player.tireWear = 1.0;
+        this.player.damage = Math.max(0, this.player.damage - 0.3);
+        this.racing = true; this._inPit = false; note.remove();
+      }
+    }, 100);
+  }
+
+  _toast(msg, color) {
+    let t = document.getElementById('_gt');
+    if (!t) {
+      t = document.createElement('div'); t.id = '_gt';
+      t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.9);font-family:Orbitron,sans-serif;font-size:0.9rem;font-weight:700;padding:14px 28px;border-radius:6px;z-index:60;pointer-events:none;transition:opacity 0.3s;';
+      document.body.appendChild(t);
+    }
+    t.style.color = color; t.style.border = `2px solid ${color}`;
+    t.innerText = msg; t.style.opacity = '1';
+    clearTimeout(this._toastT); this._toastT = setTimeout(() => t.style.opacity = '0', 2500);
+  }
+
+  _showFinish() {
+    const sorted = [...this.allCars].sort((a, b) => b.lap - a.lap || b.progress - a.progress);
+    const medals = ['🥇','🥈','🥉'];
+    const d = document.createElement('div');
+    d.style.cssText = 'position:fixed;inset:0;z-index:80;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-family:Orbitron,sans-serif;';
+    d.innerHTML = '<div style="font-size:3.5rem;font-weight:900;color:#e10600;margin-bottom:1.5rem;letter-spacing:0.1em">RACE OVER</div>' +
+      sorted.slice(0,3).map((c, i) => `<div style="font-size:1.4rem;margin:6px 0;color:${c===this.player?'#ffd700':'#ccc'}">${medals[i]} ${c.team.name}</div>`).join('') +
+      '<button onclick="location.reload()" style="margin-top:2rem;padding:14px 48px;background:#e10600;color:white;border:none;font-family:Orbitron,sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;border-radius:4px;letter-spacing:0.15em">RESTART</button>';
+    document.body.appendChild(d);
   }
 
   _setupAudio() {
@@ -329,6 +426,8 @@ class Game {
       if(v==='w'||e.key==='ArrowUp') k.w=1; if(v==='s'||e.key==='ArrowDown') k.s=1;
       if(v==='a'||e.key==='ArrowLeft') k.a=1; if(v==='d'||e.key==='ArrowRight') k.d=1;
       if(v===' ') k.space=1; if(v==='c') this.cameraMode = this.cameraMode==='chase'?'cockpit':'chase';
+      // Fix 3: P key triggers pit stop
+      if(v==='p') this.doPitStop();
     };
     window.onkeyup = e => {
       const v = e.key.toLowerCase();
@@ -341,6 +440,9 @@ class Game {
       el.ontouchstart = (e) => { k[key]=1; e.preventDefault(); }; el.ontouchend = (e) => { k[key]=0; e.preventDefault(); };
     };
     b('t-left','a'); b('t-right','d'); b('t-gas','w'); b('t-brake','s'); b('t-drs','space');
+    // Fix 3: wire pit touch button
+    const pitBtn = document.getElementById('t-pit');
+    if(pitBtn) { pitBtn.ontouchstart = e => { this.doPitStop(); e.preventDefault(); }; pitBtn.onclick = () => this.doPitStop(); }
   }
 
   animate() {
@@ -359,6 +461,8 @@ class Game {
     }
     this.smoke.update(dt);
     this.updateHUD();
+    // Fix 1: draw minimap every frame
+    this._drawMinimap();
     this.updateAudio();
     this.updateCamera();
     this.renderer.render(this.scene, this.camera);
@@ -391,7 +495,7 @@ class Game {
         p.lap++; this.lapStart = performance.now();
         const msg = document.getElementById('lap-msg');
         msg.innerText = `LAP ${p.lap}`; msg.style.opacity = 1; setTimeout(() => msg.style.opacity = 0, 2000);
-        if(p.lap > LAPS_TO_WIN) location.reload();
+        if(p.lap > LAPS_TO_WIN) { this.racing = false; this._showFinish(); return; }
       } else this._started = true;
     } else if (!near) this._near = false;
 
@@ -416,7 +520,7 @@ class Game {
     const sorted = [...this.allCars].sort((a,b) => b.lap - a.lap || b.progress - a.progress);
     const pos = sorted.indexOf(p) + 1;
     if(pos < this._lastPos) {
-       const ov = el('overtake-msg'); ov.style.opacity = 1; setTimeout(()=>ov.style.opacity=0, 2000);
+       const ov = el('overtake-msg'); if(ov) { ov.style.opacity = 1; setTimeout(()=>ov.style.opacity=0, 2000); }
     }
     this._lastPos = pos;
     el('pos').innerText = `POS: ${pos}${pos===1?'st':pos===2?'nd':pos===3?'rd':'th'}`;
@@ -430,6 +534,24 @@ class Game {
     const f = t => `${Math.floor(t/60).toString().padStart(2,'0')}:${Math.floor(t%60).toString().padStart(2,'0')}.${Math.floor((t%1)*1000).toString().padStart(3,'0')}`;
     el('hud-timer').innerText = f(elapsed);
     el('lap').innerText = `${p.lap}/${LAPS_TO_WIN}`;
+
+    // Fix 4a: DRS status
+    const drsEl = el('drs-msg');
+    if(drsEl) {
+      if(p.drsActive)      { drsEl.innerText='DRS ACTIVE';    drsEl.style.color='#00ff88'; drsEl.style.textShadow='0 0 8px #00ff88'; }
+      else if(p.canUseDrs) { drsEl.innerText='DRS AVAILABLE'; drsEl.style.color='#ffff00'; drsEl.style.textShadow='none'; }
+      else                 { drsEl.innerText='DRS LOCKED';    drsEl.style.color='#444';    drsEl.style.textShadow='none'; }
+    }
+
+    // Fix 4b: best lap tracking
+    if(this._started && elapsed > 5 && elapsed < this.bestLap) this.bestLap = elapsed;
+    const bEl = el('best'); if(bEl) bEl.innerText = this.bestLap < Infinity ? f(this.bestLap) : '--:--.---';
+
+    // Fix 4c: tire wear color (green -> red)
+    for(let i=0;i<4;i++){const t=el(`t${i}`);if(t)t.style.background=`rgb(${Math.floor((1-p.tireWear)*255)},${Math.floor(p.tireWear*255)},0)`;}
+
+    // Fix 4d: damage display
+    const dmgEl = el('dmg'); if(dmgEl) { dmgEl.innerText = Math.floor(p.damage*100)+'%'; dmgEl.style.color = p.damage > 0.5 ? '#f00' : p.damage > 0.1 ? '#ff0' : '#888'; }
   }
 
   updateAudio() {

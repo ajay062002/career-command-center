@@ -3,203 +3,276 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>F1 Grand Prix 3D</title>
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r160/three.min.js"></script>
-  
+  <title>F1 LEGO RACING — High Performance 3D Simulator</title>
+  <meta name="description" content="Experience the thrill of high-speed F1 racing in this 3D LEGO-style simulator. Choose your team, master the circuit, and win the championship." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
-  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #000; overflow: hidden; font-family: 'Orbitron', sans-serif; height: 100vh; }
+    body { background: #000; overflow: hidden; font-family: 'Orbitron', sans-serif; }
     canvas { display: block; position: fixed; top: 0; left: 0; z-index: 1; }
-    
-    /* Selection Overlay */
     #overlay {
       position: fixed; inset: 0; z-index: 20;
-      background: linear-gradient(135deg, #0a1428 0%, #050a14 100%);
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0a00 50%, #0a0a1a 100%);
       display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
-      text-align: center;
     }
     #overlay h1 {
-      font-size: clamp(2rem, 6vw, 4rem); font-weight: 900; letter-spacing: 0.1em;
+      font-size: clamp(2rem, 6vw, 5rem); font-weight: 900; letter-spacing: 0.1em;
       background: linear-gradient(90deg, #e10600, #ff6b00, #e10600);
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-      margin-bottom: 0.5rem;
+      text-shadow: none; margin-bottom: 0.5rem;
     }
-    #overlay .subtitle { font-size: 0.8rem; color: #666; letter-spacing: 0.3em; margin-bottom: 2rem; }
-    .section-label { font-size: 0.65rem; color: #e10600; letter-spacing: 0.4em; text-transform: uppercase; margin-bottom: 1rem; }
-    .cards { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 2rem; }
+    #overlay .subtitle { font-size: 0.9rem; color: #666; letter-spacing: 0.3em; margin-bottom: 3rem; }
+    .section-label { font-size: 0.7rem; color: #e10600; letter-spacing: 0.4em; text-transform: uppercase; margin-bottom: 1rem; }
+    .cards { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 2.5rem; }
     .card {
-      width: 130px; padding: 14px 10px; border: 1px solid #222; border-radius: 8px; text-align: center;
+      width: 140px; padding: 16px 12px; border: 1px solid #222; border-radius: 8px; text-align: center;
       cursor: pointer; transition: all 0.2s; background: #111;
     }
-    .card:hover { border-color: #e10600; background: #1a0000; transform: translateY(-4px); }
-    .card.selected { border-color: #e10600; background: #200000; box-shadow: 0 0 15px rgba(225,6,0,0.4); }
-    .card-color { height: 6px; border-radius: 3px; margin-bottom: 8px; }
-    .card-short { font-size: 1.2rem; font-weight: 900; color: white; }
-    .card-name { font-size: 0.6rem; color: #888; }
-    
+    .card:hover { border-color: #e10600; background: #1a0000; transform: translateY(-4px); box-shadow: 0 8px 24px rgba(225,6,0,0.3); }
+    .card.selected { border-color: #e10600; background: #200000; box-shadow: 0 0 20px rgba(225,6,0,0.5); }
+    .card-color { height: 8px; border-radius: 4px; margin-bottom: 10px; }
+    .card-name { font-size: 0.65rem; color: #ccc; letter-spacing: 0.1em; line-height: 1.4; }
+    .card-short { font-size: 1.4rem; font-weight: 900; color: white; }
     #start-btn {
-      padding: 14px 50px; background: #e10600; color: white; border: none; border-radius: 4px;
-      font-family: 'Orbitron', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.2em;
+      padding: 16px 60px; background: #e10600; color: white; border: none; border-radius: 4px;
+      font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.2em;
       cursor: pointer; transition: all 0.2s; display: none;
     }
-    #start-btn:hover { background: #ff2020; box-shadow: 0 0 20px rgba(225,6,0,0.5); }
-    
-    /* Countdown & Lights */
+    #start-btn:hover { background: #ff2020; box-shadow: 0 0 30px rgba(225,6,0,0.6); transform: scale(1.05); }
     #countdown-overlay {
-      position: fixed; inset: 0; z-index: 30; display: none;
+      position: fixed; inset: 0; z-index: 25; display: none;
       flex-direction: column; align-items: center; justify-content: center; pointer-events: none;
     }
-    .lights-container { display: flex; gap: 10px; margin-bottom: 40px; }
-    .light-unit { width: 40px; height: 100px; background: #111; border: 2px solid #333; border-radius: 4px; display: flex; flex-direction: column; justify-content: space-around; align-items: center; padding: 5px; }
-    .bulb { width: 30px; height: 30px; background: #200; border-radius: 50%; transition: background 0.1s; }
-    .light-unit.active .bulb { background: #f00; box-shadow: 0 0 20px #f00; }
-    .light-unit.go .bulb { background: #0f0; box-shadow: 0 0 20px #0f0; }
-
+    @keyframes pulse { 
+      0% { transform: scale(3.5); opacity: 0; filter: blur(20px); } 
+      50% { transform: scale(1.1); opacity: 1; filter: blur(0px); }
+      100% { transform: scale(1); opacity: 0.8; } 
+    }
     #countdown-text {
-      font-size: 15vw; font-weight: 900; color: #fff;
-      text-shadow: 0 0 50px rgba(255,255,255,0.4);
+      font-size: 18vw; font-weight: 900; color: #fff;
+      text-shadow: 0 0 40px rgba(255,255,255,0.6);
+      animation: pulse 0.9s infinite;
     }
-    @keyframes countPulse {
-      0% { transform: scale(2); opacity: 0; }
-      20% { transform: scale(1); opacity: 1; }
-      80% { transform: scale(1); opacity: 1; }
-      100% { transform: scale(0.8); opacity: 0; }
+    /* Fix #17: Race start lights */
+    #start-lights {
+      display: flex; gap: 12px; margin-bottom: 32px;
     }
-    
-    /* HUD */
-    #hud { position: fixed; inset: 0; z-index: 10; pointer-events: none; display: none; }
-    .hud-panel { background: rgba(0,0,0,0.8); border: 2px solid #222; padding: 12px; border-radius: 4px; }
-    #hud-tl { position: absolute; top: 20px; left: 20px; border-left: 4px solid #e10600; }
-    #hud-tr { position: absolute; top: 20px; right: 20px; border-right: 4px solid #e10600; text-align: right; }
-    #hud-bl { position: absolute; bottom: 20px; left: 20px; border-left: 4px solid #e10600; }
-    #hud-lb { position: absolute; top: 180px; right: 20px; border-right: 4px solid #e10600; font-size: 0.7rem; min-width: 160px; }
-    
-    .hud-label { font-size: 0.5rem; color: #666; text-transform: uppercase; letter-spacing: 0.2em; }
-    .hud-val { font-weight: 900; color: #fff; }
-    .hud-gear { font-size: 3rem; color: #e10600; line-height: 1; }
-    .hud-speed { font-size: 1.5rem; }
-    #rpm-bg { width: 100%; height: 4px; background: #222; margin-top: 6px; }
-    #rpm-bar { height: 100%; background: #0f0; width: 0%; transition: width 0.05s; }
-    
-    #hud-timer { font-size: 1.2rem; color: #ffd700; font-family: monospace; }
-    .tire-row { display: flex; gap: 4px; margin-top: 6px; }
-    .tire-box { width: 24px; height: 36px; background: #0f0; border-radius: 2px; }
-    
-    /* Touch Controls */
-    #touch-controls { position: fixed; inset: 0; z-index: 40; pointer-events: none; display: none; }
-    .t-btn {
-      position: absolute; pointer-events: auto; width: 80px; height: 80px; border-radius: 50%;
-      background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2);
-      display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900;
-      backdrop-filter: blur(4px); -webkit-tap-highlight-color: transparent;
+    .light-unit {
+      width: 48px; height: 80px; background: #222; border: 2px solid #444;
+      border-radius: 8px; display: flex; flex-direction: column;
+      align-items: center; justify-content: space-around; padding: 8px 0;
     }
-    .t-btn:active { background: rgba(225,6,0,0.4); border-color: #e10600; }
-    #t-left  { bottom: 40px; left: 40px; }
-    #t-right { bottom: 40px; left: 140px; }
-    #t-gas   { bottom: 140px; right: 40px; width: 100px; height: 100px; }
-    #t-brake { bottom: 30px; right: 40px; width: 100px; height: 100px; }
-    #t-drs   { bottom: 150px; right: 160px; width: 60px; height: 60px; font-size: 0.7rem; }
-    #t-pit   { top: 120px; left: 20px; width: 60px; height: 60px; font-size: 0.7rem; border-color: #ffd700; }
+    .bulb {
+      width: 28px; height: 28px; border-radius: 50%; background: #111;
+      border: 2px solid #333; transition: background 0.15s, box-shadow 0.15s;
+    }
+    .light-unit.active .bulb {
+      background: #ff2020;
+      box-shadow: 0 0 16px 4px #ff0000, 0 0 40px 8px rgba(255,0,0,0.5);
+    }
+    .light-unit.go .bulb { background: #0a0a0a; box-shadow: none; }
+    /* Fix #18: Overtake flash */
+    #overtake-flash {
+      position: fixed; top: 38%; left: 50%; transform: translateX(-50%);
+      font-size: 4rem; font-weight: 900; color: #00ff88;
+      text-shadow: 0 0 40px #00ff88; pointer-events: none;
+      opacity: 0; transition: opacity 0.3s; z-index: 12;
+      letter-spacing: 0.15em;
+    }
+    #hud {
+      position: fixed; inset: 0; z-index: 10; pointer-events: none; display: none;
+    }
+    #hud-tl {
+      position: absolute; top: 20px; left: 20px;
+      background: rgba(0,0,0,0.75); border-left: 3px solid #e10600;
+      padding: 14px 18px; border-radius: 0 6px 6px 0; min-width: 220px;
+    }
+    #hud-tr {
+      position: absolute; top: 20px; right: 20px;
+      background: rgba(0,0,0,0.75); border-right: 3px solid #e10600;
+      padding: 14px 18px; border-radius: 6px 0 0 6px; text-align: right; min-width: 200px;
+    }
+    #hud-bl {
+      position: absolute; bottom: 20px; left: 20px;
+      background: rgba(0,0,0,0.75); border-left: 3px solid #e10600;
+      padding: 14px 18px; border-radius: 0 6px 6px 0;
+    }
+    .hud-label { font-size: 0.55rem; color: #888; letter-spacing: 0.3em; text-transform: uppercase; }
+    .hud-gear { font-size: 4rem; font-weight: 900; color: #e10600; line-height: 1; }
+    .hud-speed { font-size: 2rem; font-weight: 700; color: white; }
+    .hud-unit { font-size: 0.7rem; color: #888; }
+    #rpm-bar-bg { width: 100%; height: 4px; background: #222; margin-top: 8px; border-radius: 2px; }
+    #rpm-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #0f0, #ff0, #f00); border-radius: 2px; transition: width 0.05s; }
+    #drs-light { margin-top: 6px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: #333; }
+    #drs-light.active { color: #00ff88; text-shadow: 0 0 10px #00ff88; }
+    #hud-lap { font-size: 1.1rem; font-weight: 700; color: white; }
+    #hud-timer { font-size: 1.6rem; font-weight: 700; color: #ffd700; font-family: monospace; }
+    #hud-pos { font-size: 0.85rem; color: #aaa; margin-top: 4px; }
+    #pit-notice { font-size: 0.7rem; color: #ffd700; margin-top: 6px; display: none; animation: blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    .tire-row { display: flex; gap: 5px; margin-top: 8px; }
+    .tire-box { width: 28px; height: 42px; border-radius: 3px; background: #0f0; border: 1px solid #000; transition: background 0.5s; }
+    #minimap-canvas { position: absolute; bottom: 20px; right: 20px; border: 1px solid #333; border-radius: 6px; background: rgba(0,0,0,0.8); }
+    #hud-lb {
+      position: absolute; top: 160px; right: 20px;
+      background: rgba(0,0,0,0.75); border-right: 3px solid #e10600;
+      padding: 10px 14px; border-radius: 6px 0 0 6px; min-width: 170px; text-align: right;
+    }
+    .lb-row { font-size: 0.62rem; padding: 2px 0; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+    .lb-pos { color: #888; font-size: 0.55rem; min-width: 18px; }
+    .lb-name { color: #ccc; }
+    .lb-gap { color: #888; font-size: 0.55rem; font-family: monospace; }
+    .lb-row.is-player .lb-name { color: #fff; font-weight: 700; }
+    #lap-flash {
+      position: fixed; top: 38%; left: 50%; transform: translateX(-50%);
+      font-size: 5rem; font-weight: 900; color: rgba(255,255,255,0.15);
+      pointer-events: none; opacity: 0; transition: opacity 0.4s; z-index: 8;
+      font-style: italic; letter-spacing: 0.1em;
+    }
+    #finish-overlay {
+      position: fixed; inset: 0; z-index: 30; display: none;
+      background: rgba(0,0,0,0.92); flex-direction: column; align-items: center; justify-content: center;
+      color: white;
+    }
+    #finish-overlay h2 { font-size: 5rem; font-weight: 900; color: #e10600; margin-bottom: 2rem; letter-spacing: 0.1em; }
+    .podium-entry { font-size: 1.8rem; margin: 8px 0; }
+    #restart-btn {
+      margin-top: 2rem; padding: 14px 50px; background: #e10600; color: white; border: none;
+      font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; border-radius: 4px;
+      letter-spacing: 0.2em;
+    }
+    #restart-btn:hover { background: #ff2020; }
+    #countdown-lights { display: none; }
+    #touch-controls {
+      position: fixed; inset: 0; pointer-events: none; z-index: 15; display: none;
+    }
+    .touch-btn {
+      position: absolute; pointer-events: auto; background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px); border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff;
+      user-select: none; -webkit-tap-highlight-color: transparent;
+    }
+    .touch-btn:active { background: rgba(225,6,0,0.5); border-color: #e10600; }
+    #touch-left { bottom: 40px; left: 40px; width: 80px; height: 80px; }
+    #touch-right { bottom: 40px; left: 140px; width: 80px; height: 80px; }
+    #touch-gas { bottom: 140px; right: 40px; width: 90px; height: 90px; }
+    #touch-brake { bottom: 40px; right: 40px; width: 90px; height: 90px; }
+    #touch-drs { bottom: 150px; right: 150px; width: 70px; height: 70px; font-size: 0.7rem; }
+    #touch-pit { top: 120px; left: 20px; width: 60px; height: 60px; font-size: 0.7rem; border-color: #ffd700; }
 
-    @media (max-width: 1024px), (pointer: coarse) { #touch-controls { display: block; } }
-    
-    /* Messages */
-    #lap-msg {
-      position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);
-      font-size: 4rem; font-weight: 900; color: rgba(255,255,255,0.3); pointer-events: none; opacity: 0;
-      text-shadow: 0 0 20px rgba(0,255,0,0.2);
+    @media (max-width: 1024px), (pointer: coarse) {
+      #touch-controls { display: block; }
+      #controls-hint { display: none; }
     }
-    #overtake-msg {
-      position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
-      color: #0f0; font-weight: 900; font-size: 2rem; opacity: 0; transition: opacity 0.3s;
+
+    #controls-hint {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      font-size: 0.6rem; color: #444; letter-spacing: 0.2em; z-index: 5; pointer-events: none;
     }
   </style>
+  <script type="module" crossorigin src="./assets/index-CDWIGAMO.js"></script>
 </head>
 <body>
-
-  <!-- Selection Overlay -->
   <div id="overlay">
-    <h1>F1 RACING</h1>
-    <p class="subtitle">GRAND PRIX PRO SIMULATOR</p>
-    
-    <p class="section-label">Select Your Team</p>
-    <div id="team-cards" class="cards"></div>
-    
-    <p class="section-label" id="circuit-label" style="display:none">Select Circuit</p>
-    <div id="circuit-cards" class="cards" style="display:none"></div>
-    
+    <h1>F1 LEGO RACING</h1>
+    <p class="subtitle">SEASON 2025 · WORLD CHAMPIONSHIP</p>
+
+    <p class="section-label">Choose Your Team</p>
+    <div class="cards" id="team-cards"></div>
+
+    <p class="section-label" id="circuit-label" style="display:none">Choose Circuit</p>
+    <div class="cards" id="circuit-cards"></div>
+
     <button id="start-btn">START RACE</button>
   </div>
 
-  <!-- Countdown Overlay -->
   <div id="countdown-overlay">
-    <div class="lights-container">
-      <div class="light-unit" id="l1"><div class="bulb"></div><div class="bulb"></div></div>
-      <div class="light-unit" id="l2"><div class="bulb"></div><div class="bulb"></div></div>
-      <div class="light-unit" id="l3"><div class="bulb"></div><div class="bulb"></div></div>
-      <div class="light-unit" id="l4"><div class="bulb"></div><div class="bulb"></div></div>
-      <div class="light-unit" id="l5"><div class="bulb"></div><div class="bulb"></div></div>
+    <!-- Fix #17: F1 start lights -->
+    <div id="start-lights">
+      <div class="light-unit" id="light-0"><div class="bulb"></div><div class="bulb"></div></div>
+      <div class="light-unit" id="light-1"><div class="bulb"></div><div class="bulb"></div></div>
+      <div class="light-unit" id="light-2"><div class="bulb"></div><div class="bulb"></div></div>
+      <div class="light-unit" id="light-3"><div class="bulb"></div><div class="bulb"></div></div>
+      <div class="light-unit" id="light-4"><div class="bulb"></div><div class="bulb"></div></div>
     </div>
     <div id="countdown-text"></div>
   </div>
 
-  <!-- HUD Overlay -->
   <div id="hud">
-    <div id="overtake-msg">OVERTAKE!</div>
-    <div id="hud-tl" class="hud-panel">
-      <div style="display:flex; align-items:center; gap:12px">
-        <div class="hud-gear" id="gear">1</div>
+    <div id="hud-tl">
+      <div style="display:flex;align-items:flex-end;gap:14px">
+        <div>
+          <div class="hud-label">Gear</div>
+          <div class="hud-gear" id="hud-gear">N</div>
+        </div>
+        <div style="width:1px;height:48px;background:#333"></div>
         <div>
           <div class="hud-label">Speed</div>
-          <div class="hud-val hud-speed" id="speed">0</div>
+          <div class="hud-speed"><span id="hud-speed">000</span><span class="hud-unit"> KPH</span></div>
         </div>
       </div>
-      <div id="rpm-bg"><div id="rpm-bar"></div></div>
-      <div id="drs-msg" style="font-size:0.55rem; margin-top:4px; color:#555">DRS LOCKED</div>
+      <div id="rpm-bar-bg"><div id="rpm-bar"></div></div>
+      <div id="drs-light">DRS: LOCKED</div>
     </div>
 
-    <div id="hud-tr" class="hud-panel">
-      <div class="hud-label">Lap <span id="lap">1/5</span></div>
+    <div id="hud-tr">
+      <div class="hud-label">Lap</div>
+      <div id="hud-lap">1 / 5</div>
       <div id="hud-timer">00:00.000</div>
-      <div class="hud-label">Best: <span id="best">--:--.---</span></div>
-      <div class="hud-label" style="font-size:0.55rem; margin-top:4px" id="pos">POS: 1st</div>
-      <div id="sec-times" style="font-size:0.5rem; color:#888; margin-top:4px">
-        S1: <span id="s1">--</span> S2: <span id="s2">--</span> S3: <span id="s3">--</span>
+      <div class="hud-label">Best</div>
+      <div id="hud-best">--:--.---</div>
+      <div id="hud-pos">POS: 1st</div>
+      <div id="hud-sectors" style="font-family:monospace; font-size:0.6rem; color:#888; margin-top:6px; letter-spacing:1px;">
+        S1: <span id="s1-time">--.-</span> S2: <span id="s2-time">--.-</span> S3: <span id="s3-time">--.-</span>
       </div>
+      <div id="pit-notice">⬛ PIT WINDOW OPEN</div>
     </div>
 
-    <div id="hud-bl" class="hud-panel">
-      <div class="hud-label">Tires & Status</div>
+    <div id="hud-bl">
+      <div class="hud-label">Tire Thermal</div>
       <div class="tire-row">
-        <div id="t0" class="tire-box"></div><div id="t1" class="tire-box"></div>
-        <div id="t2" class="tire-box"></div><div id="t3" class="tire-box"></div>
+        <div class="tire-box" id="t0"></div>
+        <div class="tire-box" id="t1"></div>
+        <div class="tire-box" id="t2"></div>
+        <div class="tire-box" id="t3"></div>
       </div>
-      <div class="hud-label" style="margin-top:8px">Damage: <span id="dmg" style="color:#fff">0%</span></div>
+      <div style="font-size:0.55rem;color:#555;margin-top:4px" id="tire-pct">100%</div>
+      <div style="margin-top:10px;">
+          <div class="hud-label">Damage</div>
+          <div style="font-size:0.8rem;font-weight:700;color:#888;" id="dmg-val">0%</div>
+      </div>
     </div>
 
-    <div id="hud-lb" class="hud-panel">
-      <div class="hud-label">Leaderboard</div>
+    <div id="hud-lb">
+      <div class="hud-label">Race Order</div>
       <div id="lb-rows"></div>
     </div>
+
+    <canvas id="minimap-canvas" width="180" height="180"></canvas>
   </div>
 
-  <!-- Message Box -->
-  <div id="lap-msg">LAP 2</div>
+  <div id="lap-flash">LAP 2</div>
+  <!-- Fix #18: Overtake flash -->
+  <div id="overtake-flash">OVERTAKE</div>
 
-  <!-- Touch Controls -->
+  <div id="finish-overlay">
+    <h2>RACE OVER</h2>
+    <div id="podium-list"></div>
+    <button id="restart-btn" onclick="location.reload()">RESTART</button>
+  </div>
+
+  <div id="controls-hint">W/S — Throttle/Brake &nbsp;|&nbsp; A/D — Steer &nbsp;|&nbsp; SPACE — DRS &nbsp;|&nbsp; P — Pit &nbsp;|&nbsp; C — Camera (Chase/TV/Cockpit)</div>
+
   <div id="touch-controls">
-    <div id="t-left" class="t-btn">L</div>
-    <div id="t-right" class="t-btn">R</div>
-    <div id="t-gas" class="t-btn">GO</div>
-    <div id="t-brake" class="t-btn">STOP</div>
-    <div id="t-drs" class="t-btn">DRS</div>
-    <div id="t-pit" class="t-btn">PIT</div>
+    <div id="touch-left" class="touch-btn">L</div>
+    <div id="touch-right" class="touch-btn">R</div>
+    <div id="touch-gas" class="touch-btn">GO</div>
+    <div id="touch-brake" class="touch-btn">STOP</div>
+    <div id="touch-drs" class="touch-btn">DRS</div>
+    <div id="touch-pit" class="touch-btn">PIT</div>
   </div>
 
-  <script src="main.js"></script>
 </body>
 </html>
