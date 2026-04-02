@@ -3,12 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>F1 LEGO RACING — High Performance 3D Simulator</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
+  <title>F1 Grand Prix — Pro Simulator (Arcade Physics)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
-
-  <!-- Three.js from CDN via importmap — no Vite/bundler required -->
+  
   <script type="importmap">
   {
     "imports": {
@@ -19,18 +17,18 @@
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #000; overflow: hidden; font-family: 'Orbitron', sans-serif; }
+    body { background: #000; overflow: hidden; font-family: 'Orbitron', sans-serif; height: 100vh; }
     canvas { display: block; position: fixed; top: 0; left: 0; z-index: 1; }
     #overlay {
       position: fixed; inset: 0; z-index: 20;
-      background: linear-gradient(135deg, #0a0a0a 0%, #1a0a00 50%, #0a0a1a 100%);
+      background: linear-gradient(135deg, #0a1428 0%, #050a14 100%);
       display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
     }
     #overlay h1 {
       font-size: clamp(2rem, 6vw, 5rem); font-weight: 900; letter-spacing: 0.1em;
       background: linear-gradient(90deg, #e10600, #ff6b00, #e10600);
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-      text-shadow: none; margin-bottom: 0.5rem;
+      margin-bottom: 0.5rem;
     }
     #overlay .subtitle { font-size: 0.9rem; color: #666; letter-spacing: 0.3em; margin-bottom: 3rem; }
     .section-label { font-size: 0.7rem; color: #e10600; letter-spacing: 0.4em; text-transform: uppercase; margin-bottom: 1rem; }
@@ -54,11 +52,16 @@
       position: fixed; inset: 0; z-index: 25; display: none;
       align-items: center; justify-content: center; pointer-events: none;
     }
-    #countdown-num {
-      font-size: 20vw; font-weight: 900; color: #e10600;
-      text-shadow: 0 0 60px rgba(225,6,0,0.8); animation: pulse 0.8s ease-out;
+    @keyframes pulse { 
+      0% { transform: scale(3.5); opacity: 0; filter: blur(20px); } 
+      50% { transform: scale(1.1); opacity: 1; filter: blur(0px); }
+      100% { transform: scale(1); opacity: 0.8; } 
     }
-    @keyframes pulse { from { transform: scale(1.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    #countdown-text {
+      font-size: 18vw; font-weight: 900; color: #fff;
+      text-shadow: 0 0 40px rgba(255,255,255,0.6);
+      animation: pulse 0.9s infinite;
+    }
     #hud {
       position: fixed; inset: 0; z-index: 10; pointer-events: none; display: none;
     }
@@ -122,10 +125,6 @@
       letter-spacing: 0.2em;
     }
     #restart-btn:hover { background: #ff2020; }
-    #countdown-lights { display: flex; gap: 30px; padding: 20px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 2px solid #222; }
-    .light-unit { width: 100px; height: 180px; background: #1a1a1a; border-radius: 8px; padding: 12px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, 1fr); gap: 10px; border: 2px solid #333; }
-    .bulb { width: 100%; aspect-ratio: 1; border-radius: 50%; background: #222; border: 1px solid #111; transition: background 0.1s; }
-    .light-unit.active .bulb { background: #e10600; box-shadow: 0 0 30px #ff2020; border-color: #ff5555; }
     #touch-controls {
       position: fixed; inset: 0; pointer-events: none; z-index: 15; display: none;
     }
@@ -156,23 +155,20 @@
 </head>
 <body>
   <div id="overlay">
-    <h1>F1 LEGO RACING</h1>
-    <p class="subtitle">SEASON 2025 · WORLD CHAMPIONSHIP</p>
+    <h1>F1 Grand Prix</h1>
+    <p class="subtitle">ULTIMATE 3D RACING SIMULATOR</p>
+
     <p class="section-label">Choose Your Team</p>
     <div class="cards" id="team-cards"></div>
+
     <p class="section-label" id="circuit-label" style="display:none">Choose Circuit</p>
     <div class="cards" id="circuit-cards"></div>
+
     <button id="start-btn">START RACE</button>
   </div>
 
   <div id="countdown-overlay">
-    <div id="countdown-lights">
-      <div class="light-unit"><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div></div>
-      <div class="light-unit"><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div></div>
-      <div class="light-unit"><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div></div>
-      <div class="light-unit"><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div></div>
-      <div class="light-unit"><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div></div>
-    </div>
+    <div id="countdown-text"></div>
   </div>
 
   <div id="hud">
@@ -206,7 +202,7 @@
     </div>
 
     <div id="hud-bl">
-      <div class="hud-label">Tire Thermal</div>
+      <div class="hud-label">Tire Condition</div>
       <div class="tire-row">
         <div class="tire-box" id="t0"></div>
         <div class="tire-box" id="t1"></div>
@@ -215,8 +211,8 @@
       </div>
       <div style="font-size:0.55rem;color:#555;margin-top:4px" id="tire-pct">100%</div>
       <div style="margin-top:10px;">
-        <div class="hud-label">Damage</div>
-        <div style="font-size:0.8rem;font-weight:700;color:#888;" id="dmg-val">0%</div>
+          <div class="hud-label">Damage</div>
+          <div style="font-size:0.8rem;font-weight:700;color:#888;" id="dmg-val">0%</div>
       </div>
     </div>
 
@@ -244,7 +240,7 @@
     <div id="touch-gas" class="touch-btn">GO</div>
     <div id="touch-brake" class="touch-btn">STOP</div>
     <div id="touch-drs" class="touch-btn">DRS</div>
-    <div id="touch-pit" class="touch-btn" style="border-color:#ffd700">PIT</div>
+    <div id="touch-pit" class="touch-btn">PIT</div>
   </div>
 
   <script type="module" src="main.js"></script>
