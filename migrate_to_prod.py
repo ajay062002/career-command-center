@@ -15,7 +15,7 @@ PROD = 'https://career-command-center-api.onrender.com/api'
 
 # ── 1. Login to production ────────────────────────────────────────────────────
 print("Logging into production...")
-r = requests.post(f'{PROD}/auth/login/', json={'username': 'admin', 'password': 'password123'})
+r = requests.post(f'{PROD}/auth/login/', json={'username': 'admin', 'password': 'Test@1234'})
 if r.status_code != 200:
     print("Login failed:", r.text)
     sys.exit(1)
