@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>F1 Grand Prix 3D</title>
   
-  <!-- Use a stable script tag for Three.js instead of importmap for maximum reliability -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r160/three.min.js"></script>
   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
@@ -49,26 +48,30 @@
     }
     #start-btn:hover { background: #ff2020; box-shadow: 0 0 20px rgba(225,6,0,0.5); }
     
-    /* Countdown */
+    /* Countdown & Lights */
     #countdown-overlay {
       position: fixed; inset: 0; z-index: 30; display: none;
-      align-items: center; justify-content: center; pointer-events: none;
+      flex-direction: column; align-items: center; justify-content: center; pointer-events: none;
     }
+    .lights-container { display: flex; gap: 10px; margin-bottom: 40px; }
+    .light-unit { width: 40px; height: 100px; background: #111; border: 2px solid #333; border-radius: 4px; display: flex; flex-direction: column; justify-content: space-around; align-items: center; padding: 5px; }
+    .bulb { width: 30px; height: 30px; background: #200; border-radius: 50%; transition: background 0.1s; }
+    .light-unit.active .bulb { background: #f00; box-shadow: 0 0 20px #f00; }
+    .light-unit.go .bulb { background: #0f0; box-shadow: 0 0 20px #0f0; }
+
     #countdown-text {
-      font-size: 20vw; font-weight: 900; color: #fff;
+      font-size: 15vw; font-weight: 900; color: #fff;
       text-shadow: 0 0 50px rgba(255,255,255,0.4);
     }
     @keyframes countPulse {
-      0% { transform: scale(3) rotate(-10deg); opacity: 0; filter: blur(20px); }
-      20% { transform: scale(1.1) rotate(0deg); opacity: 1; filter: blur(0px); }
-      80% { transform: scale(1) rotate(0deg); opacity: 1; }
-      100% { transform: scale(0.8) rotate(5deg); opacity: 0; }
+      0% { transform: scale(2); opacity: 0; }
+      20% { transform: scale(1); opacity: 1; }
+      80% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(0.8); opacity: 0; }
     }
     
     /* HUD */
-    #hud {
-      position: fixed; inset: 0; z-index: 10; pointer-events: none; display: none;
-    }
+    #hud { position: fixed; inset: 0; z-index: 10; pointer-events: none; display: none; }
     .hud-panel { background: rgba(0,0,0,0.8); border: 2px solid #222; padding: 12px; border-radius: 4px; }
     #hud-tl { position: absolute; top: 20px; left: 20px; border-left: 4px solid #e10600; }
     #hud-tr { position: absolute; top: 20px; right: 20px; border-right: 4px solid #e10600; text-align: right; }
@@ -107,7 +110,12 @@
     /* Messages */
     #lap-msg {
       position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);
-      font-size: 4rem; font-weight: 900; color: rgba(255,255,255,0.2); pointer-events: none; opacity: 0;
+      font-size: 4rem; font-weight: 900; color: rgba(255,255,255,0.3); pointer-events: none; opacity: 0;
+      text-shadow: 0 0 20px rgba(0,255,0,0.2);
+    }
+    #overtake-msg {
+      position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
+      color: #0f0; font-weight: 900; font-size: 2rem; opacity: 0; transition: opacity 0.3s;
     }
   </style>
 </head>
@@ -121,19 +129,27 @@
     <p class="section-label">Select Your Team</p>
     <div id="team-cards" class="cards"></div>
     
-    <p class="section-label">Select Circuit</p>
-    <div id="circuit-cards" class="cards"></div>
+    <p class="section-label" id="circuit-label" style="display:none">Select Circuit</p>
+    <div id="circuit-cards" class="cards" style="display:none"></div>
     
     <button id="start-btn">START RACE</button>
   </div>
 
   <!-- Countdown Overlay -->
   <div id="countdown-overlay">
+    <div class="lights-container">
+      <div class="light-unit" id="l1"><div class="bulb"></div><div class="bulb"></div></div>
+      <div class="light-unit" id="l2"><div class="bulb"></div><div class="bulb"></div></div>
+      <div class="light-unit" id="l3"><div class="bulb"></div><div class="bulb"></div></div>
+      <div class="light-unit" id="l4"><div class="bulb"></div><div class="bulb"></div></div>
+      <div class="light-unit" id="l5"><div class="bulb"></div><div class="bulb"></div></div>
+    </div>
     <div id="countdown-text"></div>
   </div>
 
   <!-- HUD Overlay -->
   <div id="hud">
+    <div id="overtake-msg">OVERTAKE!</div>
     <div id="hud-tl" class="hud-panel">
       <div style="display:flex; align-items:center; gap:12px">
         <div class="hud-gear" id="gear">1</div>
@@ -150,7 +166,7 @@
       <div class="hud-label">Lap <span id="lap">1/5</span></div>
       <div id="hud-timer">00:00.000</div>
       <div class="hud-label">Best: <span id="best">--:--.---</span></div>
-      <div class="hud-label" style="font-size:0.5rem; margin-top:4px" id="pos">POS: 1st</div>
+      <div class="hud-label" style="font-size:0.55rem; margin-top:4px" id="pos">POS: 1st</div>
       <div id="sec-times" style="font-size:0.5rem; color:#888; margin-top:4px">
         S1: <span id="s1">--</span> S2: <span id="s2">--</span> S3: <span id="s3">--</span>
       </div>
