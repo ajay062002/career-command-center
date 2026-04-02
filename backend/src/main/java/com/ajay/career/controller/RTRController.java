@@ -33,6 +33,11 @@ public class RTRController {
         return ResponseEntity.ok(rtrService.updateRTR(id, dto));
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<RTRDTO> patchRTR(@PathVariable("id") UUID id, @RequestBody RTRDTO dto) {
+        return ResponseEntity.ok(rtrService.updateRTR(id, dto));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRTR(@PathVariable("id") UUID id) {
         rtrService.deleteRTR(id);
