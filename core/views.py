@@ -1,10 +1,13 @@
 import datetime
 import json
+import re
 import subprocess
 import sys
+from io import BytesIO
 from pathlib import Path
 
 from django.conf import settings
+from django.http import HttpResponse
 from django.utils import timezone
 from django.db.models import Count, Sum
 from rest_framework import viewsets, status
@@ -170,33 +173,84 @@ class AutomationViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], url_path='generate-resume')
     def generate_resume(self, request):
         automation_dir = self._get_automation_path()
-        json_path = automation_dir / "data" / "base_content.json"
-        script_path = automation_dir / "test_render.py"
-        
+        template_path = automation_dir / "templates" / "template.docx"
+
         try:
-            # 1. Update JSON
-            with open(json_path, "w", encoding="utf-8") as f:
-                json.dump(request.data, f, indent=4)
-            
-            # 2. Run script
-            result = subprocess.run(
-                [sys.executable, str(script_path)],
-                capture_output=True, text=True, cwd=str(automation_dir)
+            from docxtpl import DocxTemplate
+            from docx import Document
+            from docx.shared import Pt
+            from docx.enum.text import WD_LINE_SPACING, WD_ALIGN_PARAGRAPH
+
+            ctx = request.data
+
+            # --- Render template into memory ---
+            raw_buf = BytesIO()
+            doc = DocxTemplate(str(template_path))
+            doc.render(ctx)
+            doc.save(raw_buf)
+            raw_buf.seek(0)
+
+            # --- Post-process: normalize bullets ---
+            final_buf = BytesIO()
+            d = Document(raw_buf)
+
+            LIST_STYLE_CANDIDATES = {
+                "List Bullet", "List Paragraph", "Bullet",
+                "List Bullet 2", "List Bullet 3", "Body Text List",
+            }
+            BULLET_PREFIXES = ("•", "-", "–", "—", "*")
+
+            def tighten(p):
+                pf = p.paragraph_format
+                pf.space_before = Pt(0)
+                pf.space_after = Pt(0)
+                pf.line_spacing_rule = WD_LINE_SPACING.SINGLE
+                pf.line_spacing = 1
+                p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+
+            def is_list(p):
+                try:
+                    return p.style and p.style.name in LIST_STYLE_CANDIDATES
+                except Exception:
+                    return False
+
+            prev_was_list = False
+            to_delete = []
+            for p in d.paragraphs:
+                txt = p.text.strip()
+                if txt.startswith(BULLET_PREFIXES):
+                    new_text = p.text.lstrip("".join(BULLET_PREFIXES)).lstrip(" \t")
+                    p.text = new_text if new_text else ""
+                    try:
+                        p.style = d.styles["List Bullet"]
+                    except KeyError:
+                        p.style = d.styles["List Paragraph"]
+                if is_list(p):
+                    tighten(p)
+                    if prev_was_list and txt == "":
+                        to_delete.append(p)
+                    prev_was_list = True
+                else:
+                    prev_was_list = False
+
+            for p in to_delete:
+                el = p._element
+                el.getparent().remove(el)
+
+            for p in d.paragraphs:
+                if is_list(p):
+                    tighten(p)
+
+            d.save(final_buf)
+            final_buf.seek(0)
+
+            response = HttpResponse(
+                final_buf.read(),
+                content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
             )
-            
-            if result.returncode == 0:
-                # Find the path in output: "[OK] Rendered OK: /path/to/file.docx"
-                import re
-                match = re.search(r"Rendered OK: (.*\.docx)", result.stdout)
-                file_path = match.group(1).strip() if match else "Unknown"
-                
-                # Try to open in explorer if on Windows
-                if sys.platform == 'win32' and file_path != "Unknown":
-                    # Use comma after /select, as required for the command
-                    subprocess.run(["explorer", "/select,", file_path])
-                
-                return Response({"status": "success", "message": "Resume generated", "path": file_path})
-            return Response({"error": result.stderr}, status=500)
+            response['Content-Disposition'] = 'attachment; filename="Ajay_Purshotam_Thota.docx"'
+            return response
+
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
