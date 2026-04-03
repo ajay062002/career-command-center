@@ -34,6 +34,7 @@ export class ResumeBuilderComponent implements OnInit {
     jdText: string = '';
     jsonContent: string = '';
     vendorEmail: string = '';
+    uploadedFileName: string = '';
 
     isGenerating = false;
     isLoading = true;
@@ -85,17 +86,40 @@ export class ResumeBuilderComponent implements OnInit {
         });
     }
 
+    onJsonFileSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (!input.files?.length) return;
+        const file = input.files[0];
+        this.uploadedFileName = file.name;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const text = e.target?.result as string;
+                JSON.parse(text); // validate
+                this.jsonContent = text;
+                this.snackBar.open(`✅ Loaded ${file.name}`, 'OK', { duration: 3000 });
+            } catch {
+                this.snackBar.open('❌ Invalid JSON file', 'Close', { duration: 3000 });
+                this.uploadedFileName = '';
+            }
+        };
+        reader.readAsText(file);
+        input.value = ''; // reset so same file can be re-selected
+    }
+
     generateResume(): void {
         try {
             const parsedContent = JSON.parse(this.jsonContent);
             this.isGenerating = true;
             this.resumeService.generateResume(parsedContent).subscribe({
-                next: (res) => {
-                    if (res.status === 'success') {
-                        this.snackBar.open('✅ Resume generated successfully!', 'Close', { duration: 5000 });
-                    } else {
-                        this.snackBar.open('❌ ' + res.message, 'Close', { duration: 5000 });
-                    }
+                next: (blob: Blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Ajay_Purshotam_Thota.docx';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    this.snackBar.open('✅ Resume downloaded!', 'Close', { duration: 5000 });
                     this.isGenerating = false;
                 },
                 error: (err) => {
