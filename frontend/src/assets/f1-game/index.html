@@ -172,7 +172,8 @@
       font-size: 0.6rem; color: #444; letter-spacing: 0.2em; z-index: 5; pointer-events: none;
     }
   </style>
-  <script type="module" crossorigin src="./assets/index-CDWIGAMO.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+  <script type="module" src="./main.js"></script>
 </head>
 <body>
   <div id="overlay">
@@ -205,25 +206,25 @@
       <div style="display:flex;align-items:flex-end;gap:14px">
         <div>
           <div class="hud-label">Gear</div>
-          <div class="hud-gear" id="hud-gear">N</div>
+          <div class="hud-gear" id="gear">N</div>
         </div>
         <div style="width:1px;height:48px;background:#333"></div>
         <div>
           <div class="hud-label">Speed</div>
-          <div class="hud-speed"><span id="hud-speed">000</span><span class="hud-unit"> KPH</span></div>
+          <div class="hud-speed"><span id="speed">000</span><span class="hud-unit"> KPH</span></div>
         </div>
       </div>
       <div id="rpm-bar-bg"><div id="rpm-bar"></div></div>
-      <div id="drs-light">DRS: LOCKED</div>
+      <div id="drs-msg">DRS: LOCKED</div>
     </div>
 
     <div id="hud-tr">
       <div class="hud-label">Lap</div>
-      <div id="hud-lap">1 / 5</div>
+      <div id="lap">1 / 5</div>
       <div id="hud-timer">00:00.000</div>
       <div class="hud-label">Best</div>
-      <div id="hud-best">--:--.---</div>
-      <div id="hud-pos">POS: 1st</div>
+      <div id="best">--:--.---</div>
+      <div id="pos">POS: 1st</div>
       <div id="hud-sectors" style="font-family:monospace; font-size:0.6rem; color:#888; margin-top:6px; letter-spacing:1px;">
         S1: <span id="s1-time">--.-</span> S2: <span id="s2-time">--.-</span> S3: <span id="s3-time">--.-</span>
       </div>
@@ -241,7 +242,7 @@
       <div style="font-size:0.55rem;color:#555;margin-top:4px" id="tire-pct">100%</div>
       <div style="margin-top:10px;">
           <div class="hud-label">Damage</div>
-          <div style="font-size:0.8rem;font-weight:700;color:#888;" id="dmg-val">0%</div>
+          <div style="font-size:0.8rem;font-weight:700;color:#888;" id="dmg">0%</div>
       </div>
     </div>
 
@@ -253,9 +254,9 @@
     <canvas id="minimap-canvas" width="180" height="180"></canvas>
   </div>
 
-  <div id="lap-flash">LAP 2</div>
+  <div id="lap-msg">LAP 2</div>
   <!-- Fix #18: Overtake flash -->
-  <div id="overtake-flash">OVERTAKE</div>
+  <div id="overtake-msg">OVERTAKE</div>
 
   <div id="finish-overlay">
     <h2>RACE OVER</h2>
