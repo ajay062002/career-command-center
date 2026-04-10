@@ -2,7 +2,6 @@ package com.ajay.career.service.impl;
 
 import com.ajay.career.dto.analytics.*;
 import com.ajay.career.entity.JobStatus;
-import com.ajay.career.entity.StudySession;
 import com.ajay.career.repository.*;
 import com.ajay.career.service.AnalyticsService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +12,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,21 +32,34 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         LocalDate now = LocalDate.now();
         LocalDate sevenDaysAgo = now.minusDays(7);
 
-        int studyMinutesThisWeek = studySessionRepository.findByDateBetween(sevenDaysAgo, now).stream()
-                .map(StudySession::getTimeSpentMinutes)
-                .filter(m -> m != null)
-                .mapToInt(Integer::intValue)
-                .sum();
+        // Run all independent count queries in parallel
+        CompletableFuture<Long> totalJobs = CompletableFuture.supplyAsync(() -> jobRepository.count());
+        CompletableFuture<Long> activeSubs = CompletableFuture.supplyAsync(() -> submissionRepository.count());
+        CompletableFuture<Long> rtrPending = CompletableFuture.supplyAsync(() -> rtrRepository.countByStatusNot("Rejected"));
+        CompletableFuture<Long> offers = CompletableFuture.supplyAsync(() -> jobRepository.countByStatus(JobStatus.OFFER));
+        CompletableFuture<Long> rejected = CompletableFuture.supplyAsync(() -> jobRepository.countByStatus(JobStatus.REJECTED));
+        CompletableFuture<Long> overdueReminders = CompletableFuture.supplyAsync(() -> reminderRepository.countByDueDateBeforeAndCompletedFalse(now));
+        CompletableFuture<Long> totalUsers = CompletableFuture.supplyAsync(() -> userRepository.count());
+        CompletableFuture<Integer> studyMinutes = CompletableFuture.supplyAsync(() -> {
+            Map<LocalDate, Integer> minutesByDate = studySessionRepository.sumMinutesByDateBetween(sevenDaysAgo, now).stream()
+                    .collect(Collectors.toMap(
+                            row -> (LocalDate) row[0],
+                            row -> ((Number) row[1]).intValue()
+                    ));
+            return minutesByDate.values().stream().mapToInt(Integer::intValue).sum();
+        });
+
+        CompletableFuture.allOf(totalJobs, activeSubs, rtrPending, offers, rejected, overdueReminders, totalUsers, studyMinutes).join();
 
         return DashboardSummaryDTO.builder()
-                .totalJobs(jobRepository.count())
-                .activeSubmissions(submissionRepository.count())
-                .rtrPending(rtrRepository.countByStatusNot("Rejected"))
-                .offers(jobRepository.countByStatus(JobStatus.OFFER))
-                .rejected(jobRepository.countByStatus(JobStatus.REJECTED))
-                .studyMinutesThisWeek(studyMinutesThisWeek)
-                .overdueReminders(reminderRepository.countByDueDateBeforeAndCompletedFalse(now))
-                .totalUsers(userRepository.count())
+                .totalJobs(totalJobs.join())
+                .activeSubmissions(activeSubs.join())
+                .rtrPending(rtrPending.join())
+                .offers(offers.join())
+                .rejected(rejected.join())
+                .studyMinutesThisWeek(studyMinutes.join())
+                .overdueReminders(overdueReminders.join())
+                .totalUsers(totalUsers.join())
                 .build();
     }
 
@@ -73,11 +86,11 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         LocalDate now = LocalDate.now();
         LocalDate sevenDaysAgo = now.minusDays(6);
 
-        Map<LocalDate, Integer> minutesByDate = studySessionRepository.findByDateBetween(sevenDaysAgo, now).stream()
-                .filter(s -> s.getDate() != null)
-                .collect(Collectors.groupingBy(
-                        StudySession::getDate,
-                        Collectors.summingInt(s -> s.getTimeSpentMinutes() != null ? s.getTimeSpentMinutes() : 0)));
+        Map<LocalDate, Integer> minutesByDate = studySessionRepository.sumMinutesByDateBetween(sevenDaysAgo, now).stream()
+                .collect(Collectors.toMap(
+                        row -> (LocalDate) row[0],
+                        row -> ((Number) row[1]).intValue()
+                ));
 
         List<StudyTrendDTO> trend = new ArrayList<>();
         for (int i = 0; i < 7; i++) {

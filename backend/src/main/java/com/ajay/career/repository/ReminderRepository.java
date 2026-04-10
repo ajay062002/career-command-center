@@ -15,5 +15,7 @@ public interface ReminderRepository extends JpaRepository<Reminder, UUID> {
 
     List<Reminder> findByDueDateBefore(LocalDate date);
 
+    List<Reminder> findByDueDateBeforeAndCompletedFalse(LocalDate date);
+
     long countByDueDateBeforeAndCompletedFalse(LocalDate date);
 }

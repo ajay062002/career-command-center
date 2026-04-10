@@ -41,8 +41,7 @@ public class ReminderServiceImpl implements ReminderService {
     @Override
     @Transactional(readOnly = true)
     public List<ReminderDTO> getOverdueReminders() {
-        return reminderRepository.findByDueDateBefore(LocalDate.now()).stream()
-                .filter(reminder -> Boolean.FALSE.equals(reminder.getCompleted()))
+        return reminderRepository.findByDueDateBeforeAndCompletedFalse(LocalDate.now()).stream()
                 .map(reminderMapper::toDTO)
                 .collect(Collectors.toList());
     }
