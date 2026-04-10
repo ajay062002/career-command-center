@@ -3,6 +3,7 @@ import json
 import re
 import subprocess
 import sys
+import threading
 from io import BytesIO
 from pathlib import Path
 
@@ -105,33 +106,39 @@ class AnalyticsViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'], url_path='vendor-performance')
     def vendor_performance(self, request):
+        from django.db.models import Q
         user = self.get_user(request)
-        
-        # Get submission counts by vendor
-        sub_data = models.Submission.objects.filter(user=user).values('submittedByVendor').annotate(count=Count('id'))
-        rtr_data = models.RTR.objects.filter(user=user).values('vendorCompany').annotate(count=Count('id'))
-        
-        vendor_map = {}
-        for item in sub_data:
-            v = item['submittedByVendor']
-            if not v: continue
-            
-            interviews = models.Submission.objects.filter(
-                user=user, 
-                submittedByVendor=v, 
-                submissionStatus__in=['INTERVIEW', 'INTERVIEW_SCHEDULED']
-            ).count()
-            
-            vendor_map[v] = {'vendorCompany': v, 'totalSubmissions': item['count'], 'totalRtrs': 0, 'interviewsOrOffers': interviews}
-            
+
+        # Single annotated query per dataset — no per-vendor loop queries
+        sub_data = models.Submission.objects.filter(user=user)\
+            .values('submittedByVendor')\
+            .annotate(
+                totalSubmissions=Count('id'),
+                interviewsOrOffers=Count('id', filter=Q(submissionStatus__in=['INTERVIEW', 'INTERVIEW_SCHEDULED']))
+            )
+        rtr_data = models.RTR.objects.filter(user=user)\
+            .values('vendorCompany')\
+            .annotate(totalRtrs=Count('id'))
+
+        vendor_map = {
+            item['submittedByVendor']: {
+                'vendorCompany': item['submittedByVendor'],
+                'totalSubmissions': item['totalSubmissions'],
+                'totalRtrs': 0,
+                'interviewsOrOffers': item['interviewsOrOffers']
+            }
+            for item in sub_data if item['submittedByVendor']
+        }
+
         for item in rtr_data:
             v = item['vendorCompany']
-            if not v: continue
+            if not v:
+                continue
             if v in vendor_map:
-                vendor_map[v]['totalRtrs'] = item['count']
+                vendor_map[v]['totalRtrs'] = item['totalRtrs']
             else:
-                vendor_map[v] = {'vendorCompany': v, 'totalSubmissions': 0, 'totalRtrs': item['count'], 'interviewsOrOffers': 0}
-        
+                vendor_map[v] = {'vendorCompany': v, 'totalSubmissions': 0, 'totalRtrs': item['totalRtrs'], 'interviewsOrOffers': 0}
+
         return Response(list(vendor_map.values()))
 
     @action(detail=False, methods=['get'], url_path='rtr-timeline')
@@ -297,25 +304,40 @@ class AutomationViewSet(viewsets.ViewSet):
     def linkedin_scrape(self, request):
         kw = request.data.get('keyword', 'Java Developer')
         user = request.user
-        if not user.is_authenticated: return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
-        try:
-            autom_dir = self._get_automation_path()
-            scraper = autom_dir / "linkedin_scraper.py"
-            result = subprocess.run([sys.executable, str(scraper), kw], capture_output=True, text=True, cwd=str(autom_dir))
-            if result.returncode == 0:
-                jobs_data = json.loads(result.stdout.strip())
-                saved_count = 0
-                for job_info in jobs_data:
-                    if not models.ScrapedJob.objects.filter(user=user, link=job_info['link']).exists():
-                        models.ScrapedJob.objects.create(
-                            user=user, title=job_info['title'], company=job_info['company'],
-                            location=job_info.get('location', 'Remote'), link=job_info['link'],
-                            source=job_info.get('source', 'nvoids'), summary=job_info.get('summary', '')
-                        )
-                        saved_count += 1
-                return Response({"status": "success", "count": len(jobs_data), "new_jobs": saved_count})
-            return Response({"error": result.stderr}, status=500)
-        except Exception as e: return Response({"error": str(e)}, status=500)
+        if not user.is_authenticated:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        autom_dir = self._get_automation_path()
+        scraper = autom_dir / "linkedin_scraper.py"
+        user_id = user.id
+
+        def run_scrape():
+            try:
+                result = subprocess.run(
+                    [sys.executable, str(scraper), kw],
+                    capture_output=True, text=True,
+                    cwd=str(autom_dir), timeout=60
+                )
+                if result.returncode == 0:
+                    jobs_data = json.loads(result.stdout.strip())
+                    # Re-fetch user inside the thread to avoid cross-thread ORM issues
+                    thread_user = models.User.objects.get(id=user_id)
+                    for job_info in jobs_data:
+                        if not models.ScrapedJob.objects.filter(user=thread_user, link=job_info['link']).exists():
+                            models.ScrapedJob.objects.create(
+                                user=thread_user,
+                                title=job_info['title'],
+                                company=job_info['company'],
+                                location=job_info.get('location', 'Remote'),
+                                link=job_info['link'],
+                                source=job_info.get('source', 'nvoids'),
+                                summary=job_info.get('summary', '')
+                            )
+            except Exception:
+                pass
+
+        threading.Thread(target=run_scrape, daemon=True).start()
+        return Response({"status": "scraping_started", "message": "Scraping in background — refresh job discovery shortly"})
 
 class ScrapedJobViewSet(viewsets.ModelViewSet):
     serializer_class = ScrapedJobSerializer
@@ -355,21 +377,21 @@ class SubmissionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer): serializer.save(user=self.request.user)
     def get_queryset(self):
         if not self.request.user.is_authenticated: return models.Submission.objects.none()
-        return models.Submission.objects.filter(user=self.request.user)
+        return models.Submission.objects.filter(user=self.request.user).select_related('job')
 
 class RTRViewSet(viewsets.ModelViewSet):
     serializer_class = RTRSerializer
     def perform_create(self, serializer): serializer.save(user=self.request.user)
     def get_queryset(self):
         if not self.request.user.is_authenticated: return models.RTR.objects.none()
-        return models.RTR.objects.filter(user=self.request.user)
+        return models.RTR.objects.filter(user=self.request.user).select_related('job')
 
 class ReminderViewSet(viewsets.ModelViewSet):
     serializer_class = ReminderSerializer
     def perform_create(self, serializer): serializer.save(user=self.request.user)
     def get_queryset(self):
         if not self.request.user.is_authenticated: return models.Reminder.objects.none()
-        return models.Reminder.objects.filter(user=self.request.user)
+        return models.Reminder.objects.filter(user=self.request.user).select_related('job')
 
     @action(detail=False, methods=['get'], url_path='overdue')
     def overdue(self, request):

@@ -2,6 +2,7 @@ package com.ajay.career.repository;
 
 import com.ajay.career.entity.Submission;
 import com.ajay.career.entity.SubmissionStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,10 @@ import java.util.UUID;
 
 @Repository
 public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
+
+    @EntityGraph(attributePaths = {"job"})
+    @Query("SELECT s FROM Submission s")
+    List<Submission> findAllWithJob();
 
     List<Submission> findByJobId(UUID jobId);
 

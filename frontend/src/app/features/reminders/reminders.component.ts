@@ -89,9 +89,9 @@ export class RemindersComponent implements OnInit {
 
   saveReminder(reminder: Reminder): void {
     this.reminderService.createReminder(reminder).subscribe({
-      next: () => {
+      next: (saved: Reminder) => {
         this.snackBar.open('Reminder created!', 'Close', { duration: 3000 });
-        this.loadReminders();
+        this.reminders = [saved, ...this.reminders];
       },
       error: () => {
         this.snackBar.open('Error creating reminder', 'Close', { duration: 3000 });
@@ -105,7 +105,7 @@ export class RemindersComponent implements OnInit {
     this.reminderService.markComplete(reminder.id).subscribe({
       next: () => {
         this.snackBar.open('Reminder completed!', 'Close', { duration: 3000 });
-        this.loadReminders();
+        this.reminders = this.reminders.filter(r => r.id !== reminder.id);
       },
       error: () => {
         this.snackBar.open('Error completing reminder', 'Close', { duration: 3000 });

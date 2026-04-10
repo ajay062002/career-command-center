@@ -29,7 +29,7 @@ public class SubmissionServiceImpl implements SubmissionService {
     @Override
     @Transactional(readOnly = true)
     public List<SubmissionDTO> getAllSubmissions() {
-        return submissionRepository.findAll().stream()
+        return submissionRepository.findAllWithJob().stream()
                 .map(submissionMapper::toDTO)
                 .collect(Collectors.toList());
     }

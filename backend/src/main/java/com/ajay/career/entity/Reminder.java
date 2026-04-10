@@ -7,7 +7,10 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "reminders")
+@Table(name = "reminders", indexes = {
+    @Index(name = "idx_reminder_job_id", columnList = "job_id"),
+    @Index(name = "idx_reminder_due_completed", columnList = "dueDate, completed")
+})
 @Getter
 @Setter
 @NoArgsConstructor
