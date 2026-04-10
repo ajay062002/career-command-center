@@ -2,8 +2,8 @@ services:
   - type: web
     name: career-command-center-api
     runtime: python
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py seed
-    startCommand: gunicorn django_backend.wsgi:application --bind 0.0.0.0:$PORT
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py seed && python manage.py emergency_admin
+    startCommand: gunicorn django_backend.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --threads 2 --timeout 120
     envVars:
       - key: SECRET_KEY
         generateValue: true

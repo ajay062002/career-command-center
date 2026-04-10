@@ -144,7 +144,7 @@ export class RtrComponent implements OnInit {
     this.editingId = null;
     this.rtrForm.reset({ date: new Date(), status: RTRStatus.RTR });
     this.showForm = true;
-    setTimeout(() => document.getElementById('rtr-form-top')?.scrollIntoView({ behavior: 'smooth' }), 100);
+    requestAnimationFrame(() => document.getElementById('rtr-form-top')?.scrollIntoView({ behavior: 'smooth' }));
   }
 
   openEditForm(rtr: RTR): void {
@@ -152,7 +152,7 @@ export class RtrComponent implements OnInit {
     this.editingId = rtr.id!;
     this.rtrForm.patchValue({ ...rtr, date: rtr.date ? new Date(rtr.date) : new Date() });
     this.showForm = true;
-    setTimeout(() => document.getElementById('rtr-form-top')?.scrollIntoView({ behavior: 'smooth' }), 100);
+    requestAnimationFrame(() => document.getElementById('rtr-form-top')?.scrollIntoView({ behavior: 'smooth' }));
   }
 
   cancelForm(): void {

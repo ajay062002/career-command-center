@@ -52,7 +52,7 @@ export class RegisterComponent {
         this.isLoading = false;
         this.isSuccess = true;
         this.snackBar.open('Registration Successful!', 'Close', { duration: 3000 });
-        setTimeout(() => this.router.navigate(['/login']), 2000); // 2 second delay to see success msg
+        this.router.navigate(['/login']);
       },
       error: (err) => {
         this.isLoading = false;

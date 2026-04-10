@@ -32,7 +32,7 @@ public class RTRServiceImpl implements RTRService {
     @Override
     @Transactional(readOnly = true)
     public List<RTRDTO> getAllRTRs() {
-        return rtrRepository.findAll().stream()
+        return rtrRepository.findAllWithJob().stream()
                 .map(rtrMapper::toDTO)
                 .collect(Collectors.toList());
     }

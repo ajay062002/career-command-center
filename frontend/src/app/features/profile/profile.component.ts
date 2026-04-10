@@ -138,10 +138,8 @@ export class ProfileComponent implements OnInit {
     localStorage.setItem('currentUser', JSON.stringify(updated));
     this.user = updated;
 
-    setTimeout(() => {
-      this.saving = false;
-      this.editMode = false;
-      this.snack.open('Profile saved!', 'OK', { duration: 3000 });
-    }, 600);
+    this.saving = false;
+    this.editMode = false;
+    this.snack.open('Profile saved!', 'OK', { duration: 3000 });
   }
 }

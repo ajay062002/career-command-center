@@ -216,10 +216,17 @@ export class SubmissionsComponent implements OnInit {
       : this.submissionService.createSubmission(payload);
 
     action.subscribe({
-      next: () => {
+      next: (saved: Submission) => {
         this.snackBar.open(`Submission ${this.isEdit ? 'updated' : 'added'}`, 'Close', { duration: 2500 });
+        if (this.isEdit) {
+          const idx = this.allSubmissions.findIndex(s => s.id === saved.id);
+          if (idx > -1) this.allSubmissions[idx] = saved;
+        } else {
+          this.allSubmissions = [saved, ...this.allSubmissions];
+        }
+        this.buildVendorList();
+        this.applyFilter();
         this.cancelForm();
-        this.loadData();
       },
       error: () => this.snackBar.open('Error saving submission', 'Close', { duration: 3000 })
     });
@@ -230,7 +237,9 @@ export class SubmissionsComponent implements OnInit {
     this.submissionService.deleteSubmission(sub.id!).subscribe({
       next: () => {
         this.snackBar.open('Submission deleted', 'Close', { duration: 2500 });
-        this.loadData();
+        this.allSubmissions = this.allSubmissions.filter(s => s.id !== sub.id);
+        this.buildVendorList();
+        this.applyFilter();
       },
       error: () => this.snackBar.open('Error deleting submission', 'Close', { duration: 3000 })
     });
