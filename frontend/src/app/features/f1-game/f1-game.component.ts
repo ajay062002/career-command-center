@@ -279,48 +279,35 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   }
 
   private processCarPhysics(car: any, input: any, dt: number, isPlayer: boolean) {
-    const maxSpeed = isPlayer ? 480 : 400;
-    const accel = 650;
-    const steering = 3.8;
+    const maxSpeed = isPlayer ? 400 : 350;
+    const accel = isPlayer ? 8 : 6.5;
+    const braking = 12;
+    const friction = 0.95;
+    const steeringAngle = 0.08;
 
-    if (input.throttle) car.speed += accel * dt;
-    if (input.brake) car.speed -= accel * 2.5 * dt;
-    car.speed *= 0.985; // Lower friction for higher speed feel
+    // Steering
+    if (input.left) car.steeringAngle = Math.max(car.steeringAngle - steeringAngle * dt, -0.5);
+    if (input.right) car.steeringAngle = Math.min(car.steeringAngle + steeringAngle * dt, 0.5);
+    car.steeringAngle *= 0.92; // Return to center
 
-    if (car.speed > 10) {
-      const rot = (car.speed / maxSpeed) * steering * dt;
-      if (input.left) car.angle -= rot;
-      if (input.right) car.angle += rot;
-    }
+    // Accel/Brake
+    if (input.throttle && car.speed < maxSpeed) car.speed += accel * dt * 100;
+    if (input.brake) car.speed -= braking * dt * 100;
 
+    car.speed *= friction;
     car.speed = Math.max(0, Math.min(car.speed, maxSpeed));
-    
+
     car.lastX = car.x;
     car.lastY = car.y;
+    car.angle += car.steeringAngle * dt;
     car.x += Math.cos(car.angle) * car.speed * dt;
     car.y += Math.sin(car.angle) * car.speed * dt;
 
-    // --- BOUNCE PHYSICS ---
-    const distFromTrack = this.getDistToTrack(car.x, car.y);
-    if (distFromTrack > this.trackWidth / 2) {
-      // Find normal of the collision
-      const nearest = this.getNearestPointOnTrack(car.x, car.y);
-      const dx = car.x - nearest.x;
-      const dy = car.y - nearest.y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      
-      // Calculate Collision angle
-      const normal = Math.atan2(dy, dx);
-      
-      // Bounce Out!
-      car.angle = normal + (normal - car.angle);
-      
-      // Move car instantly inside to prevent sticking
-      car.x = nearest.x + (dx / dist) * (this.trackWidth / 2 - 2);
-      car.y = nearest.y + (dy / dist) * (this.trackWidth / 2 - 2);
-      
-      // Maintain momentum (Bounce effect)
-      car.speed *= 0.75; 
+    // Wall collision (Simplified bounce like logic from original)
+    if (this.getDistToTrack(car.x, car.y) > this.trackWidth / 2) {
+        car.x = car.lastX;
+        car.y = car.lastY;
+        car.speed *= 0.5; // Bounce slow
     }
 
     // Lap tracking
