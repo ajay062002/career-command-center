@@ -400,8 +400,13 @@ class AutomationViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['post'], url_path='generate-resume')
     def generate_resume(self, request):
+        print("[GEN-START] Starting resume generation...")
         automation_dir = self._get_automation_path()
         template_path = automation_dir / "reference" / "Ajay Purshotam Thota.docx"
+        
+        if not template_path.exists():
+            print(f"[GEN-ERROR] Template not found at {template_path}")
+            return Response({'error': 'Reference template not found on server.'}, status=404)
 
         try:
             from docxtpl import DocxTemplate
@@ -410,20 +415,28 @@ class AutomationViewSet(viewsets.ViewSet):
             from docx.enum.text import WD_LINE_SPACING, WD_ALIGN_PARAGRAPH
 
             data = request.data
-            # Handle both wrapped and flat formats
-            if "resume_data" in data:
-                ctx = data.get('resume_data')
-                jd_text = data.get('jd_text', '')
-            else:
-                ctx = data
-                jd_text = ""
+            ctx = data.get('resume_data', data)
+            jd_text = data.get('jd_text', '')
 
-            # 1. Render template into high-level object
+            # --- DATA SANITIZATION for docxtpl ---
+            # Some templates expect strings, AI might return lists. Let's be safe.
+            safe_ctx = {}
+            for k, v in ctx.items():
+                if isinstance(v, list):
+                    # If it's a list (like SUMMARY), we keep it as list for 'jinja loops'
+                    # but also provide a string version 'K_STR' just in case
+                    safe_ctx[k] = v
+                    safe_ctx[f"{k}_STR"] = "\n".join([f"• {item}" for item in v])
+                else:
+                    safe_ctx[k] = v
+
+            # 1. Render template
+            print("[GEN-STEP] Rendering template...")
             doc = DocxTemplate(str(template_path))
-            doc.render(ctx)
+            doc.render(safe_ctx)
             
             # --- Save to server outputs folder for reference ---
-            title_slug = ctx.get('TITLE', 'Resume').replace(' ', '_').replace('/', '_')
+            title_slug = str(safe_ctx.get('TITLE', 'Resume')).replace(' ', '_').replace('/', '_')
             filename = f"Ajay_Thota_{title_slug}_Resume.docx"
             try:
                 output_base_dir = automation_dir / "outputs" / "generated_resumes"
@@ -432,20 +445,16 @@ class AutomationViewSet(viewsets.ViewSet):
                 target_folder = output_base_dir / folder_name
                 target_folder.mkdir(parents=True, exist_ok=True)
                 
-                # Save actual copy in folder
                 doc.save(str(target_folder / filename))
-                
-                # Save JD too
                 if jd_text:
                     with open(target_folder / "job_description.txt", "w", encoding="utf-8") as f:
                         f.write(jd_text)
-                
-                # Update latest copy
-                doc.save(str(output_base_dir / "latest_resume.docx"))
+                print(f"[GEN-SUCCESS] Archived copy saved to {folder_name}")
             except Exception as se:
-                print(f"Server archive failed (continuing delivery): {se}")
+                print(f"[GEN-WARNING] Archive failed (continuing): {se}")
 
-            # 2. Memory-based post-processing for better formatting
+            # 2. Post-processing (Bullet points, spacing)
+            print("[GEN-STEP] Post-processing formatting...")
             raw_buf = BytesIO()
             doc.save(raw_buf)
             raw_buf.seek(0)
@@ -486,26 +495,36 @@ class AutomationViewSet(viewsets.ViewSet):
                     prev_was_list = False
 
             for p in to_delete:
-                el = p._element
-                el.getparent().remove(el)
+                try:
+                    el = p._element
+                    el.getparent().remove(el)
+                except: pass
 
-            # Re-tighten all lists to be sure
             for p in d.paragraphs:
                 if is_list(p): tighten(p)
 
-            # 3. Finalize and Extract labels
+            # 3. Finalize
             d.save(final_buf)
             content_bytes = final_buf.getvalue()
-            tool_name = self._extract_important_tool(jd_text)
+            
+            # Use tool name for user filename if possible
+            tool_name = "Tailored"
+            if jd_text:
+                try: tool_name = self._extract_important_tool(jd_text)
+                except: pass
+            
             response_filename = f"{tool_name}_Ajay_Purshotam_Thota.docx"
 
-            # 4. Return to user
+            print(f"[GEN-COMPLETE] Returning file: {response_filename}")
             response = FileResponse(BytesIO(content_bytes), as_attachment=True, filename=response_filename)
             response['Access-Control-Expose-Headers'] = 'Content-Disposition'
             return response
             
         except Exception as e:
-            return Response({'error': str(e)}, status=500)
+            import traceback
+            print(f"[GEN-FATAL] Crash: {str(e)}")
+            print(traceback.format_exc())
+            return Response({'error': f'Generation Error: {str(e)}'}, status=500)
             
         except Exception as e:
             return Response({'error': str(e)}, status=500)
