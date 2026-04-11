@@ -8,7 +8,7 @@ from io import BytesIO
 from pathlib import Path
 
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.utils import timezone
 from django.db.models import Count, Sum
 from rest_framework import viewsets, status
@@ -323,7 +323,7 @@ class AutomationViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], url_path='generate-resume')
     def generate_resume(self, request):
         automation_dir = self._get_automation_path()
-        template_path = automation_dir / "templates" / "template.docx"
+        template_path = automation_dir / "reference" / "template.docx"
 
         try:
             from docxtpl import DocxTemplate
@@ -345,6 +345,27 @@ class AutomationViewSet(viewsets.ViewSet):
             doc = DocxTemplate(str(template_path))
             doc.render(ctx)
             doc.save(raw_buf)
+            
+            # --- Save to server outputs folder for reference ---
+            try:
+                output_base_dir = automation_dir / "outputs" / "generated_resumes"
+                title_slug = ctx.get('TITLE', 'Resume').replace(' ', '_').replace('/', '_')
+                timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+                folder_name = f"{title_slug}_{timestamp}"
+                target_folder = output_base_dir / folder_name
+                target_folder.mkdir(parents=True, exist_ok=True)
+                
+                filename = f"Ajay_Thota_{title_slug}_Resume.docx"
+                server_file_path = target_folder / filename
+                doc.save(str(server_file_path))
+                
+                # Save JD too
+                if jd_text:
+                    with open(target_folder / "job_description.txt", "w", encoding="utf-8") as f:
+                        f.write(jd_text)
+            except Exception as e:
+                print(f"Error saving server copy: {e}")
+
             raw_buf.seek(0)
 
             # --- Post-process: normalize bullets ---
