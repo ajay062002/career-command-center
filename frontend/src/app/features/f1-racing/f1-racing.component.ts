@@ -3,21 +3,20 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
-  selector: 'app-f1-game',
+  selector: 'app-f1-racing',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule],
   template: `
     <div class="racing-container">
       <div class="game-header">
-        <div class="header-left">
-          <h1>SARK Stadium - Night Grand Prix</h1>
-          <span class="subtitle">W/A/S/D to Drive • SPACE for DRS</span>
+        <div class="header-info">
+          <h1>Interlagos Stadium - Grand Prix</h1>
+          <p>W/A/S/D to drive | SPACE for DRS | P for Pit Stop</p>
         </div>
         <div class="header-actions">
-          <button mat-mini-fab class="reset-fab" (click)="resetGame()" matTooltip="Restart Race">
+          <button mat-mini-fab color="warn" (click)="resetGame()" matTooltip="Restart Race">
             <mat-icon>restart_alt</mat-icon>
           </button>
         </div>
@@ -62,10 +61,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
         <div class="overlay-msg finish-msg" *ngIf="gamePhase === 'results'">
           <div class="results-card">
-            <div class="trophy-icon"><mat-icon>emoji_events</mat-icon></div>
-            <h2>{{ playerPos === 1 ? 'VICTORY!' : 'RACE FINISHED' }}</h2>
+            <h2>RACE FINISHED</h2>
             <div class="winner">YOU FINISHED POS #{{ playerPos }}</div>
-            <button mat-raised-button class="restart-btn" (click)="resetGame()">RACE AGAIN</button>
+            <button mat-raised-button color="accent" (click)="resetGame()">RACE AGAIN</button>
           </div>
         </div>
       </div>
@@ -77,64 +75,60 @@ import { MatTooltipModule } from '@angular/material/tooltip';
       display: flex;
       flex-direction: column;
       gap: 20px;
-      max-width: 1300px;
-      margin: 0 auto;
     }
     .game-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      .header-left h1 { margin: 0; color: #fff; font-size: 1.8rem; letter-spacing: 1px; font-weight: 800; }
-      .subtitle { color: rgba(255,255,255,0.4); font-size: 0.85rem; letter-spacing: 0.5px; }
+      h1 { margin: 0; color: #fff; font-size: 1.5rem; letter-spacing: 1px; }
+      p { margin: 0; color: rgba(255,255,255,0.4); font-size: 0.85rem; }
     }
-    .reset-fab { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: #fff !important; }
     .canvas-wrapper {
       position: relative;
       background: #000;
-      border-radius: 24px;
+      border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 20px 80px rgba(0,0,0,0.8);
-      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.05);
       canvas { display: block; max-width: 100%; height: auto; }
     }
     .hud {
       position: absolute;
-      background: rgba(15,15,15,0.6);
-      backdrop-filter: blur(15px);
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,0.1);
-      padding: 16px 24px;
-      border-radius: 16px;
+      padding: 12px 20px;
+      border-radius: 12px;
       display: flex;
       flex-direction: column;
       pointer-events: none;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-      .label { font-size: 0.65rem; font-weight: 800; color: #64b5f6; letter-spacing: 2px; }
-      .value { font-family: 'Orbitron', monospace; font-weight: 700; color: #fff; }
+      .label { font-size: 0.7rem; font-weight: 800; color: rgba(255,255,255,0.4); letter-spacing: 1px; }
+      .value { font-family: 'Orbitron', sans-serif; font-weight: 700; color: #fff; }
     }
     .speed-hud {
-      bottom: 30px;
-      left: 30px;
-      .value { font-size: 2.2rem; span { font-size: 0.8rem; margin-left: 8px; color: rgba(255,255,255,0.4); } }
+      bottom: 20px;
+      left: 20px;
+      .value { font-size: 2rem; span { font-size: 0.8rem; margin-left: 5px; color: rgba(255,255,255,0.5); } }
     }
     .lap-hud {
-      top: 30px;
-      right: 30px;
-      gap: 8px;
-      .lap-row, .pos-row { display: flex; align-items: baseline; gap: 15px; }
-      .value { font-size: 1.4rem; color: #ffeb3b; }
+      top: 20px;
+      right: 20px;
+      gap: 5px;
+      .lap-row, .pos-row { display: flex; align-items: baseline; gap: 10px; }
+      .value { font-size: 1.2rem; }
     }
     .tire-hud {
-      bottom: 30px;
-      right: 30px;
+      bottom: 20px;
+      right: 20px;
       flex-direction: row;
       align-items: center;
       gap: 15px;
       transition: all 0.3s ease;
-      mat-icon { color: #64b5f6; }
-      &.low-grip { background: rgba(244, 67, 54, 0.25); border-color: rgba(244, 67, 54, 0.4); mat-icon { color: #f44336; } }
-      .tire-info { flex: 1; min-width: 100px; }
-      .tire-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 8px; overflow: hidden; }
-      .tire-fill { height: 100%; background: #4caf50; transition: width 0.3s; box-shadow: 0 0 10px rgba(76,175,80,0.5); }
+      mat-icon { color: rgba(255,255,255,0.5); }
+      &.low-grip { background: rgba(244, 67, 54, 0.2); border-color: rgba(244, 67, 54, 0.4); }
+      .tire-info { flex: 1; min-width: 80px; }
+      .tire-bar { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 5px; overflow: hidden; }
+      .tire-fill { height: 100%; background: #4caf50; transition: width 0.3s; }
     }
     .overlay-msg {
       position: absolute;
@@ -142,34 +136,28 @@ import { MatTooltipModule } from '@angular/material/tooltip';
       display: flex;
       justify-content: center;
       align-items: center;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.6);
       z-index: 100;
-      backdrop-filter: blur(5px);
     }
     .countdown {
-      font-size: 180px;
+      font-size: 150px;
       font-weight: 900;
       color: #ff5252;
-      animation: zoomIn 0.5s ease-out;
-      text-shadow: 0 0 50px rgba(255,82,82,0.6);
-      &.go { color: #69f0ae; text-shadow: 0 0 50px rgba(105,240,174,0.6); }
+      text-shadow: 0 0 30px rgba(255,82,82,0.5);
+      &.go { color: #69f0ae; text-shadow: 0 0 30px rgba(105,240,174,0.5); }
     }
-    @keyframes zoomIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     .results-card {
-      background: linear-gradient(135deg, rgba(30,30,30,0.95), rgba(10,10,10,0.95));
-      padding: 50px 70px;
-      border-radius: 32px;
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(20,20,20,0.95);
+      padding: 40px;
+      border-radius: 24px;
+      border: 1px solid #accent;
       text-align: center;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-      .trophy-icon mat-icon { font-size: 80px; width: 80px; height: 80px; color: #ffeb3b; margin-bottom: 20px; }
-      h2 { color: #fff; font-size: 3rem; font-weight: 800; margin: 0; }
-      .winner { font-size: 1.4rem; color: rgba(255,255,255,0.5); margin: 15px 0 40px; }
-      .restart-btn { padding: 0 40px; height: 50px; background: #64b5f6 !important; color: #000 !important; font-weight: 800; border-radius: 25px; }
+      h2 { color: #ffeb3b; font-size: 2.5rem; margin-bottom: 10px; }
+      .winner { font-size: 1.2rem; color: #fff; margin-bottom: 30px; }
     }
   `]
 })
-export class F1GameComponent implements AfterViewInit, OnDestroy {
+export class F1RacingComponent implements OnInit, OnDestroy {
   @ViewChild('gameCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
   
   // Game Configuration
@@ -203,7 +191,7 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   @HostListener('window:keyup', ['$event'])
   handleKeyUp(event: KeyboardEvent) { this.keys[event.key.toLowerCase()] = false; }
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     this.resetGame();
     this.animationFrameId = requestAnimationFrame((time) => this.gameLoop(time));
   }
@@ -220,9 +208,9 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     };
 
     this.aiCars = [
-      { id: 1, x: 200, y: 180, angle: 0, speed: 0, lap: 0, tireWear: 1.0, targetWP: 1, color: '#f44336' },
-      { id: 2, x: 300, y: 180, angle: 0, speed: 0, lap: 0, tireWear: 1.0, targetWP: 1, color: '#2196f3' },
-      { id: 3, x: 200, y: 120, angle: 0, speed: 0, lap: 0, tireWear: 1.0, targetWP: 1, color: '#4caf50' }
+      { id: 1, x: 200, y: 180, angle: 0, speed: 0, lap: 0, tireWear: 1.0, targetWP: 1, color: '#ff1744' },
+      { id: 2, x: 300, y: 180, angle: 0, speed: 0, lap: 0, tireWear: 1.0, targetWP: 1, color: '#2979ff' },
+      { id: 3, x: 200, y: 120, angle: 0, speed: 0, lap: 0, tireWear: 1.0, targetWP: 1, color: '#00e676' }
     ];
 
     this.gamePhase = 'start';
@@ -279,13 +267,13 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   }
 
   private processCarPhysics(car: any, input: any, dt: number, isPlayer: boolean) {
-    const maxSpeed = isPlayer ? 480 : 400;
-    const accel = 650;
-    const steering = 3.8;
+    const maxSpeed = isPlayer ? 450 : 380;
+    const accel = 600;
+    const steering = 3.5;
 
     if (input.throttle) car.speed += accel * dt;
-    if (input.brake) car.speed -= accel * 2.5 * dt;
-    car.speed *= 0.985; // Lower friction for higher speed feel
+    if (input.brake) car.speed -= accel * 2 * dt;
+    car.speed *= 0.98; // Friction
 
     if (car.speed > 10) {
       const rot = (car.speed / maxSpeed) * steering * dt;
@@ -309,18 +297,16 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
       const dy = car.y - nearest.y;
       const dist = Math.sqrt(dx*dx + dy*dy);
       
-      // Calculate Collision angle
+      // Reflect angle
       const normal = Math.atan2(dy, dx);
-      
-      // Bounce Out!
       car.angle = normal + (normal - car.angle);
       
-      // Move car instantly inside to prevent sticking
+      // Hit Back! (Push car back inside)
       car.x = nearest.x + (dx / dist) * (this.trackWidth / 2 - 2);
       car.y = nearest.y + (dy / dist) * (this.trackWidth / 2 - 2);
       
-      // Maintain momentum (Bounce effect)
-      car.speed *= 0.75; 
+      // Maintain some speed (Bounce effect)
+      car.speed *= 0.7;
     }
 
     // Lap tracking
@@ -341,9 +327,9 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
 
     const input = {
       throttle: true,
-      brake: Math.abs(diff) > 0.4,
-      left: diff < -0.05,
-      right: diff > 0.05
+      brake: Math.abs(diff) > 0.5,
+      left: diff < -0.1,
+      right: diff > 0.1
     };
     this.processCarPhysics(car, input, dt, false);
   }
@@ -354,23 +340,15 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
 
   // --- DRAWING ENGINE ---
   private drawTrack(ctx: CanvasRenderingContext2D) {
-    // Darker Night Grass
-    ctx.fillStyle = '#102e12';
+    // Grass
+    ctx.fillStyle = '#1b5e20';
     ctx.fillRect(0, 0, 1200, 700);
 
     // --- DRAW STADIUM ---
     this.drawStadium(ctx);
 
-    // Track Border (White)
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = this.trackWidth + 12;
-    ctx.beginPath();
-    ctx.moveTo(this.waypoints[0].x, this.waypoints[0].y);
-    this.waypoints.forEach(p => ctx.lineTo(p.x, p.y));
-    ctx.stroke();
-
     // Asphalt
-    ctx.strokeStyle = '#222';
+    ctx.strokeStyle = '#333';
     ctx.lineWidth = this.trackWidth;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -382,67 +360,45 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     // Curbs (Red and White)
     ctx.setLineDash([20, 20]);
     ctx.strokeStyle = '#f44336';
-    ctx.lineWidth = this.trackWidth + 8;
+    ctx.lineWidth = this.trackWidth + 10;
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Grid slots & Finish line
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    for(let i=0; i<3; i++) {
-       ctx.fillRect(180 - i*50, 150 - this.trackWidth/2 + 20 + i*40, 40, 15);
-    }
-    
+    // Finish Line
     ctx.fillStyle = '#fff';
-    // Checker pattern finish line
-    for(let y=0; y<this.trackWidth; y+=20) {
-      ctx.fillStyle = (y % 40 === 0) ? '#fff' : '#000';
-      ctx.fillRect(240, 150 - this.trackWidth/2 + y, 10, 20);
-      ctx.fillRect(250, 150 - this.trackWidth/2 + y, 10, 20);
-    }
+    ctx.fillRect(240, 150 - this.trackWidth/2, 20, this.trackWidth);
   }
 
   private drawStadium(ctx: CanvasRenderingContext2D) {
     // Grandstands
-    ctx.fillStyle = '#1e1e1e';
-    // Top Grandstand with glowing ads
-    ctx.fillRect(400, 15, 400, 35);
-    ctx.fillStyle = '#64b5f6';
-    ctx.fillRect(420, 22, 100, 10); // Ad 1
-    ctx.fillStyle = '#ffeb3b';
-    ctx.fillRect(550, 22, 100, 10); // Ad 2
-
+    ctx.fillStyle = '#455a64';
+    // Top Grandstand
+    ctx.fillRect(400, 20, 400, 40);
     // Bottom Grandstand
-    ctx.fillStyle = '#1e1e1e';
-    ctx.fillRect(400, 650, 400, 35);
+    ctx.fillRect(400, 640, 400, 40);
     
-    // Spectators (Glowing night crowd)
+    // Spectators (Small colorful dots)
     ctx.fillStyle = '#fff';
-    for(let i=0; i<400; i+=12) {
-      if (Math.random() > 0.3) {
-        ctx.fillStyle = ['#ff5252','#448aff','#ffd740','#fff'][Math.floor(Math.random()*4)];
-        ctx.beginPath();
-        ctx.arc(400+i, 25, 1.5, 0, Math.PI*2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(400+i, 665, 1.5, 0, Math.PI*2);
-        ctx.fill();
-      }
+    for(let i=0; i<400; i+=10) {
+      ctx.fillStyle = ['#ff5252','#448aff','#ffd740'][Math.floor(Math.random()*3)];
+      ctx.beginPath();
+      ctx.arc(400+i, 30, 2, 0, Math.PI*2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(400+i, 660, 2, 0, Math.PI*2);
+      ctx.fill();
     }
 
-    // High Floodlights
-    [ [80,80], [1120,80], [80,620], [1120,620], [600, 50], [600, 650] ].forEach(p => {
-      // Light Post
-      ctx.fillStyle = '#333';
-      ctx.fillRect(p[0]-3, p[1]-3, 6, 6);
-      
-      // Light Glow
-      const grad = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], 180);
-      grad.addColorStop(0, 'rgba(255,255,255,0.12)');
-      grad.addColorStop(0.5, 'rgba(100,181,246,0.03)');
+    // Floodlights
+    ctx.fillStyle = '#90a4ae';
+    [ [100,100], [1100,100], [100,600], [1100,600] ].forEach(p => {
+      ctx.fillRect(p[0]-5, p[1]-5, 10, 10);
+      const grad = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], 100);
+      grad.addColorStop(0, 'rgba(255,255,255,0.1)');
       grad.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.arc(p[0], p[1], 200, 0, Math.PI*2);
+      ctx.arc(p[0], p[1], 150, 0, Math.PI*2);
       ctx.fill();
     });
   }
@@ -457,55 +413,33 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     ctx.translate(car.x, car.y);
     ctx.rotate(car.angle);
 
-    // --- CAR COMPLEX DRAWING ---
-    // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.fillRect(-15, -6, 32, 14);
+    // Front Wing
+    ctx.fillStyle = '#222';
+    ctx.fillRect(15, -12, 5, 24);
 
-    // Front Wing (Wider)
-    ctx.fillStyle = '#111';
-    ctx.fillRect(16, -14, 4, 28);
-    // Endplates
-    ctx.fillRect(14, -14, 6, 4);
-    ctx.fillRect(14, 10, 6, 4);
+    // Rear Wing
+    ctx.fillRect(-20, -12, 4, 24);
 
-    // Rear Wing (Higher)
-    ctx.fillStyle = '#000';
-    ctx.fillRect(-22, -13, 3, 26);
-
-    // Main Body (V-Tapered)
+    // Main Body (Tapered)
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.moveTo(-18, -9);
-    ctx.lineTo(16, -5);
-    ctx.lineTo(16, 5);
-    ctx.lineTo(-18, 9);
+    ctx.moveTo(-15, -8);
+    ctx.lineTo(15, -4);
+    ctx.lineTo(15, 4);
+    ctx.lineTo(-15, 8);
     ctx.closePath();
     ctx.fill();
-    
-    // Sidepods (Aggressive curve)
-    ctx.fillRect(-8, -12, 10, 3);
-    ctx.fillRect(-8, 9, 10, 3);
 
-    // Cockpit & Halo
-    ctx.fillStyle = '#0a0a0a';
+    // Halo / Cockpit
+    ctx.fillStyle = '#000';
     ctx.beginPath();
-    ctx.ellipse(3, 0, 8, 4, 0, 0, Math.PI*2);
-    ctx.fill();
-    // Driver Helmet
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(0, 0, 2.5, 0, Math.PI*2);
+    ctx.arc(0, 0, 3, 0, Math.PI*2);
     ctx.fill();
     
-    // Exposed Wheels (Thick Pirelli Slicks)
+    // Wheels
     ctx.fillStyle = '#111';
-    [ [11,-16], [11,12], [-14,-16], [-14,12] ].forEach(w => {
-      ctx.fillRect(w[0], w[1], 9, 5);
-      // Rim detail
-      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(w[0]+2, w[1]+1, 5, 3);
+    [ [10,-14], [10,10], [-15,-14], [-15,10] ].forEach(w => {
+      ctx.fillRect(w[0], w[1], 8, 4);
     });
 
     ctx.restore();
@@ -546,9 +480,8 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   }
 
   private distAlongPath(car: any) {
+     // Simplified lap progress based on current waypoint
      const wp = car.targetWP || 0;
-     const next = this.waypoints[wp];
-     const distToNext = Math.sqrt((car.x-next.x)**2 + (car.y-next.y)**2);
-     return wp * 2000 - distToNext;
+     return wp * 1000 + (1000 - this.getDistToTrack(car.x, car.y));
   }
 }

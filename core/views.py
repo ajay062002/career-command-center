@@ -525,9 +525,6 @@ class AutomationViewSet(viewsets.ViewSet):
             print(f"[GEN-FATAL] Crash: {str(e)}")
             print(traceback.format_exc())
             return Response({'error': f'Generation Error: {str(e)}'}, status=500)
-            
-        except Exception as e:
-            return Response({'error': str(e)}, status=500)
 
     @action(detail=False, methods=['get'], url_path='list-generations')
     def list_generations(self, request):
