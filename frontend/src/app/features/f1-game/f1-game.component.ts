@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -56,7 +56,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         <!-- Start/Finish Message -->
         <div class="overlay-msg" *ngIf="gamePhase === 'start'">
           <div class="countdown" [class.go]="countdown <= 0">
-            {{ countdown > 0 ? Math.ceil(countdown) : 'GO!' }}
+            {{ countdown > 0 ? Math.ceil(countdown) : 'GOO!' }}
           </div>
         </div>
 
@@ -169,6 +169,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     }
   `]
 })
+export class F1GameComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('gameCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
+  
   // Game Configuration
   totalLaps = 3;
   trackWidth = 140;
@@ -276,7 +279,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     this.processCarPhysics(this.player, input, dt, true);
     this.aiCars.forEach(ai => this.processAI(ai, dt));
 
-    // Simple Collision Check between cars
+    // Simple Collision Check
     [this.player, ...this.aiCars].forEach(c1 => {
       [this.player, ...this.aiCars].forEach(c2 => {
         if (c1.id !== c2.id) {
@@ -285,7 +288,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
            const dist = Math.sqrt(dx*dx + dy*dy);
            if (dist < 40) {
               c1.health -= 5 * dt;
-              // Bounce Away
               const angle = Math.atan2(dy, dx);
               c1.angle -= 0.1;
               c1.speed *= 0.8;
@@ -300,7 +302,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     const accel = isPlayer ? 1000 : 800;
     if (input.throttle) car.speed += accel * dt;
     if (input.brake) car.speed -= accel * 2 * dt;
-    car.speed *= 0.98; // Friction
+    car.speed *= 0.98;
 
     const steerSpeed = 3.5;
     if (car.speed > 20) {
@@ -314,20 +316,16 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     car.x += Math.cos(car.angle) * car.speed * dt;
     car.y += Math.sin(car.angle) * car.speed * dt;
 
-    // --- BOUNCE WALLS ---
     const track = this.tracks[this.currentTrackIndex];
     if (this.getDistToTrack(car.x, car.y, track.waypoints) > this.trackWidth / 2) {
         const nearest = this.getNearestPointOnTrack(car.x, car.y, track.waypoints);
         const normal = Math.atan2(car.y - nearest.y, car.x - nearest.x);
-        car.angle = normal + (normal - car.angle); // Elastic bounce
+        car.angle = normal + (normal - car.angle);
         car.speed *= 0.8;
         car.health -= 2;
-        // Push back inside
         car.x = nearest.x + Math.cos(normal) * (this.trackWidth / 2 - 5);
         car.y = nearest.y + Math.sin(normal) * (this.trackWidth / 2 - 5);
     }
-    
-    // Lap Track
     if (car.lastX < track.waypoints[0].x && car.x >= track.waypoints[0].x) car.lap++;
   }
 
@@ -347,14 +345,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
   private drawScene(ctx: CanvasRenderingContext2D) {
     const track = this.tracks[this.currentTrackIndex];
-    // Background
     ctx.fillStyle = '#102e12';
     ctx.fillRect(0, 0, 1200, 700);
-
-    // Draw Pits
     this.drawPits(ctx, track.waypoints[0]);
-
-    // Track
     ctx.strokeStyle = '#333';
     ctx.lineWidth = this.trackWidth;
     ctx.lineCap = 'round';
@@ -363,8 +356,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     ctx.moveTo(track.waypoints[0].x, track.waypoints[0].y);
     track.waypoints.forEach(p => ctx.lineTo(p.x, p.y));
     ctx.stroke();
-
-    // Red/White Curbs (Physical Walls)
     ctx.setLineDash([20, 20]);
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = this.trackWidth + 10;
@@ -374,18 +365,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     ctx.setLineDash([20, 20], 20);
     ctx.stroke();
     ctx.setLineDash([]);
-
-    // Finish Line
     ctx.fillStyle = '#fff';
     ctx.fillRect(track.waypoints[0].x, track.waypoints[0].y - this.trackWidth/2, 10, this.trackWidth);
-
-    // Cars
     this.drawCar(ctx, this.player, '#ffea00');
     this.aiCars.forEach(ai => this.drawCar(ctx, ai, ai.color));
-
-    if (this.gamePhase === 'start') {
-       this.drawCountdown(ctx);
-    }
+    if (this.gamePhase === 'start') this.drawCountdown(ctx);
   }
 
   private drawPits(ctx: CanvasRenderingContext2D, start: any) {
@@ -415,19 +399,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     ctx.rotate(car.angle);
 
     // --- PRO CAR MODEL ---
-    // Shadow
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.fillRect(-15, -6, 32, 14);
-
-    // Front Wing
     ctx.fillStyle = '#111';
     ctx.fillRect(16, -14, 4, 28);
-
-    // Rear Wing
     ctx.fillStyle = '#000';
     ctx.fillRect(-22, -13, 3, 26);
-
-    // Main Body
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(-18, -9);
@@ -436,23 +413,15 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     ctx.lineTo(-18, 9);
     ctx.closePath();
     ctx.fill();
-    
-    // Cockpit
     ctx.fillStyle = '#0a0a0a';
     ctx.beginPath();
     ctx.ellipse(3, 0, 8, 4, 0, 0, Math.PI*2);
     ctx.fill();
-    
-    // Wheels
     ctx.fillStyle = '#111';
     [ [11,-16], [11,12], [-14,-16], [-14,12] ].forEach(w => {
       ctx.fillRect(w[0], w[1], 9, 5);
     });
-
-    // Health UI
     ctx.restore();
-    
-    // Draw Health Bar (Fixed Position above car)
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.fillRect(car.x - 20, car.y - 35, 40, 5);
     ctx.fillStyle = car.health > 40 ? '#69f0ae' : '#ff5252';
