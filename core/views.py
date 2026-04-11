@@ -323,7 +323,7 @@ class AutomationViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], url_path='generate-resume')
     def generate_resume(self, request):
         automation_dir = self._get_automation_path()
-        template_path = automation_dir / "reference" / "template.docx"
+        template_path = automation_dir / "reference" / "Ajay Purshotam Thota.docx"
 
         try:
             from docxtpl import DocxTemplate
