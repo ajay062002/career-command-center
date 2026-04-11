@@ -3,6 +3,7 @@ import json
 import re
 import os
 import sys
+import threading
 from io import BytesIO
 from pathlib import Path
 
@@ -83,9 +84,11 @@ class AnalyticsViewSet(viewsets.ViewSet):
     def dashboard(self, request):
         user = self.get_user(request)
         if not user.is_authenticated: return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+        
         rtr_count = models.RTR.objects.filter(user=user).count()
         sub_count = models.Submission.objects.filter(user=user).count()
         sub_rate = (sub_count / rtr_count * 100) if rtr_count > 0 else 0
+        
         vendor_set = set(models.RTR.objects.filter(user=user).values_list('vendorCompany', flat=True)) | \
                      set(models.Submission.objects.filter(user=user).values_list('submittedByVendor', flat=True))
         vendor_count = len([v for v in vendor_set if v])
@@ -94,19 +97,33 @@ class AnalyticsViewSet(viewsets.ViewSet):
             'totalJobs': models.Job.objects.filter(user=user).count(),
             'activeSubmissions': sub_count,
             'rtrPending': rtr_count,
+            'offers': models.Job.objects.filter(user=user, status=models.JobWorkflowStatus.OFFER).count(),
+            'rejected': models.Job.objects.filter(user=user, status=models.JobWorkflowStatus.REJECTED).count(),
             'totalVendors': vendor_count,
             'submissionRate': round(sub_rate, 1),
             'interviewConversions': models.Submission.objects.filter(user=user, submissionStatus__in=['INTERVIEW', 'INTERVIEW_SCHEDULED']).count()
         })
 
+    @action(detail=False, methods=['get'], url_path='jobs-by-status')
+    def jobs_by_status(self, request):
+        user = self.get_user(request)
+        counts = models.Job.objects.filter(user=user).values('status').annotate(count=Count('id'))
+        return Response(counts)
+
+    @action(detail=False, methods=['get'], url_path='study-trend')
+    def study_trend(self, request):
+        user = self.get_user(request)
+        last_7_days = timezone.now() - datetime.timedelta(days=7)
+        trend = models.StudySession.objects.filter(user=user, date__gte=last_7_days).values('date').annotate(totalMinutes=Sum('timeSpentMinutes')).order_by('date')
+        return Response(trend)
+
 class AutomationViewSet(viewsets.ViewSet):
     def _get_automation_path(self):
-        # Production-safe path matching the root folders we created
         return Path(settings.BASE_DIR)
 
     def _extract_important_tool(self, jd_text):
         if not jd_text: return "SoftwareEngineer"
-        tools = ["Java", "Spring", "Angular", "React", "Python", "AWS", "Kafka", "Docker"]
+        tools = ["Java", "Spring", "Angular", "React", "Python", "AWS", "Kafka", "Docker", "DevOps", "Microservices"]
         for t in tools:
             if t.lower() in jd_text.lower(): return t
         return "SoftwareEngineer"
@@ -117,37 +134,70 @@ class AutomationViewSet(viewsets.ViewSet):
         try:
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-1.5-flash')
-            prompt = f"Tailor resume for this JD: {jd_text[:2000]}. Sections: {json.dumps(sections)}. Data: {json.dumps(base_content)}. Return ONLY JSON."
+            prompt = f"""
+            You are a World-Class Recruiter. Rewrite Ajay Purshotam Thota's resume for this JD.
+            JD: {jd_text[:3500]}
+            TOGGLES: {json.dumps(sections)}
+            DATA: {json.dumps(base_content)}
+            Return ONLY a valid JSON object:
+            {{"TITLE": "...", "SUMMARY": ["...", "..."], "TD": ["...", "..."], "CH": ["...", "..."], "TD_ENV": "..."}}
+            """
             response = model.generate_content(prompt)
-            raw = response.text
-            if "```json" in raw: raw = raw.split("```json")[-1].split("```")[0]
+            raw = response.text.strip()
+            if "```json" in raw: raw = raw.split("```json")[-1].split("```")[0].strip()
             return json.loads(raw)
-        except: return None
+        except Exception as e:
+            print(f"[AI-ERROR] {e}")
+            return None
 
     @action(detail=False, methods=['post'], url_path='tailor-sections')
     def tailor_sections(self, request):
         jd_text = request.data.get('jd_text', '')
         base_content = request.data.get('base_content', {})
         sections = request.data.get('sections', {})
+        
+        # Try AI First
         ai_res = self._ai_tailor_sections(jd_text, base_content, sections)
         if ai_res:
-             return Response({'updated': ai_res, 'ai_powered': True})
-        return Response({'error': 'AI failed'}, status=500)
+            return Response({'updated': ai_res, 'ai_powered': True})
+
+        # Fallback keyword logic
+        updated = {"TITLE": "Senior Java Developer", "SUMMARY": base_content.get('SUMMARY', [])[:5]}
+        return Response({'updated': updated, 'ai_powered': False})
 
     @action(detail=False, methods=['post'], url_path='generate-resume')
     def generate_resume(self, request):
         root = self._get_automation_path()
         template_path = root / "reference" / "Ajay Purshotam Thota.docx"
         if not template_path.exists():
-            return Response({'error': f'Template missing at {template_path}'}, status=404)
+            return Response({'error': 'Template missing'}, status=404)
+        
         try:
             from docxtpl import DocxTemplate
+            from docx import Document
+            from docx.shared import Pt
+            from docx.enum.text import WD_LINE_SPACING
+            
             doc = DocxTemplate(str(template_path))
             doc.render(request.data.get('resume_data', {}))
+            
             buf = BytesIO()
             doc.save(buf)
             buf.seek(0)
-            return FileResponse(buf, as_attachment=True, filename="Tailored_Resume.docx")
+            
+            # Post-processing tighten up
+            d = Document(buf)
+            for p in d.paragraphs:
+                pf = p.paragraph_format
+                pf.space_before = Pt(0)
+                pf.space_after = Pt(0)
+                pf.line_spacing = 1.0
+            
+            final_buf = BytesIO()
+            d.save(final_buf)
+            final_buf.seek(0)
+            
+            return FileResponse(final_buf, as_attachment=True, filename="Ajay_Thota_Tailored.docx")
         except Exception as e:
             return Response({'error': str(e)}, status=500)
 
@@ -161,20 +211,14 @@ class ScrapedJobViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='promote')
     def promote_to_job(self, request, pk=None):
         scraped_job = self.get_object()
-        job = models.Job.objects.create(
-            user=request.user,
-            jobTitle=scraped_job.title,
-            companyName=scraped_job.company,
-            status=models.JobWorkflowStatus.APPLIED
-        )
+        job = models.Job.objects.create(user=request.user, jobTitle=scraped_job.title, companyName=scraped_job.company, status='APPLIED')
         return Response(JobSerializer(job).data)
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
-    pagination_class = AngularPagination
     def get_queryset(self):
         if not self.request.user.is_authenticated: return models.User.objects.none()
-        return models.User.objects.all() if self.request.user.role == 'ROLE_ADMIN' else models.User.objects.filter(id=self.request.user.id)
+        return models.User.objects.filter(id=self.request.user.id)
 
 class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
