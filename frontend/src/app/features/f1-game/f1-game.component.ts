@@ -169,21 +169,27 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     }
   `]
 })
-export class F1GameComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('gameCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
-  
   // Game Configuration
   totalLaps = 3;
   trackWidth = 140;
   Math = Math;
 
-  // Track State
-  waypoints = [
-    {x: 250, y: 150}, {x: 550, y: 100}, {x: 850, y: 120}, {x: 1050, y: 250},
-    {x: 1100, y: 450}, {x: 950, y: 600}, {x: 650, y: 620}, {x: 350, y: 600},
-    {x: 100, y: 500}, {x: 80, y: 300}, {x: 150, y: 180}, {x: 220, y: 150},
-    {x: 250, y: 150}
+  // Track Database
+  tracks = [
+    {
+      name: 'Interlagos (Speed)',
+      waypoints: [{x:250, y:150}, {x:550, y:100}, {x:850, y:120}, {x:1050, y:250}, {x:1100, y:450}, {x:950, y:600}, {x:650, y:620}, {x:350, y:600}, {x:100, y:500}, {x:80, y:300}, {x:150, y:180}, {x:220, y:150}, {x:250, y:150}]
+    },
+    {
+       name: 'Monaco (Tight)',
+       waypoints: [{x:100,y:100}, {x:500,y:80}, {x:900,y:150}, {x:1000,y:400}, {x:800,y:600}, {x:400,y:550}, {x:150,y:400}, {x:100,y:100}]
+    },
+    {
+       name: 'Silverstone (Fast)',
+       waypoints: [{x:200,y:200}, {x:1000,y:100}, {x:1100,y:500}, {x:600,y:650}, {x:100,y:400}, {x:200,y:200}]
+    }
   ];
+  currentTrackIndex = 0;
 
   // Game Logic State
   player: any = {};
@@ -193,8 +199,16 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   playerPos = 1;
   lastTime = 0;
   animationFrameId = 0;
+  
+  // Teams
+  teams = [
+    { name: 'Red Bull', color: '#1e3d59' },
+    { name: 'Mercedes', color: '#00d2be' },
+    { name: 'Ferrari', color: '#ff2800' },
+    { name: 'McLaren', color: '#ff8700' },
+    { name: 'Aston Martin', color: '#006f62' }
+  ];
 
-  // Input state
   private keys: { [key: string]: boolean } = {};
 
   @HostListener('window:keydown', ['$event'])
@@ -208,311 +222,223 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     this.animationFrameId = requestAnimationFrame((time) => this.gameLoop(time));
   }
 
-  ngOnDestroy(): void {
-    cancelAnimationFrame(this.animationFrameId);
-  }
+  ngOnDestroy(): void { cancelAnimationFrame(this.animationFrameId); }
 
   resetGame() {
+    const track = this.tracks[this.currentTrackIndex];
     this.player = {
-      id: 0, x: 250, y: 150, angle: 0, speed: 0, lap: 0,
-      tireWear: 1.0, isPitting: false, drsActive: false,
-      lastX: 250, lastY: 150, radius: 15
+      id: 0, x: track.waypoints[0].x, y: track.waypoints[0].y, angle: 0, speed: 0, lap: 0,
+      tireWear: 1.0, health: 100, lastX: track.waypoints[0].x, lastY: track.waypoints[0].y
     };
 
-    this.aiCars = [
-      { id: 1, x: 200, y: 180, angle: 0, speed: 0, lap: 0, tireWear: 1.0, targetWP: 1, color: '#f44336' },
-      { id: 2, x: 300, y: 180, angle: 0, speed: 0, lap: 0, tireWear: 1.0, targetWP: 1, color: '#2196f3' },
-      { id: 3, x: 200, y: 120, angle: 0, speed: 0, lap: 0, tireWear: 1.0, targetWP: 1, color: '#4caf50' }
-    ];
+    this.aiCars = this.teams.slice(1).map((team, i) => ({
+      id: i + 1, x: track.waypoints[0].x - (i+1)*50, y: track.waypoints[0].y + 20, 
+      angle: 0, speed: 0, lap: 0, targetWP: 1, color: team.color, health: 100
+    }));
 
     this.gamePhase = 'start';
     this.countdown = 3;
     this.lastTime = performance.now();
   }
 
+  nextTrack() {
+    this.currentTrackIndex = (this.currentTrackIndex + 1) % this.tracks.length;
+    this.resetGame();
+  }
+
   private gameLoop(time: number) {
     const dt = Math.min((time - this.lastTime) / 1000, 0.1);
     this.lastTime = time;
-
     const ctx = this.canvasRef.nativeElement.getContext('2d');
     if (ctx) {
       if (this.gamePhase === 'start') {
         this.countdown -= dt;
         if (this.countdown <= -1) this.gamePhase = 'racing';
-        this.drawTrack(ctx);
-        this.drawAllCars(ctx);
+        this.drawScene(ctx);
       } else if (this.gamePhase === 'racing') {
         this.updatePhysics(dt);
-        this.drawTrack(ctx);
-        this.drawAllCars(ctx);
-        this.checkResults();
+        this.drawScene(ctx);
+        if (this.player.lap >= this.totalLaps) this.gamePhase = 'results';
       } else {
-        this.drawTrack(ctx);
-        this.drawAllCars(ctx);
+        this.drawScene(ctx);
       }
     }
-
     this.animationFrameId = requestAnimationFrame((time) => this.gameLoop(time));
   }
 
   private updatePhysics(dt: number) {
-    // Player Input
     const input = {
       throttle: this.keys['w'] || this.keys['arrowup'],
       brake: this.keys['s'] || this.keys['arrowdown'],
       left: this.keys['a'] || this.keys['arrowleft'],
-      right: this.keys['d'] || this.keys['arrowright'],
-      drs: this.keys[' ']
+      right: this.keys['d'] || this.keys['arrowright']
     };
-
     this.processCarPhysics(this.player, input, dt, true);
     this.aiCars.forEach(ai => this.processAI(ai, dt));
-    
-    // Sort for leaderboard
-    const all = [this.player, ...this.aiCars].sort((a,b) => {
-      if (a.lap !== b.lap) return b.lap - a.lap;
-      const distA = this.distAlongPath(a);
-      const distB = this.distAlongPath(b);
-      return distB - distA;
+
+    // Simple Collision Check between cars
+    [this.player, ...this.aiCars].forEach(c1 => {
+      [this.player, ...this.aiCars].forEach(c2 => {
+        if (c1.id !== c2.id) {
+           const dx = c2.x - c1.x;
+           const dy = c2.y - c1.y;
+           const dist = Math.sqrt(dx*dx + dy*dy);
+           if (dist < 40) {
+              c1.health -= 5 * dt;
+              // Bounce Away
+              const angle = Math.atan2(dy, dx);
+              c1.angle -= 0.1;
+              c1.speed *= 0.8;
+           }
+        }
+      });
     });
-    this.playerPos = all.findIndex(c => c.id === 0) + 1;
   }
 
   private processCarPhysics(car: any, input: any, dt: number, isPlayer: boolean) {
-    const maxSpeed = isPlayer ? 400 : 350;
-    const accel = isPlayer ? 8 : 6.5;
-    const braking = 12;
-    const friction = 0.95;
-    const steeringAngle = 0.08;
+    const maxSpeed = isPlayer ? 450 : 380;
+    const accel = isPlayer ? 1000 : 800;
+    if (input.throttle) car.speed += accel * dt;
+    if (input.brake) car.speed -= accel * 2 * dt;
+    car.speed *= 0.98; // Friction
 
-    // Steering
-    if (input.left) car.steeringAngle = Math.max(car.steeringAngle - steeringAngle * dt, -0.5);
-    if (input.right) car.steeringAngle = Math.min(car.steeringAngle + steeringAngle * dt, 0.5);
-    car.steeringAngle *= 0.92; // Return to center
+    const steerSpeed = 3.5;
+    if (car.speed > 20) {
+       if (input.left) car.angle -= steerSpeed * (car.speed / maxSpeed) * dt;
+       if (input.right) car.angle += steerSpeed * (car.speed / maxSpeed) * dt;
+    }
 
-    // Accel/Brake
-    if (input.throttle && car.speed < maxSpeed) car.speed += accel * dt * 100;
-    if (input.brake) car.speed -= braking * dt * 100;
-
-    car.speed *= friction;
     car.speed = Math.max(0, Math.min(car.speed, maxSpeed));
-
     car.lastX = car.x;
     car.lastY = car.y;
-    car.angle += car.steeringAngle * dt;
     car.x += Math.cos(car.angle) * car.speed * dt;
     car.y += Math.sin(car.angle) * car.speed * dt;
 
-    // Wall collision (Simplified bounce like logic from original)
-    if (this.getDistToTrack(car.x, car.y) > this.trackWidth / 2) {
-        car.x = car.lastX;
-        car.y = car.lastY;
-        car.speed *= 0.5; // Bounce slow
+    // --- BOUNCE WALLS ---
+    const track = this.tracks[this.currentTrackIndex];
+    if (this.getDistToTrack(car.x, car.y, track.waypoints) > this.trackWidth / 2) {
+        const nearest = this.getNearestPointOnTrack(car.x, car.y, track.waypoints);
+        const normal = Math.atan2(car.y - nearest.y, car.x - nearest.x);
+        car.angle = normal + (normal - car.angle); // Elastic bounce
+        car.speed *= 0.8;
+        car.health -= 2;
+        // Push back inside
+        car.x = nearest.x + Math.cos(normal) * (this.trackWidth / 2 - 5);
+        car.y = nearest.y + Math.sin(normal) * (this.trackWidth / 2 - 5);
     }
-
-    // Lap tracking
-    if (car.lastX < 250 && car.x >= 250 && car.y < 250) car.lap++;
+    
+    // Lap Track
+    if (car.lastX < track.waypoints[0].x && car.x >= track.waypoints[0].x) car.lap++;
   }
 
   private processAI(car: any, dt: number) {
-    const target = this.waypoints[car.targetWP];
+    const twp = this.tracks[this.currentTrackIndex].waypoints;
+    const target = twp[car.targetWP];
     const dx = target.x - car.x;
     const dy = target.y - car.y;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    if (dist < 100) car.targetWP = (car.targetWP + 1) % this.waypoints.length;
-
-    const targetAngle = Math.atan2(dy, dx);
-    let diff = targetAngle - car.angle;
-    while (diff > Math.PI) diff -= Math.PI * 2;
-    while (diff < -Math.PI) diff += Math.PI * 2;
-
-    const input = {
-      throttle: true,
-      brake: Math.abs(diff) > 0.4,
-      left: diff < -0.05,
-      right: diff > 0.05
-    };
-    this.processCarPhysics(car, input, dt, false);
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    if (dist < 100) car.targetWP = (car.targetWP + 1) % twp.length;
+    const tA = Math.atan2(dy, dx);
+    let diff = tA - car.angle;
+    while(diff > Math.PI) diff -= Math.PI*2;
+    while(diff < -Math.PI) diff += Math.PI*2;
+    this.processCarPhysics(car, { throttle: true, brake: Math.abs(diff) > 0.6, left: diff < -0.1, right: diff > 0.1 }, dt, false);
   }
 
-  private checkResults() {
-    if (this.player.lap >= this.totalLaps) this.gamePhase = 'results';
-  }
-
-  // --- DRAWING ENGINE ---
-  private drawTrack(ctx: CanvasRenderingContext2D) {
-    // Darker Night Grass
+  private drawScene(ctx: CanvasRenderingContext2D) {
+    const track = this.tracks[this.currentTrackIndex];
+    // Background
     ctx.fillStyle = '#102e12';
     ctx.fillRect(0, 0, 1200, 700);
 
-    // --- DRAW STADIUM ---
-    this.drawStadium(ctx);
+    // Draw Pits
+    this.drawPits(ctx, track.waypoints[0]);
 
-    // Track Border (White)
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = this.trackWidth + 12;
-    ctx.beginPath();
-    ctx.moveTo(this.waypoints[0].x, this.waypoints[0].y);
-    this.waypoints.forEach(p => ctx.lineTo(p.x, p.y));
-    ctx.stroke();
-
-    // Asphalt
-    ctx.strokeStyle = '#222';
+    // Track
+    ctx.strokeStyle = '#333';
     ctx.lineWidth = this.trackWidth;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.beginPath();
-    ctx.moveTo(this.waypoints[0].x, this.waypoints[0].y);
-    this.waypoints.forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.moveTo(track.waypoints[0].x, track.waypoints[0].y);
+    track.waypoints.forEach(p => ctx.lineTo(p.x, p.y));
     ctx.stroke();
 
-    // Curbs (Red and White)
+    // Red/White Curbs (Physical Walls)
     ctx.setLineDash([20, 20]);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = this.trackWidth + 10;
+    ctx.stroke();
     ctx.strokeStyle = '#f44336';
-    ctx.lineWidth = this.trackWidth + 8;
+    ctx.lineWidth = this.trackWidth + 10;
+    ctx.setLineDash([20, 20], 20);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Grid slots & Finish line
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    for(let i=0; i<3; i++) {
-       ctx.fillRect(180 - i*50, 150 - this.trackWidth/2 + 20 + i*40, 40, 15);
-    }
-    
+    // Finish Line
     ctx.fillStyle = '#fff';
-    // Checker pattern finish line
-    for(let y=0; y<this.trackWidth; y+=20) {
-      ctx.fillStyle = (y % 40 === 0) ? '#fff' : '#000';
-      ctx.fillRect(240, 150 - this.trackWidth/2 + y, 10, 20);
-      ctx.fillRect(250, 150 - this.trackWidth/2 + y, 10, 20);
+    ctx.fillRect(track.waypoints[0].x, track.waypoints[0].y - this.trackWidth/2, 10, this.trackWidth);
+
+    // Cars
+    this.drawCar(ctx, this.player, '#ffea00');
+    this.aiCars.forEach(ai => this.drawCar(ctx, ai, ai.color));
+
+    if (this.gamePhase === 'start') {
+       this.drawCountdown(ctx);
     }
   }
 
-  private drawStadium(ctx: CanvasRenderingContext2D) {
-    // Grandstands
-    ctx.fillStyle = '#1e1e1e';
-    // Top Grandstand with glowing ads
-    ctx.fillRect(400, 15, 400, 35);
-    ctx.fillStyle = '#64b5f6';
-    ctx.fillRect(420, 22, 100, 10); // Ad 1
-    ctx.fillStyle = '#ffeb3b';
-    ctx.fillRect(550, 22, 100, 10); // Ad 2
-
-    // Bottom Grandstand
-    ctx.fillStyle = '#1e1e1e';
-    ctx.fillRect(400, 650, 400, 35);
-    
-    // Spectators (Glowing night crowd)
-    ctx.fillStyle = '#fff';
-    for(let i=0; i<400; i+=12) {
-      if (Math.random() > 0.3) {
-        ctx.fillStyle = ['#ff5252','#448aff','#ffd740','#fff'][Math.floor(Math.random()*4)];
-        ctx.beginPath();
-        ctx.arc(400+i, 25, 1.5, 0, Math.PI*2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(400+i, 665, 1.5, 0, Math.PI*2);
-        ctx.fill();
-      }
-    }
-
-    // High Floodlights
-    [ [80,80], [1120,80], [80,620], [1120,620], [600, 50], [600, 650] ].forEach(p => {
-      // Light Post
-      ctx.fillStyle = '#333';
-      ctx.fillRect(p[0]-3, p[1]-3, 6, 6);
-      
-      // Light Glow
-      const grad = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], 180);
-      grad.addColorStop(0, 'rgba(255,255,255,0.12)');
-      grad.addColorStop(0.5, 'rgba(100,181,246,0.03)');
-      grad.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(p[0], p[1], 200, 0, Math.PI*2);
-      ctx.fill();
+  private drawPits(ctx: CanvasRenderingContext2D, start: any) {
+    const pitY = start.y - this.trackWidth/2 - 40;
+    this.teams.forEach((t, i) => {
+       ctx.fillStyle = t.color;
+       ctx.fillRect(start.x - 300 + i*120, pitY, 100, 30);
+       ctx.fillStyle = '#fff';
+       ctx.font = '10px Arial';
+       ctx.fillText(t.name, start.x - 290 + i*120, pitY + 20);
     });
   }
 
-  private drawAllCars(ctx: CanvasRenderingContext2D) {
-    this.drawDetailedCar(ctx, this.player, '#ffea00');
-    this.aiCars.forEach(ai => this.drawDetailedCar(ctx, ai, ai.color));
+  private drawCountdown(ctx: CanvasRenderingContext2D) {
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(0, 0, 1200, 700);
+    ctx.font = '900 150px Orbitron';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = this.countdown > 0 ? '#ff5252' : '#69f0ae';
+    const text = this.countdown > 0 ? Math.ceil(this.countdown).toString() : 'GOO!';
+    ctx.fillText(text, 600, 350);
   }
 
-  private drawDetailedCar(ctx: CanvasRenderingContext2D, car: any, color: string) {
+  private drawCar(ctx: CanvasRenderingContext2D, car: any, color: string) {
     ctx.save();
     ctx.translate(car.x, car.y);
     ctx.rotate(car.angle);
-
-    // --- CAR COMPLEX DRAWING ---
-    // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.fillRect(-15, -6, 32, 14);
-
-    // Front Wing (Wider)
-    ctx.fillStyle = '#111';
-    ctx.fillRect(16, -14, 4, 28);
-    // Endplates
-    ctx.fillRect(14, -14, 6, 4);
-    ctx.fillRect(14, 10, 6, 4);
-
-    // Rear Wing (Higher)
-    ctx.fillStyle = '#000';
-    ctx.fillRect(-22, -13, 3, 26);
-
-    // Main Body (V-Tapered)
     ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(-18, -9);
-    ctx.lineTo(16, -5);
-    ctx.lineTo(16, 5);
-    ctx.lineTo(-18, 9);
-    ctx.closePath();
-    ctx.fill();
-    
-    // Sidepods (Aggressive curve)
-    ctx.fillRect(-8, -12, 10, 3);
-    ctx.fillRect(-8, 9, 10, 3);
-
-    // Cockpit & Halo
-    ctx.fillStyle = '#0a0a0a';
-    ctx.beginPath();
-    ctx.ellipse(3, 0, 8, 4, 0, 0, Math.PI*2);
-    ctx.fill();
-    // Driver Helmet
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(0, 0, 2.5, 0, Math.PI*2);
-    ctx.fill();
-    
-    // Exposed Wheels (Thick Pirelli Slicks)
-    ctx.fillStyle = '#111';
-    [ [11,-16], [11,12], [-14,-16], [-14,12] ].forEach(w => {
-      ctx.fillRect(w[0], w[1], 9, 5);
-      // Rim detail
-      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(w[0]+2, w[1]+1, 5, 3);
-    });
-
+    ctx.fillRect(-20, -10, 40, 20);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(15, -12, 5, 24); // Front Wing
+    // Health bar
+    ctx.fillStyle = '#f44336';
+    ctx.fillRect(-20, -20, 40, 4);
+    ctx.fillStyle = '#69f0ae';
+    ctx.fillRect(-20, -20, 40 * (car.health/100), 4);
     ctx.restore();
   }
 
-  // --- MATH UTILS ---
-  private getDistToTrack(x: number, y: number) {
+  private getDistToTrack(x: number, y: number, wps: any[]) {
     let minD = 10000;
-    for (let i=0; i<this.waypoints.length-1; i++) {
-       const d = this.distToSegment(x, y, this.waypoints[i], this.waypoints[i+1]);
+    for (let i=0; i<wps.length-1; i++) {
+       const d = this.distToSegment(x, y, wps[i], wps[i+1]);
        if (d < minD) minD = d;
     }
     return minD;
   }
 
-  private getNearestPointOnTrack(x: number, y: number) {
+  private getNearestPointOnTrack(x: number, y: number, wps: any[]) {
     let minD = 10000;
     let nearest = {x:0, y:0};
-    for (let i=0; i<this.waypoints.length-1; i++) {
-       const p = this.getClosestPointOnSegment(x, y, this.waypoints[i], this.waypoints[i+1]);
+    for (let i=0; i<wps.length-1; i++) {
+       const p = this.getClosestPointOnSegment(x, y, wps[i], wps[i+1]);
        const d = Math.sqrt((x-p.x)**2 + (y-p.y)**2);
        if (d < minD) { minD = d; nearest = p; }
     }
@@ -525,17 +451,9 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   }
 
   private getClosestPointOnSegment(x: number, y: number, p1: any, p2: any) {
-    const dx = p2.x - p1.x;
-    const dy = p2.y - p1.y;
+    const dx = p2.x - p1.x; const dy = p2.y - p1.y;
     const t = ((x-p1.x)*dx + (y-p1.y)*dy) / (dx*dx + dy*dy);
     const ct = Math.max(0, Math.min(1, t));
     return { x: p1.x + ct*dx, y: p1.y + ct*dy };
-  }
-
-  private distAlongPath(car: any) {
-     const wp = car.targetWP || 0;
-     const next = this.waypoints[wp];
-     const distToNext = Math.sqrt((car.x-next.x)**2 + (car.y-next.y)**2);
-     return wp * 2000 - distToNext;
   }
 }
