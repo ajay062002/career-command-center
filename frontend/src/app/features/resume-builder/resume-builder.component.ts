@@ -201,8 +201,9 @@ export class ResumeBuilderComponent implements OnInit {
                 this.isGenerating = false;
                 this.loadHistory(); // Refresh history
             },
-            error: () => {
-                this.snackBar.open('❌ Could not generate resume.', 'Close', { duration: 5000 });
+            error: (err) => {
+                const msg = err?.error?.error || 'Could not generate resume.';
+                this.snackBar.open('❌ ' + msg, 'Close', { duration: 5000 });
                 this.isGenerating = false;
             }
         });
