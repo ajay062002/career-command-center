@@ -413,16 +413,50 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     ctx.save();
     ctx.translate(car.x, car.y);
     ctx.rotate(car.angle);
-    ctx.fillStyle = color;
-    ctx.fillRect(-20, -10, 40, 20);
+
+    // --- PRO CAR MODEL ---
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(-15, -6, 32, 14);
+
+    // Front Wing
+    ctx.fillStyle = '#111';
+    ctx.fillRect(16, -14, 4, 28);
+
+    // Rear Wing
     ctx.fillStyle = '#000';
-    ctx.fillRect(15, -12, 5, 24); // Front Wing
-    // Health bar
-    ctx.fillStyle = '#f44336';
-    ctx.fillRect(-20, -20, 40, 4);
-    ctx.fillStyle = '#69f0ae';
-    ctx.fillRect(-20, -20, 40 * (car.health/100), 4);
+    ctx.fillRect(-22, -13, 3, 26);
+
+    // Main Body
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(-18, -9);
+    ctx.lineTo(16, -5);
+    ctx.lineTo(16, 5);
+    ctx.lineTo(-18, 9);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Cockpit
+    ctx.fillStyle = '#0a0a0a';
+    ctx.beginPath();
+    ctx.ellipse(3, 0, 8, 4, 0, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Wheels
+    ctx.fillStyle = '#111';
+    [ [11,-16], [11,12], [-14,-16], [-14,12] ].forEach(w => {
+      ctx.fillRect(w[0], w[1], 9, 5);
+    });
+
+    // Health UI
     ctx.restore();
+    
+    // Draw Health Bar (Fixed Position above car)
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(car.x - 20, car.y - 35, 40, 5);
+    ctx.fillStyle = car.health > 40 ? '#69f0ae' : '#ff5252';
+    ctx.fillRect(car.x - 20, car.y - 35, 40 * (car.health/100), 5);
   }
 
   private getDistToTrack(x: number, y: number, wps: any[]) {
