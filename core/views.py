@@ -233,55 +233,63 @@ class AutomationViewSet(viewsets.ViewSet):
         """
         api_key = getattr(settings, 'GEMINI_API_KEY', None)
         if not api_key:
-            return None # Fallback to keyword logic
+            print("[AI-ERROR] Missing GEMINI_API_KEY in settings.")
+            return None
             
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-pro')
+            # Use the newer, faster 1.5-flash model
+            model = genai.GenerativeModel('gemini-1.5-flash')
             
-            # Formulate the payload for the AI
-            pool = {
-                "Title": base_content.get('TITLE'),
-                "Pool_Summary": base_content.get('SUMMARY', [])[:15], # Sample pool
-                "Pool_TD": base_content.get('TD', [])[:15],
-                "Pool_CH": base_content.get('CH', [])[:15],
-                "Env": base_content.get('TD_ENV')
-            }
+            # Formulate the payload
+            pool_summary = base_content.get('SUMMARY', [])
+            pool_td = base_content.get('TD', [])
+            pool_ch = base_content.get('CH', [])
             
             prompt = f"""
-            You are a Senior Technical Recruiter and Career Coach. 
-            Act as an AI Agent for Ajay Purshotam Thota (11+ yrs Full Stack Java Developer).
+            You are a World-Class Technical Recruiter. Ajay Purshotam Thota is a Senior Java Developer (11+ yrs).
+            Rewrite his resume sections for this Job Description (JD) to make him the #1 candidate.
             
-            TASK: Re-write specific sections of his resume to match this Job Description (JD).
+            JD: {jd_text[:3500]}
+            SECTION TOGGLES: {json.dumps(sections)}
             
-            JD: {jd_text[:3000]}
+            AVAILABLE DATA FOR AJAY:
+            - Full Summary List: {json.dumps(pool_summary[:20])}
+            - Banking Experience Bullets: {json.dumps(pool_td[:20])}
+            - Healthcare Experience Bullets: {json.dumps(pool_ch[:20])}
+            - Current Environment Line: {base_content.get('TD_ENV')}
+            - Current Job Title: {base_content.get('TITLE')}
             
-            SECTIONS TO UPDATE: {json.dumps(sections)}
+            DIRECTIONS:
+            1. ONLY update sections that are 'true' in SECTION TOGGLES.
+            2. TITLE: Create a matching senior job title.
+            3. SUMMARY: Rewrite 4-6 highly impactful bullets matching JD keywords.
+            4. TD/CH: Pick/Rewrite the best bullets highlighting relevant tech stack (Kafka, Spring, etc).
+            5. TD_ENV: Rebuild a tool-line using only tools mentioned in JD that Ajay knows.
+            6. KEYWORDS: Return a list of 10 matched keywords found in JD.
             
-            BASE DATA: {json.dumps(pool)}
-            
-            GUIDELINES:
-            1. If 'title' is requested, provide a professional matching title.
-            2. If 'summary' or 'td' or 'ch' are requested, pick and RE-WRITE the most relevant bullets to highlight matching skills. Maintain a professional, senior tone.
-            3. If 'env' is requested, build a comma-separated list of tools found in the JD that Ajay knows.
-            4. Keep all factual experience true.
-            
-            OUTPUT: Return ONLY a valid JSON object with the following keys where requested:
-            - TITLE, TITLE2, SUMMARY (array), TD (array), CH (array), TD_ENV, CH_ENV, KEYWORDS (array found in JD)
+            OUTPUT: Return ONLY a valid JSON object. Do not include markdown formatting.
+            {{
+              "TITLE": "...", "TITLE2": "...", "SUMMARY": ["...", "..."], 
+              "TD": ["...", "..."], "CH": ["...", "..."], 
+              "TD_ENV": "...", "KEYWORDS": ["...", "..."]
+            }}
             """
             
             response = model.generate_content(prompt)
-            # Find JSON in response (Gemini sometimes adds markdown blocks)
-            text = response.text
-            if "```json" in text:
-                text = text.split("```json")[1].split("```")[0].strip()
-            elif "```" in text:
-                text = text.split("```")[1].split("```")[0].strip()
+            raw_text = response.text.strip()
+            
+            # Clean up markdown if present
+            if "```json" in raw_text:
+                raw_text = raw_text.split("```json")[-1].split("```")[0].strip()
+            elif "```" in raw_text:
+                raw_text = raw_text.split("```")[-1].split("```")[0].strip()
                 
-            ai_data = json.loads(text)
+            ai_data = json.loads(raw_text)
+            print(f"[AI-SUCCESS] Successfully tailored sections: {list(ai_data.keys())}")
             return ai_data
         except Exception as e:
-            print(f"Gemini AI Error: {e}")
+            print(f"[AI-ERROR] Failed to call Gemini: {str(e)}")
             return None
 
     @action(detail=False, methods=['post'], url_path='tailor-sections')
