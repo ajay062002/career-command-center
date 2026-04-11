@@ -1,10 +1,8 @@
 import datetime
-import google.generativeai as genai
 import json
 import re
-import subprocess
+import os
 import sys
-import threading
 from io import BytesIO
 from pathlib import Path
 
@@ -18,13 +16,18 @@ from rest_framework.decorators import action
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login as django_login
 
+# Safe import for Gemini
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+
 from . import models
 from .serializers import (UserSerializer, JobSerializer, SubmissionSerializer, 
                           RTRSerializer, ReminderSerializer, StudySessionSerializer, ScrapedJobSerializer)
 from .pagination import AngularPagination
 
 def home(request):
-    from django.http import HttpResponse
     return HttpResponse("Command Center Backend is Online")
 
 class AuthViewSet(viewsets.ViewSet):
@@ -54,7 +57,6 @@ class AuthViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['post'], url_path='change-password')
     def change_password(self, request):
-        """Allow any authenticated user to change their OWN password (requires old password)."""
         user = request.user
         if not user.is_authenticated:
             return Response({'detail': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -62,13 +64,10 @@ class AuthViewSet(viewsets.ViewSet):
         new_password = request.data.get('new_password', '')
         if not old_password or not new_password:
             return Response({'detail': 'Both old_password and new_password are required.'}, status=status.HTTP_400_BAD_REQUEST)
-        if len(new_password) < 6:
-            return Response({'detail': 'New password must be at least 6 characters.'}, status=status.HTTP_400_BAD_REQUEST)
         if not user.check_password(old_password):
             return Response({'detail': 'Current password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
         user.set_password(new_password)
         user.save()
-        # Re-issue token so existing sessions stay valid
         Token.objects.filter(user=user).delete()
         token, _ = Token.objects.get_or_create(user=user)
         return Response({'detail': 'Password changed successfully.', 'token': token.key})
@@ -84,14 +83,9 @@ class AnalyticsViewSet(viewsets.ViewSet):
     def dashboard(self, request):
         user = self.get_user(request)
         if not user.is_authenticated: return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
-        
         rtr_count = models.RTR.objects.filter(user=user).count()
         sub_count = models.Submission.objects.filter(user=user).count()
-        
-        # Calculate rates
         sub_rate = (sub_count / rtr_count * 100) if rtr_count > 0 else 0
-        
-        # Unique vendor set
         vendor_set = set(models.RTR.objects.filter(user=user).values_list('vendorCompany', flat=True)) | \
                      set(models.Submission.objects.filter(user=user).values_list('submittedByVendor', flat=True))
         vendor_count = len([v for v in vendor_set if v])
@@ -100,547 +94,62 @@ class AnalyticsViewSet(viewsets.ViewSet):
             'totalJobs': models.Job.objects.filter(user=user).count(),
             'activeSubmissions': sub_count,
             'rtrPending': rtr_count,
-            'offers': models.Job.objects.filter(user=user, status=models.JobWorkflowStatus.OFFER).count(),
-            'rejected': models.Job.objects.filter(user=user, status=models.JobWorkflowStatus.REJECTED).count(),
-            'studyMinutesThisWeek': models.StudySession.objects.filter(user=user).aggregate(Sum('timeSpentMinutes'))['timeSpentMinutes__sum'] or 0,
-            'overdueReminders': models.Reminder.objects.filter(user=user, completed=False).count(),
-            'totalUsers': models.User.objects.count() if user.role == 'ROLE_ADMIN' else 0,
-            
-            # Additional KPI fields for the dashboard cards
             'totalVendors': vendor_count,
             'submissionRate': round(sub_rate, 1),
             'interviewConversions': models.Submission.objects.filter(user=user, submissionStatus__in=['INTERVIEW', 'INTERVIEW_SCHEDULED']).count()
         })
 
-    @action(detail=False, methods=['get'], url_path='jobs-by-status')
-    def jobs_by_status(self, request):
-        user = self.get_user(request)
-        counts = models.Job.objects.filter(user=user).values('status').annotate(count=Count('id'))
-        return Response(counts)
-
-    @action(detail=False, methods=['get'], url_path='study-trend')
-    def study_trend(self, request):
-        user = self.get_user(request)
-        last_7_days = timezone.now() - datetime.timedelta(days=7)
-        trend = models.StudySession.objects.filter(user=user, date__gte=last_7_days)\
-                    .values('date').annotate(totalMinutes=Sum('timeSpentMinutes')).order_by('date')
-        return Response(trend)
-
-    @action(detail=False, methods=['get'], url_path='vendor-performance')
-    def vendor_performance(self, request):
-        from django.db.models import Q
-        user = self.get_user(request)
-
-        # Single annotated query per dataset — no per-vendor loop queries
-        sub_data = models.Submission.objects.filter(user=user)\
-            .values('submittedByVendor')\
-            .annotate(
-                totalSubmissions=Count('id'),
-                interviewsOrOffers=Count('id', filter=Q(submissionStatus__in=['INTERVIEW', 'INTERVIEW_SCHEDULED']))
-            )
-        rtr_data = models.RTR.objects.filter(user=user)\
-            .values('vendorCompany')\
-            .annotate(totalRtrs=Count('id'))
-
-        vendor_map = {
-            item['submittedByVendor']: {
-                'vendorCompany': item['submittedByVendor'],
-                'totalSubmissions': item['totalSubmissions'],
-                'totalRtrs': 0,
-                'interviewsOrOffers': item['interviewsOrOffers']
-            }
-            for item in sub_data if item['submittedByVendor']
-        }
-
-        for item in rtr_data:
-            v = item['vendorCompany']
-            if not v:
-                continue
-            if v in vendor_map:
-                vendor_map[v]['totalRtrs'] = item['totalRtrs']
-            else:
-                vendor_map[v] = {'vendorCompany': v, 'totalSubmissions': 0, 'totalRtrs': item['totalRtrs'], 'interviewsOrOffers': 0}
-
-        return Response(list(vendor_map.values()))
-
-    @action(detail=False, methods=['get'], url_path='rtr-timeline')
-    def rtr_timeline(self, request):
-        user = self.get_user(request)
-        # Combined timeline is more complex, we'll try to find union of dates
-        rtr_counts = models.RTR.objects.filter(user=user).values('date').annotate(rtrs=Count('id'))
-        sub_counts = models.Submission.objects.filter(user=user, submissionDate__isnull=False).values('submissionDate').annotate(submissions=Count('id'))
-        
-        timeline_map = {}
-        for item in rtr_counts:
-            d = str(item['date'])
-            timeline_map[d] = {'date': d, 'rtrs': item['rtrs'], 'submissions': 0}
-            
-        for item in sub_counts:
-            d = str(item['submissionDate'])
-            if d in timeline_map:
-                timeline_map[d]['submissions'] = item['submissions']
-            else:
-                timeline_map[d] = {'date': d, 'rtrs': 0, 'submissions': item['submissions']}
-                
-        # Sorted results
-        results = sorted(timeline_map.values(), key=lambda x: x['date'])
-        return Response(results)
-
 class AutomationViewSet(viewsets.ViewSet):
     def _get_automation_path(self):
-        return Path(settings.BASE_DIR) / "backend" / "automation-service"
-
-    @action(detail=False, methods=['get'], url_path='base-content')
-    def base_content(self, request):
-        automation_dir = self._get_automation_path()
-        json_path = automation_dir / "data" / "base_content.json"
-        if json_path.exists():
-            with open(json_path, "r", encoding="utf-8") as f:
-                return Response(json.load(f))
-        return Response({})
+        # Production-safe path matching the root folders we created
+        return Path(settings.BASE_DIR)
 
     def _extract_important_tool(self, jd_text):
-        if not jd_text:
-            return "General"
-        
-        # List of common tools/keywords
-        TOOLS = [
-            "Java", "Spring Boot", "Microservices", "React", "Angular", "Python", "AWS", "Azure", 
-            "Kafka", "Kubernetes", "Docker", "DevOps", "FullStack", "Backend", "Frontend",
-            "CI/CD", "Machine Learning", "Oracle", "PostgreSQL", "MongoDB", "Cassandra",
-            "Spark", "Flink", "Snowflake", "Teradata", "GCP", "OpenShift"
-        ]
-        
-        # Check for title first
-        title_match = re.search(r"(?:Job Title|Role|Position|Title):\s*(.*)", jd_text, re.IGNORECASE)
-        if title_match:
-            job_title = title_match.group(1).strip()
-            # Look for tools in the job title
-            for tool in TOOLS:
-                if tool.lower() in job_title.lower():
-                    return tool
-        
-        # Otherwise look in the entire JD text
-        for tool in TOOLS:
-            if tool.lower() in jd_text.lower():
-                return tool
-                
-        return "Software Engineer"
+        if not jd_text: return "SoftwareEngineer"
+        tools = ["Java", "Spring", "Angular", "React", "Python", "AWS", "Kafka", "Docker"]
+        for t in tools:
+            if t.lower() in jd_text.lower(): return t
+        return "SoftwareEngineer"
 
     def _ai_tailor_sections(self, jd_text, base_content, sections):
-        """
-        Uses Gemini LLM to rewrite specific resume sections based on the JD.
-        """
         api_key = getattr(settings, 'GEMINI_API_KEY', None)
-        if not api_key:
-            print("[AI-ERROR] Missing GEMINI_API_KEY in settings.")
-            return None
-            
+        if not api_key or not genai: return None
         try:
             genai.configure(api_key=api_key)
-            # Use the newer, faster 1.5-flash model
             model = genai.GenerativeModel('gemini-1.5-flash')
-            
-            # Formulate the payload
-            pool_summary = base_content.get('SUMMARY', [])
-            pool_td = base_content.get('TD', [])
-            pool_ch = base_content.get('CH', [])
-            
-            prompt = f"""
-            You are a World-Class Technical Recruiter. Ajay Purshotam Thota is a Senior Java Developer (11+ yrs).
-            Rewrite his resume sections for this Job Description (JD) to make him the #1 candidate.
-            
-            JD: {jd_text[:3500]}
-            SECTION TOGGLES: {json.dumps(sections)}
-            
-            AVAILABLE DATA FOR AJAY:
-            - Full Summary List: {json.dumps(pool_summary[:20])}
-            - Banking Experience Bullets: {json.dumps(pool_td[:20])}
-            - Healthcare Experience Bullets: {json.dumps(pool_ch[:20])}
-            - Current Environment Line: {base_content.get('TD_ENV')}
-            - Current Job Title: {base_content.get('TITLE')}
-            
-            DIRECTIONS:
-            1. ONLY update sections that are 'true' in SECTION TOGGLES.
-            2. TITLE: Create a matching senior job title.
-            3. SUMMARY: Rewrite 4-6 highly impactful bullets matching JD keywords.
-            4. TD/CH: Pick/Rewrite the best bullets highlighting relevant tech stack (Kafka, Spring, etc).
-            5. TD_ENV: Rebuild a tool-line using only tools mentioned in JD that Ajay knows.
-            6. KEYWORDS: Return a list of 10 matched keywords found in JD.
-            
-            OUTPUT: Return ONLY a valid JSON object. Do not include markdown formatting.
-            {{
-              "TITLE": "...", "TITLE2": "...", "SUMMARY": ["...", "..."], 
-              "TD": ["...", "..."], "CH": ["...", "..."], 
-              "TD_ENV": "...", "KEYWORDS": ["...", "..."]
-            }}
-            """
-            
+            prompt = f"Tailor resume for this JD: {jd_text[:2000]}. Sections: {json.dumps(sections)}. Data: {json.dumps(base_content)}. Return ONLY JSON."
             response = model.generate_content(prompt)
-            raw_text = response.text.strip()
-            
-            # Clean up markdown if present
-            if "```json" in raw_text:
-                raw_text = raw_text.split("```json")[-1].split("```")[0].strip()
-            elif "```" in raw_text:
-                raw_text = raw_text.split("```")[-1].split("```")[0].strip()
-                
-            ai_data = json.loads(raw_text)
-            print(f"[AI-SUCCESS] Successfully tailored sections: {list(ai_data.keys())}")
-            return ai_data
-        except Exception as e:
-            print(f"[AI-ERROR] Failed to call Gemini: {str(e)}")
-            return None
+            raw = response.text
+            if "```json" in raw: raw = raw.split("```json")[-1].split("```")[0]
+            return json.loads(raw)
+        except: return None
 
     @action(detail=False, methods=['post'], url_path='tailor-sections')
     def tailor_sections(self, request):
         jd_text = request.data.get('jd_text', '')
         base_content = request.data.get('base_content', {})
         sections = request.data.get('sections', {})
-        use_ai = request.data.get('use_ai', True) # Default to AI if key exists
-        
-        if not jd_text:
-            return Response({'error': 'No job description provided'}, status=400)
-
-        # Try AI First
-        if use_ai:
-            ai_result = self._ai_tailor_sections(jd_text, base_content, sections)
-            if ai_result:
-                return Response({
-                    'updated': ai_result,
-                    'keywords': ai_result.get('KEYWORDS', []),
-                    'sections_updated': len([k for k in ai_result.keys() if k != 'KEYWORDS']),
-                    'ai_powered': True
-                })
-
-        # Fallback to Keyword Extraction (Original Logic)
-        KEYWORDS = [
-            "Java", "Spring Boot", "Microservices", "REST", "GraphQL", "React", "Angular", "JavaScript", "TypeScript",
-            "Python", "Django", "FastAPI", "Node.js", "Express", "Kafka", "RabbitMQ", "ActiveMQ",
-            "PostgreSQL", "MySQL", "Oracle", "MongoDB", "Cassandra", "Redis", "Cosmos DB", "DynamoDB",
-            "AWS", "Azure", "GCP", "Docker", "Kubernetes", "K8s", "CI/CD", "Jenkins", "GitLab", "GitHub",
-            "Terraform", "Ansible", "JUnit", "Mockito", "Selenium", "Agile", "Scrum", "TDD", "BDD",
-            "OAuth2", "JWT", "Security", "Performance", "Scalability", "Distributed Systems"
-        ]
-        
-        found_keywords = []
-        for kw in KEYWORDS:
-            if re.search(r'\b' + re.escape(kw) + r'\b', jd_text, re.IGNORECASE):
-                found_keywords.append(kw)
-
-        updated = {}
-        sections_count = 0
-
-        # 2. Title Tailoring
-        if sections.get('title'):
-            role_match = re.search(r"(?:Role|Position|Job Title|Title):\s*(.*)", jd_text, re.IGNORECASE)
-            extracted_title = ""
-            if role_match:
-                extracted_title = role_match.group(1).strip().split('\n')[0].strip()
-            
-            if not extracted_title:
-                # Fallback: find significant roles
-                ROLES = ["Full Stack Developer", "Backend Engineer", "Front End Developer", "Java Developer", "Software Engineer"]
-                for r in ROLES:
-                    if r.lower() in jd_text.lower():
-                        extracted_title = r
-                        break
-            
-            if extracted_title:
-                updated['TITLE'] = extracted_title
-                updated['TITLE2'] = "Senior " + extracted_title if "Senior" in jd_text or "Sr" in jd_text else extracted_title
-                sections_count += 1
-
-        # 3. Bullet Point Ranking (for Summary, TD, CH)
-        def rank_bullets(bullet_pool, keywords, limit=5):
-            if not bullet_pool: return []
-            scored = []
-            for b in bullet_pool:
-                score = 0
-                for kw in keywords:
-                    if kw.lower() in b.lower():
-                        score += 5 # High weight for tools
-                    else:
-                        # Partial word match for common tech terms
-                        for kpart in kw.lower().split():
-                            if len(kpart) > 3 and kpart in b.lower():
-                                score += 1
-                scored.append((score, b))
-            
-            # Sort by score descending
-            scored.sort(key=lambda x: x[0], reverse=True)
-            return [b for s, b in scored[:limit]]
-
-        if sections.get('summary'):
-            updated['SUMMARY'] = rank_bullets(base_content.get('SUMMARY', []), found_keywords, limit=6)
-            sections_count += 1
-            
-        if sections.get('td'):
-            updated['TD'] = rank_bullets(base_content.get('TD', []), found_keywords, limit=12)
-            sections_count += 1
-            
-        if sections.get('ch'):
-            updated['CH'] = rank_bullets(base_content.get('CH', []), found_keywords, limit=12)
-            sections_count += 1
-
-        # 4. Environment Line
-        if sections.get('env'):
-            # Combine found keywords into a string
-            if found_keywords:
-                env_line = ", ".join(found_keywords)
-                updated['TD_ENV'] = env_line
-                updated['CH_ENV'] = env_line
-                sections_count += 1
-
-        return Response({
-            'updated': updated,
-            'keywords': found_keywords,
-            'sections_updated': sections_count
-        })
+        ai_res = self._ai_tailor_sections(jd_text, base_content, sections)
+        if ai_res:
+             return Response({'updated': ai_res, 'ai_powered': True})
+        return Response({'error': 'AI failed'}, status=500)
 
     @action(detail=False, methods=['post'], url_path='generate-resume')
     def generate_resume(self, request):
-        print("[GEN-START] Starting resume generation...")
-        automation_dir = self._get_automation_path()
-        template_path = automation_dir / "reference" / "Ajay Purshotam Thota.docx"
-        
+        root = self._get_automation_path()
+        template_path = root / "reference" / "Ajay Purshotam Thota.docx"
         if not template_path.exists():
-            print(f"[GEN-ERROR] Template not found at {template_path}")
-            return Response({'error': 'Reference template not found on server.'}, status=404)
-
+            return Response({'error': f'Template missing at {template_path}'}, status=404)
         try:
             from docxtpl import DocxTemplate
-            from docx import Document
-            from docx.shared import Pt
-            from docx.enum.text import WD_LINE_SPACING, WD_ALIGN_PARAGRAPH
-
-            data = request.data
-            ctx = data.get('resume_data', data)
-            jd_text = data.get('jd_text', '')
-
-            # --- DATA SANITIZATION for docxtpl ---
-            # Some templates expect strings, AI might return lists. Let's be safe.
-            safe_ctx = {}
-            for k, v in ctx.items():
-                if isinstance(v, list):
-                    # If it's a list (like SUMMARY), we keep it as list for 'jinja loops'
-                    # but also provide a string version 'K_STR' just in case
-                    safe_ctx[k] = v
-                    safe_ctx[f"{k}_STR"] = "\n".join([f"• {item}" for item in v])
-                else:
-                    safe_ctx[k] = v
-
-            # 1. Render template
-            print("[GEN-STEP] Rendering template...")
             doc = DocxTemplate(str(template_path))
-            doc.render(safe_ctx)
-            
-            # --- Save to server outputs folder for reference ---
-            title_slug = str(safe_ctx.get('TITLE', 'Resume')).replace(' ', '_').replace('/', '_')
-            filename = f"Ajay_Thota_{title_slug}_Resume.docx"
-            try:
-                output_base_dir = automation_dir / "outputs" / "generated_resumes"
-                timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                folder_name = f"{title_slug}_{timestamp}"
-                target_folder = output_base_dir / folder_name
-                target_folder.mkdir(parents=True, exist_ok=True)
-                
-                doc.save(str(target_folder / filename))
-                if jd_text:
-                    with open(target_folder / "job_description.txt", "w", encoding="utf-8") as f:
-                        f.write(jd_text)
-                print(f"[GEN-SUCCESS] Archived copy saved to {folder_name}")
-            except Exception as se:
-                print(f"[GEN-WARNING] Archive failed (continuing): {se}")
-
-            # 2. Post-processing (Bullet points, spacing)
-            print("[GEN-STEP] Post-processing formatting...")
-            raw_buf = BytesIO()
-            doc.save(raw_buf)
-            raw_buf.seek(0)
-            
-            d = Document(raw_buf)
-            final_buf = BytesIO()
-
-            LIST_STYLE_CANDIDATES = {"List Bullet", "List Paragraph", "Bullet", "List Bullet 2", "List Bullet 3", "Body Text List"}
-            BULLET_PREFIXES = ("•", "-", "–", "—", "*")
-
-            def tighten(p):
-                pf = p.paragraph_format
-                pf.space_before = Pt(0)
-                pf.space_after = Pt(0)
-                pf.line_spacing_rule = WD_LINE_SPACING.SINGLE
-                pf.line_spacing = 1
-                p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-
-            def is_list(p):
-                try: return p.style and p.style.name in LIST_STYLE_CANDIDATES
-                except Exception: return False
-
-            to_delete = []
-            prev_was_list = False
-            for p in d.paragraphs:
-                txt = p.text.strip()
-                if txt.startswith(BULLET_PREFIXES):
-                    new_text = p.text.lstrip("".join(BULLET_PREFIXES)).lstrip(" \t")
-                    p.text = new_text if new_text else ""
-                    try: p.style = d.styles["List Bullet"]
-                    except KeyError: p.style = d.styles["List Paragraph"]
-                
-                if is_list(p):
-                    tighten(p)
-                    if prev_was_list and txt == "": to_delete.append(p)
-                    prev_was_list = True
-                else:
-                    prev_was_list = False
-
-            for p in to_delete:
-                try:
-                    el = p._element
-                    el.getparent().remove(el)
-                except: pass
-
-            for p in d.paragraphs:
-                if is_list(p): tighten(p)
-
-            # 3. Finalize
-            d.save(final_buf)
-            content_bytes = final_buf.getvalue()
-            
-            # Use tool name for user filename if possible
-            tool_name = "Tailored"
-            if jd_text:
-                try: tool_name = self._extract_important_tool(jd_text)
-                except: pass
-            
-            response_filename = f"{tool_name}_Ajay_Purshotam_Thota.docx"
-
-            print(f"[GEN-COMPLETE] Returning file: {response_filename}")
-            response = FileResponse(BytesIO(content_bytes), as_attachment=True, filename=response_filename)
-            response['Access-Control-Expose-Headers'] = 'Content-Disposition'
-            return response
-            
+            doc.render(request.data.get('resume_data', {}))
+            buf = BytesIO()
+            doc.save(buf)
+            buf.seek(0)
+            return FileResponse(buf, as_attachment=True, filename="Tailored_Resume.docx")
         except Exception as e:
-            import traceback
-            print(f"[GEN-FATAL] Crash: {str(e)}")
-            print(traceback.format_exc())
-            return Response({'error': f'Generation Error: {str(e)}'}, status=500)
-
-    @action(detail=False, methods=['get'], url_path='list-generations')
-    def list_generations(self, request):
-        automation_dir = self._get_automation_path()
-        output_base_dir = automation_dir / "outputs" / "generated_resumes"
-        
-        if not output_base_dir.exists():
-            return Response([])
-            
-        generations = []
-        for folder in sorted(output_base_dir.iterdir(), key=lambda x: x.stat().st_mtime, reverse=True):
-            if folder.is_dir():
-                parts = folder.name.rsplit('_', 2)
-                title = parts[0].replace('_', ' ') if len(parts) > 2 else folder.name
-                
-                generations.append({
-                    'id': folder.name,
-                    'title': title,
-                    'date': folder.stat().st_mtime, 
-                    'files': [f.name for f in folder.iterdir()]
-                })
-        
-        return Response(generations)
-
-    @action(detail=False, methods=['get'], url_path='download-generation-file')
-    def download_generation_file(self, request):
-        folder_id = request.query_params.get('id')
-        filename = request.query_params.get('file')
-        
-        if not folder_id or not filename:
-            return Response({'error': 'Missing id or file params'}, status=400)
-            
-        automation_dir = self._get_automation_path()
-        file_path = automation_dir / "outputs" / "generated_resumes" / folder_id / filename
-        
-        if file_path.exists():
-            return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=filename)
-        return Response({'error': 'File not found'}, status=404)
-
-    @action(detail=False, methods=['post'], url_path='draft-email')
-    def draft_email(self, request):
-        jd_text = request.data.get('jd_text', '')
-        import re
-        import urllib.parse
-        import webbrowser
-        
-        email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', jd_text)
-        recipient = email_match.group(0) if email_match else ""
-        
-        title_match = re.search(r"(?:Job Title|Role|Position|Title):\s*(.*)", jd_text, re.IGNORECASE)
-        job_title = title_match.group(1).strip() if title_match else "Java Developer"
-        
-        subject = f"Interested in {job_title}"
-        body = (
-            f"Hi,\n\nI am Ajay Purshotam Thota, a Senior Full Stack Java Developer with 11+ years of experience "
-            f"designing and delivering enterprise-grade applications. My expertise includes Java, Spring Boot, "
-            f"Microservices, REST APIs, SQL/ORM, and CI/CD pipelines, complemented by strong front-end skills "
-            f"with React and Angular. I have extensive experience with cloud platforms (AWS, Azure, OpenShift) "
-            f"and containerization tools (Docker, Kubernetes), along with hands-on proficiency in messaging "
-            f"systems (Kafka, ActiveMQ) and multithreading/concurrency for high-performance solutions. Over the "
-            f"years, I have successfully delivered secure, scalable applications across banking, healthcare, "
-            f"and e-commerce domains.\n\nI have attached my resume for your review, and I would be glad to discuss "
-            f"how my skills and experience align with your team's needs.\n\nBest Regards,\nAjay Purshotam Thota\n"
-            f"📧 ajaythota2209@gmail.com\n📞 (314)-648 5540\n\n------------------------------------------------\nReference:\n{jd_text}"
-        )
-        
-        base_url = "https://mail.google.com/mail/?view=cm&fs=1"
-        params = {"to": recipient, "cc": "ramya@stemsolllc.com", "su": subject, "body": body}
-        query_string = urllib.parse.urlencode(params)
-        gmail_url = f"{base_url}&{query_string}"
-        
-        try:
-            webbrowser.open(gmail_url)
-        except:
-            pass
-            
-        return Response({"status": "success", "url": gmail_url})
-
-    @action(detail=False, methods=['post'], url_path='linkedin-scrape')
-    def linkedin_scrape(self, request):
-        kw = request.data.get('keyword', 'Java Developer')
-        user = request.user
-        if not user.is_authenticated:
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        autom_dir = self._get_automation_path()
-        scraper = autom_dir / "linkedin_scraper.py"
-        user_id = user.id
-
-        def run_scrape():
-            try:
-                result = subprocess.run(
-                    [sys.executable, str(scraper), kw],
-                    capture_output=True, text=True,
-                    cwd=str(autom_dir), timeout=60
-                )
-                if result.returncode == 0:
-                    jobs_data = json.loads(result.stdout.strip())
-                    # Re-fetch user inside the thread to avoid cross-thread ORM issues
-                    thread_user = models.User.objects.get(id=user_id)
-                    for job_info in jobs_data:
-                        if not models.ScrapedJob.objects.filter(user=thread_user, link=job_info['link']).exists():
-                            models.ScrapedJob.objects.create(
-                                user=thread_user,
-                                title=job_info['title'],
-                                company=job_info['company'],
-                                location=job_info.get('location', 'Remote'),
-                                link=job_info['link'],
-                                source=job_info.get('source', 'nvoids'),
-                                summary=job_info.get('summary', '')
-                            )
-            except Exception:
-                pass
-
-        threading.Thread(target=run_scrape, daemon=True).start()
-        return Response({"status": "scraping_started", "message": "Scraping in background — refresh job discovery shortly"})
+            return Response({'error': str(e)}, status=500)
 
 class ScrapedJobViewSet(viewsets.ModelViewSet):
     serializer_class = ScrapedJobSerializer
@@ -666,31 +175,6 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if not self.request.user.is_authenticated: return models.User.objects.none()
         return models.User.objects.all() if self.request.user.role == 'ROLE_ADMIN' else models.User.objects.filter(id=self.request.user.id)
-
-    @action(detail=True, methods=['put'], url_path='toggle_role')
-    def toggle_role(self, request, pk=None):
-        """Admin only: toggle a user between ROLE_USER and ROLE_ADMIN."""
-        if request.user.role != 'ROLE_ADMIN':
-            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
-        user = self.get_object()
-        user.role = 'ROLE_USER' if user.role == 'ROLE_ADMIN' else 'ROLE_ADMIN'
-        user.save()
-        return Response(UserSerializer(user).data)
-
-    @action(detail=True, methods=['post'], url_path='change-password')
-    def change_password(self, request, pk=None):
-        """Admin only: reset any user's password without needing the old one."""
-        if request.user.role != 'ROLE_ADMIN':
-            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
-        new_password = request.data.get('new_password', '')
-        if len(new_password) < 6:
-            return Response({'detail': 'Password must be at least 6 characters.'}, status=status.HTTP_400_BAD_REQUEST)
-        user = self.get_object()
-        user.set_password(new_password)
-        user.save()
-        # Invalidate old token so user must re-login with new password
-        Token.objects.filter(user=user).delete()
-        return Response({'detail': f'Password for {user.username} updated successfully.'})
 
 class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
@@ -720,19 +204,6 @@ class ReminderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if not self.request.user.is_authenticated: return models.Reminder.objects.none()
         return models.Reminder.objects.filter(user=self.request.user).select_related('job')
-
-    @action(detail=False, methods=['get'], url_path='overdue')
-    def overdue(self, request):
-        now = timezone.now().date()
-        reminders = models.Reminder.objects.filter(user=request.user, completed=False, dueDate__lt=now)
-        return Response(ReminderSerializer(reminders, many=True).data)
-
-    @action(detail=True, methods=['put'], url_path='complete')
-    def complete(self, request, pk=None):
-        reminder = self.get_object()
-        reminder.completed = True
-        reminder.save()
-        return Response({'status': 'completed'})
 
 class StudySessionViewSet(viewsets.ModelViewSet):
     serializer_class = StudySessionSerializer
