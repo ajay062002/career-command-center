@@ -15,15 +15,63 @@
   .subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.4); letter-spacing: 0.5px; }
 }
 
+// ── Tabs ──────────────────────────────────────────────────────────────────
+.builder-tabs {
+  margin-top: 10px;
+  ::ng-deep .mat-mdc-tab-header { border-bottom: 1px solid rgba(255,255,255,0.05); }
+  ::ng-deep .mat-mdc-tab-label-container { margin-bottom: 0; }
+  .tab-icon { margin-right: 8px; font-size: 20px; width: 20px; height: 20px; vertical-align: middle; }
+}
+
 // ── Main two-column layout ──────────────────────────────────────────────────
 .builder-layout {
   display: grid;
   grid-template-columns: 420px 1fr;
   gap: 24px;
   align-items: start;
+  margin-top: 24px;
 }
 
 .left-panel, .right-panel { display: flex; flex-direction: column; gap: 20px; }
+
+// ── History Table ──────────────────────────────────────────────────────────
+.history-container { padding: 0 4px; animation: fadeIn 0.4s ease-out; }
+.history-card { padding: 0 !important; overflow: hidden; }
+
+.history-table {
+  background: transparent !important;
+  mat-header-row { background: rgba(255,255,255,0.02); min-height: 48px; }
+  mat-row { 
+    min-height: 70px; 
+    border-bottom-color: rgba(255,255,255,0.04);
+    &:hover { background: rgba(255,255,255,0.02); }
+  }
+}
+
+.gen-title-wrap { display: flex; flex-direction: column; gap: 2px; }
+.gen-title { font-weight: 600; color: #64b5f6; font-size: 0.95rem; }
+.gen-id    { font-size: 0.75rem; color: rgba(255,255,255,0.3); font-family: monospace; }
+
+.file-badges { display: flex; gap: 6px; }
+.file-badge {
+  font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px;
+  &.docx { background: rgba(66,165,245,0.15); color: #42a5f5; border: 1px solid rgba(66,165,245,0.2); }
+  &.jd   { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.15); }
+}
+
+.history-actions { display: flex; gap: 4px; }
+
+.empty-history {
+  padding: 80px 20px; text-align: center;
+  mat-icon { font-size: 48px; width: 48px; height: 48px; color: rgba(255,255,255,0.15); margin-bottom: 16px; }
+  p { color: rgba(255,255,255,0.35); font-size: 0.95rem; }
+}
+
+// ── Column widths ──
+.mat-column-title { flex: 0 0 45%; min-width: 250px; padding-left: 20px !important; }
+.mat-column-date  { flex: 0 0 25%; }
+.mat-column-files { flex: 0 0 15%; }
+.mat-column-actions { flex: 0 0 15%; justify-content: flex-end; padding-right: 20px !important; }
 
 // ── Cards ──────────────────────────────────────────────────────────────────
 .glass-panel {

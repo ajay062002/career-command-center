@@ -42,4 +42,15 @@ export class ResumeService {
     }): Observable<any> {
         return this.http.post(`${this.apiUrl}/tailor-sections/`, payload);
     }
+
+    listGenerations(): Observable<any[]> {
+        return this.http.get<any[]>(`${this.apiUrl}/list-generations/`);
+    }
+
+    downloadGenerationFile(folderId: string, filename: string): Observable<Blob> {
+        return this.http.get(`${this.apiUrl}/download-generation-file/`, {
+            params: { id: folderId, file: filename },
+            responseType: 'blob'
+        });
+    }
 }

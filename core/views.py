@@ -452,15 +452,50 @@ class AutomationViewSet(viewsets.ViewSet):
                 print(f"Error saving resume locally: {se}")
 
             # --- RETURN IN RESPONSE ---
-            response = HttpResponse(
-                content_bytes,
-                content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-            )
-            response['Content-Disposition'] = f'attachment; filename="{tool_name}_Ajay_Purshotam_Thota.docx"'
+            response = FileResponse(BytesIO(content_bytes), as_attachment=True, filename=f"{tool_name}_Ajay_Purshotam_Thota.docx")
+            response['Access-Control-Expose-Headers'] = 'Content-Disposition'
             return response
-
+            
         except Exception as e:
-            return Response({"error": str(e)}, status=500)
+            return Response({'error': str(e)}, status=500)
+
+    @action(detail=False, methods=['get'], url_path='list-generations')
+    def list_generations(self, request):
+        automation_dir = self._get_automation_path()
+        output_base_dir = automation_dir / "outputs" / "generated_resumes"
+        
+        if not output_base_dir.exists():
+            return Response([])
+            
+        generations = []
+        for folder in sorted(output_base_dir.iterdir(), key=lambda x: x.stat().st_mtime, reverse=True):
+            if folder.is_dir():
+                parts = folder.name.rsplit('_', 2)
+                title = parts[0].replace('_', ' ') if len(parts) > 2 else folder.name
+                
+                generations.append({
+                    'id': folder.name,
+                    'title': title,
+                    'date': folder.stat().st_mtime, 
+                    'files': [f.name for f in folder.iterdir()]
+                })
+        
+        return Response(generations)
+
+    @action(detail=False, methods=['get'], url_path='download-generation-file')
+    def download_generation_file(self, request):
+        folder_id = request.query_params.get('id')
+        filename = request.query_params.get('file')
+        
+        if not folder_id or not filename:
+            return Response({'error': 'Missing id or file params'}, status=400)
+            
+        automation_dir = self._get_automation_path()
+        file_path = automation_dir / "outputs" / "generated_resumes" / folder_id / filename
+        
+        if file_path.exists():
+            return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=filename)
+        return Response({'error': 'File not found'}, status=404)
 
     @action(detail=False, methods=['post'], url_path='draft-email')
     def draft_email(self, request):

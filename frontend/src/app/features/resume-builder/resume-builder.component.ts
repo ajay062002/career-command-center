@@ -13,6 +13,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
 import { ResumeService } from '../../core/services/resume.service';
 
@@ -24,7 +26,8 @@ import { ResumeService } from '../../core/services/resume.service';
         MatCardModule, MatFormFieldModule, MatInputModule,
         MatButtonModule, MatIconModule, MatSnackBarModule,
         MatProgressBarModule, MatProgressSpinnerModule,
-        MatCheckboxModule, MatChipsModule, MatDividerModule, MatTooltipModule
+        MatCheckboxModule, MatChipsModule, MatDividerModule, MatTooltipModule,
+        MatTabsModule, MatTableModule
     ],
     templateUrl: './resume-builder.component.html',
     styleUrls: ['./resume-builder.component.scss']
@@ -35,6 +38,10 @@ export class ResumeBuilderComponent implements OnInit {
     baseContent: any = null;         // full base JSON loaded from server
     editedContent: any = null;       // working copy user can edit
     uploadedFileName: string = '';
+    
+    // History
+    history: any[] = [];
+    historyColumns: string[] = ['title', 'date', 'files', 'actions'];
 
     // Section toggle flags — which sections to update from JD
     updateTitle    = true;
@@ -59,6 +66,7 @@ export class ResumeBuilderComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadBaseContent();
+        this.loadHistory();
         this.route.queryParams.subscribe(params => {
             if (params['jd'] || params['email']) {
                 this.jdText = params['jd'] || '';
@@ -80,6 +88,23 @@ export class ResumeBuilderComponent implements OnInit {
                 this.snackBar.open('Error loading resume content.', 'Close', { duration: 3000 });
                 this.isLoading = false;
             }
+        });
+    }
+
+    loadHistory(): void {
+        this.resumeService.listGenerations().subscribe(data => {
+            this.history = data;
+        });
+    }
+
+    downloadFile(folderId: string, filename: string): void {
+        this.resumeService.downloadGenerationFile(folderId, filename).subscribe(blob => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
         });
     }
 
@@ -174,6 +199,7 @@ export class ResumeBuilderComponent implements OnInit {
                 URL.revokeObjectURL(url);
                 this.snackBar.open('✅ Resume downloaded!', 'Close', { duration: 5000 });
                 this.isGenerating = false;
+                this.loadHistory(); // Refresh history
             },
             error: () => {
                 this.snackBar.open('❌ Could not generate resume.', 'Close', { duration: 5000 });
