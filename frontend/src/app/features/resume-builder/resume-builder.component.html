@@ -1,70 +1,232 @@
 <div class="builder-container">
   <div class="page-header">
     <div class="header-left">
-      <h1>saSARK Sambhavam</h1>
-      <span class="subtitle">Ultimate Resume Engineering & Automation Suite</span>
+      <h1>SARK Sambhavam</h1>
+      <span class="subtitle">Smart Resume Tailoring &amp; Automation Suite</span>
     </div>
   </div>
 
-  <mat-progress-bar mode="indeterminate" *ngIf="isLoading || isGenerating"></mat-progress-bar>
+  <mat-progress-bar mode="indeterminate" *ngIf="isLoading || isGenerating || isTailoring"></mat-progress-bar>
 
-  <div class="builder-grid" *ngIf="!isLoading">
-    <!-- Section 1: Email Drafter -->
-    <mat-card class="builder-card glass-panel">
-      <mat-card-header>
-        <div class="icon-container gmail-bg">
-          <mat-icon>mail</mat-icon>
-        </div>
-        <div class="header-text">
-          <mat-card-title>Email Drafter</mat-card-title>
-          <mat-card-subtitle>Convert Job Descriptions into instant Gmail drafts</mat-card-subtitle>
-        </div>
-      </mat-card-header>
-      <mat-card-content>
-        <mat-form-field appearance="outline" class="full-width large-input">
-          <mat-label>Paste Job Description / Email Content</mat-label>
-          <textarea matInput [(ngModel)]="jdText" rows="18"
-            placeholder="Paste the recruiter's message or Job Description here..."></textarea>
-        </mat-form-field>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-raised-button class="action-btn email-btn" (click)="draftEmail()" [disabled]="!jdText">
-          <mat-icon>send</mat-icon> Launch Gmail Draft
-        </button>
-      </mat-card-actions>
-    </mat-card>
+  <div class="builder-layout" *ngIf="!isLoading">
 
-    <!-- Section 2: Resume Generator -->
-    <mat-card class="builder-card glass-panel">
-      <mat-card-header>
-        <div class="icon-container resume-bg">
-          <mat-icon>description</mat-icon>
-        </div>
-        <div class="header-text">
-          <mat-card-title>Resume Engineer</mat-card-title>
-          <mat-card-subtitle>Fine-tune JSON data for tailored DOCX generation</mat-card-subtitle>
-        </div>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="file-upload-bar">
-          <button mat-stroked-button type="button" (click)="jsonFileInput.click()">
-            <mat-icon>upload_file</mat-icon> Load JSON File
+    <!-- ══ LEFT PANEL: JD Input + Tailoring Controls ══════════════════════════ -->
+    <div class="left-panel">
+
+      <!-- JD Input Card -->
+      <mat-card class="glass-panel section-card">
+        <mat-card-header>
+          <div class="card-icon jd-icon"><mat-icon>article</mat-icon></div>
+          <div>
+            <mat-card-title>Job Description</mat-card-title>
+            <mat-card-subtitle>Paste the JD — only selected sections will be updated</mat-card-subtitle>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Paste JD / Recruiter Email</mat-label>
+            <textarea matInput [(ngModel)]="jdText" rows="12"
+              placeholder="Paste the job description here..."></textarea>
+          </mat-form-field>
+
+          <!-- Keyword chips after tailoring -->
+          <div class="keyword-chips" *ngIf="extractedKeywords.length > 0">
+            <span class="chips-label">Detected Keywords:</span>
+            <mat-chip-set>
+              <mat-chip *ngFor="let kw of extractedKeywords" class="kw-chip">{{ kw }}</mat-chip>
+            </mat-chip-set>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Section Selector Card -->
+      <mat-card class="glass-panel section-card">
+        <mat-card-header>
+          <div class="card-icon ctrl-icon"><mat-icon>tune</mat-icon></div>
+          <div>
+            <mat-card-title>Which Sections to Update?</mat-card-title>
+            <mat-card-subtitle>Only checked sections will be tailored from the JD</mat-card-subtitle>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="section-toggles">
+            <label class="toggle-row" matTooltip="Update job title based on the role in the JD">
+              <mat-checkbox [(ngModel)]="updateTitle" color="primary"></mat-checkbox>
+              <div class="toggle-info">
+                <span class="toggle-name"><mat-icon class="toggle-icon">badge</mat-icon> Job Title</span>
+                <span class="toggle-val">{{ editedContent?.TITLE || '—' }}</span>
+              </div>
+            </label>
+
+            <label class="toggle-row" matTooltip="Pick the most relevant summary bullets matching JD keywords">
+              <mat-checkbox [(ngModel)]="updateSummary" color="primary"></mat-checkbox>
+              <div class="toggle-info">
+                <span class="toggle-name"><mat-icon class="toggle-icon">format_list_bulleted</mat-icon> Summary Bullets</span>
+                <span class="toggle-val preview-text">{{ getSummaryPreview() | slice:0:60 }}...</span>
+              </div>
+            </label>
+
+            <label class="toggle-row" matTooltip="Tailor Tech Domain (banking) experience bullets">
+              <mat-checkbox [(ngModel)]="updateTD" color="accent"></mat-checkbox>
+              <div class="toggle-info">
+                <span class="toggle-name"><mat-icon class="toggle-icon">account_balance</mat-icon> Tech Domain Bullets (Banking)</span>
+                <span class="toggle-val">{{ editedContent?.TD?.length || 0 }} bullets</span>
+              </div>
+            </label>
+
+            <label class="toggle-row" matTooltip="Tailor Care Health experience bullets">
+              <mat-checkbox [(ngModel)]="updateCH" color="accent"></mat-checkbox>
+              <div class="toggle-info">
+                <span class="toggle-name"><mat-icon class="toggle-icon">local_hospital</mat-icon> Care Health Bullets</span>
+                <span class="toggle-val">{{ editedContent?.CH?.length || 0 }} bullets</span>
+              </div>
+            </label>
+
+            <label class="toggle-row" matTooltip="Update the tech environment/skills line based on JD tools">
+              <mat-checkbox [(ngModel)]="updateEnv" color="primary"></mat-checkbox>
+              <div class="toggle-info">
+                <span class="toggle-name"><mat-icon class="toggle-icon">settings</mat-icon> Tech Environment Line</span>
+                <span class="toggle-val preview-text">{{ editedContent?.TD_ENV | slice:0:50 }}...</span>
+              </div>
+            </label>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button class="tailor-btn" (click)="tailorFromJD()"
+                  [disabled]="!jdText || isTailoring">
+            <mat-progress-spinner diameter="20" mode="indeterminate" *ngIf="isTailoring"></mat-progress-spinner>
+            <mat-icon *ngIf="!isTailoring">auto_awesome</mat-icon>
+            <span>{{ isTailoring ? 'Tailoring...' : 'Tailor Selected Sections' }}</span>
           </button>
-          <span class="file-name-label">{{ uploadedFileName || 'No file selected' }}</span>
-          <input #jsonFileInput type="file" accept=".json,application/json" style="display:none" (change)="onJsonFileSelected($event)">
-        </div>
-        <mat-form-field appearance="outline" class="full-width large-input">
-          <mat-label>Resume Data (JSON)</mat-label>
-          <textarea matInput [(ngModel)]="jsonContent" rows="16" class="json-editor"></textarea>
-        </mat-form-field>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-raised-button class="action-btn resume-btn" (click)="generateResume()" [disabled]="isGenerating">
-          <mat-icon *ngIf="!isGenerating">auto_fix_high</mat-icon>
-          <span *ngIf="!isGenerating">Generate Premium Resume</span>
-          <mat-progress-spinner diameter="24" mode="indeterminate" *ngIf="isGenerating"></mat-progress-spinner>
-        </button>
-      </mat-card-actions>
-    </mat-card>
+          <button mat-stroked-button class="reset-btn" (click)="resetToBase()" matTooltip="Reset all sections back to base content">
+            <mat-icon>restart_alt</mat-icon> Reset to Base
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+    </div>
+
+    <!-- ══ RIGHT PANEL: Preview + Generate ════════════════════════════════════ -->
+    <div class="right-panel">
+
+      <!-- Live Preview Card -->
+      <mat-card class="glass-panel section-card preview-card">
+        <mat-card-header>
+          <div class="card-icon preview-icon"><mat-icon>preview</mat-icon></div>
+          <div>
+            <mat-card-title>Resume Preview</mat-card-title>
+            <mat-card-subtitle>Live view of your tailored content</mat-card-subtitle>
+          </div>
+          <span class="spacer"></span>
+          <button mat-icon-button (click)="showJson = !showJson" matTooltip="Toggle raw JSON editor">
+            <mat-icon>{{ showJson ? 'visibility' : 'code' }}</mat-icon>
+          </button>
+        </mat-card-header>
+
+        <mat-card-content class="preview-content">
+
+          <!-- ── Friendly section preview ── -->
+          <div *ngIf="!showJson">
+
+            <!-- Title -->
+            <div class="preview-section">
+              <div class="preview-section-label"><mat-icon>badge</mat-icon> Job Title</div>
+              <div class="preview-title-val">{{ editedContent?.TITLE }}</div>
+              <div class="preview-title-val2">{{ editedContent?.TITLE2 }}</div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Summary -->
+            <div class="preview-section">
+              <div class="preview-section-label"><mat-icon>format_list_bulleted</mat-icon> Summary ({{ editedContent?.SUMMARY?.length }} bullets)</div>
+              <ul class="preview-bullets">
+                <li *ngFor="let s of editedContent?.SUMMARY | slice:0:4">{{ s }}</li>
+                <li *ngIf="(editedContent?.SUMMARY?.length || 0) > 4" class="more-indicator">
+                  + {{ (editedContent?.SUMMARY?.length || 0) - 4 }} more bullets...
+                </li>
+              </ul>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Tech Environment -->
+            <div class="preview-section">
+              <div class="preview-section-label"><mat-icon>settings</mat-icon> Tech Environment</div>
+              <div class="env-tags">
+                <span class="env-tag" *ngFor="let tag of (editedContent?.TD_ENV || '').split(',')">{{ tag.trim() }}</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ── Raw JSON editor (advanced) ── -->
+          <div *ngIf="showJson">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Raw JSON (advanced edit)</mat-label>
+              <textarea matInput class="json-editor"
+                [value]="jsonEditorContent"
+                (input)="syncFromJsonEditor($any($event.target).value)"
+                rows="22"></textarea>
+            </mat-form-field>
+            <div class="json-hint">
+              <mat-icon>info</mat-icon> Edit JSON directly. Changes sync immediately to the preview.
+            </div>
+          </div>
+
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Action Cards Row -->
+      <div class="action-row">
+
+        <!-- Generate Resume -->
+        <mat-card class="glass-panel action-card">
+          <div class="action-card-inner">
+            <div class="action-icon docx-icon"><mat-icon>description</mat-icon></div>
+            <div class="action-text">
+              <strong>Generate Resume</strong>
+              <span>Download tailored .docx</span>
+            </div>
+            <button mat-raised-button class="gen-btn" (click)="generateResume()" [disabled]="isGenerating">
+              <mat-progress-spinner diameter="18" mode="indeterminate" *ngIf="isGenerating"></mat-progress-spinner>
+              <mat-icon *ngIf="!isGenerating">download</mat-icon>
+              <span>{{ isGenerating ? 'Building...' : 'Download' }}</span>
+            </button>
+          </div>
+        </mat-card>
+
+        <!-- Email Drafter -->
+        <mat-card class="glass-panel action-card">
+          <div class="action-card-inner">
+            <div class="action-icon email-icon"><mat-icon>mail</mat-icon></div>
+            <div class="action-text">
+              <strong>Email Drafter</strong>
+              <span>Launch Gmail draft from JD</span>
+            </div>
+            <button mat-raised-button class="email-btn" (click)="draftEmail()" [disabled]="!jdText">
+              <mat-icon>send</mat-icon> Launch
+            </button>
+          </div>
+        </mat-card>
+
+        <!-- Load JSON -->
+        <mat-card class="glass-panel action-card">
+          <div class="action-card-inner">
+            <div class="action-icon upload-icon"><mat-icon>upload_file</mat-icon></div>
+            <div class="action-text">
+              <strong>Load JSON</strong>
+              <span>{{ uploadedFileName || 'Import custom base file' }}</span>
+            </div>
+            <button mat-stroked-button (click)="jsonFileInput.click()">
+              <mat-icon>folder_open</mat-icon> Browse
+            </button>
+            <input #jsonFileInput type="file" accept=".json" style="display:none" (change)="onJsonFileSelected($event)">
+          </div>
+        </mat-card>
+
+      </div>
+    </div>
+
   </div>
 </div>

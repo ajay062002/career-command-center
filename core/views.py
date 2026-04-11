@@ -224,7 +224,101 @@ class AutomationViewSet(viewsets.ViewSet):
             if tool.lower() in jd_text.lower():
                 return tool
                 
-        return "Resume"
+        return "Software Engineer"
+
+    @action(detail=False, methods=['post'], url_path='tailor-sections')
+    def tailor_sections(self, request):
+        jd_text = request.data.get('jd_text', '')
+        base_content = request.data.get('base_content', {})
+        sections = request.data.get('sections', {})
+        
+        if not jd_text:
+            return Response({'error': 'No job description provided'}, status=400)
+
+        # 1. Keyword Extraction
+        KEYWORDS = [
+            "Java", "Spring Boot", "Microservices", "REST", "GraphQL", "React", "Angular", "JavaScript", "TypeScript",
+            "Python", "Django", "FastAPI", "Node.js", "Express", "Kafka", "RabbitMQ", "ActiveMQ",
+            "PostgreSQL", "MySQL", "Oracle", "MongoDB", "Cassandra", "Redis", "Cosmos DB", "DynamoDB",
+            "AWS", "Azure", "GCP", "Docker", "Kubernetes", "K8s", "CI/CD", "Jenkins", "GitLab", "GitHub",
+            "Terraform", "Ansible", "JUnit", "Mockito", "Selenium", "Agile", "Scrum", "TDD", "BDD",
+            "OAuth2", "JWT", "Security", "Performance", "Scalability", "Distributed Systems"
+        ]
+        
+        found_keywords = []
+        for kw in KEYWORDS:
+            if re.search(r'\b' + re.escape(kw) + r'\b', jd_text, re.IGNORECASE):
+                found_keywords.append(kw)
+
+        updated = {}
+        sections_count = 0
+
+        # 2. Title Tailoring
+        if sections.get('title'):
+            role_match = re.search(r"(?:Role|Position|Job Title|Title):\s*(.*)", jd_text, re.IGNORECASE)
+            extracted_title = ""
+            if role_match:
+                extracted_title = role_match.group(1).strip().split('\n')[0].strip()
+            
+            if not extracted_title:
+                # Fallback: find significant roles
+                ROLES = ["Full Stack Developer", "Backend Engineer", "Front End Developer", "Java Developer", "Software Engineer"]
+                for r in ROLES:
+                    if r.lower() in jd_text.lower():
+                        extracted_title = r
+                        break
+            
+            if extracted_title:
+                updated['TITLE'] = extracted_title
+                updated['TITLE2'] = "Senior " + extracted_title if "Senior" in jd_text or "Sr" in jd_text else extracted_title
+                sections_count += 1
+
+        # 3. Bullet Point Ranking (for Summary, TD, CH)
+        def rank_bullets(bullet_pool, keywords, limit=5):
+            if not bullet_pool: return []
+            scored = []
+            for b in bullet_pool:
+                score = 0
+                for kw in keywords:
+                    if kw.lower() in b.lower():
+                        score += 5 # High weight for tools
+                    else:
+                        # Partial word match for common tech terms
+                        for kpart in kw.lower().split():
+                            if len(kpart) > 3 and kpart in b.lower():
+                                score += 1
+                scored.append((score, b))
+            
+            # Sort by score descending
+            scored.sort(key=lambda x: x[0], reverse=True)
+            return [b for s, b in scored[:limit]]
+
+        if sections.get('summary'):
+            updated['SUMMARY'] = rank_bullets(base_content.get('SUMMARY', []), found_keywords, limit=6)
+            sections_count += 1
+            
+        if sections.get('td'):
+            updated['TD'] = rank_bullets(base_content.get('TD', []), found_keywords, limit=12)
+            sections_count += 1
+            
+        if sections.get('ch'):
+            updated['CH'] = rank_bullets(base_content.get('CH', []), found_keywords, limit=12)
+            sections_count += 1
+
+        # 4. Environment Line
+        if sections.get('env'):
+            # Combine found keywords into a string
+            if found_keywords:
+                env_line = ", ".join(found_keywords)
+                updated['TD_ENV'] = env_line
+                updated['CH_ENV'] = env_line
+                sections_count += 1
+
+        return Response({
+            'updated': updated,
+            'keywords': found_keywords,
+            'sections_updated': sections_count
+        })
 
     @action(detail=False, methods=['post'], url_path='generate-resume')
     def generate_resume(self, request):
