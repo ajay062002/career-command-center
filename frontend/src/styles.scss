@@ -472,3 +472,131 @@ a { text-decoration: none; }
     display: inline-block;
   }
 }
+
+// ── Mobile Responsive (≤ 768px) ──────────────────────────────────────────────
+@media (max-width: 768px) {
+
+  // Page containers — tighter padding on mobile
+  .page-container {
+    padding: 16px !important;
+  }
+
+  // Page headers — stack vertically on mobile
+  .page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
+
+    h1 {
+      font-size: 1.8rem !important;
+      letter-spacing: -0.5px !important;
+    }
+  }
+
+  // Tables — horizontal scroll on mobile
+  .table-container,
+  .mat-mdc-table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+
+    table { min-width: 600px; }
+
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+      padding: 12px 10px !important;
+      font-size: 0.8rem !important;
+    }
+  }
+
+  // Cards — full width, less padding
+  .glass-card,
+  .mat-mdc-card {
+    border-radius: var(--radius-md) !important;
+    &:hover { transform: none !important; }
+  }
+
+  // KPI / stat grids — 2-column on mobile
+  .kpi-grid,
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  // Buttons — full width on mobile forms
+  .action-btn,
+  .mat-mdc-raised-button.full-mobile {
+    width: 100% !important;
+  }
+
+  // Touch targets — minimum 44px per Apple HIG
+  .mat-mdc-icon-button {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  // Form fields — full width
+  .mat-mdc-form-field {
+    width: 100% !important;
+  }
+
+  // Dialogs — full screen on mobile
+  .mat-mdc-dialog-container {
+    border-radius: var(--radius-md) !important;
+  }
+
+  .cdk-overlay-pane {
+    max-width: 95vw !important;
+    width: 95vw !important;
+  }
+
+  // Snackbar — bottom of screen
+  .mat-mdc-snack-bar-container {
+    margin: 8px !important;
+  }
+
+  // Builder / two-column grids → single column
+  .builder-grid,
+  .two-col-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  // Charts — prevent overflow
+  canvas {
+    max-width: 100% !important;
+  }
+
+  // Hide non-essential desktop decorations
+  .desktop-only { display: none !important; }
+}
+
+// ── Extra Small (≤ 480px phone) ───────────────────────────────────────────────
+@media (max-width: 480px) {
+  .page-header h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .kpi-grid,
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .mat-mdc-tab-label {
+    min-width: 80px !important;
+    padding: 0 12px !important;
+    font-size: 0.75rem !important;
+  }
+
+  // Actions in table rows — icon only (no label)
+  .action-label { display: none; }
+}
+
+// ── Safe area for notched phones (iPhone X+) ──────────────────────────────────
+@supports (padding: env(safe-area-inset-bottom)) {
+  .sidenav-footer {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+  }
+  .main-toolbar {
+    padding-top: env(safe-area-inset-top);
+  }
+}
