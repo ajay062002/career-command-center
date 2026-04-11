@@ -32,6 +32,7 @@ export class ResumeService {
     tailorSections(payload: {
         jd_text: string;
         base_content: any;
+        use_ai: boolean;
         sections: {
             title: boolean;
             summary: boolean;

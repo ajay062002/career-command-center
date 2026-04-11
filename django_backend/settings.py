@@ -106,3 +106,5 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
     ],
 }
+
+GEMINI_API_KEY = config('GEMINI_API_KEY', default=None)

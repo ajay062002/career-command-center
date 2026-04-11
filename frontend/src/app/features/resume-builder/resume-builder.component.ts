@@ -15,6 +15,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ActivatedRoute } from '@angular/router';
 import { ResumeService } from '../../core/services/resume.service';
 
@@ -27,7 +28,7 @@ import { ResumeService } from '../../core/services/resume.service';
         MatButtonModule, MatIconModule, MatSnackBarModule,
         MatProgressBarModule, MatProgressSpinnerModule,
         MatCheckboxModule, MatChipsModule, MatDividerModule, MatTooltipModule,
-        MatTabsModule, MatTableModule
+        MatTabsModule, MatTableModule, MatSlideToggleModule
     ],
     templateUrl: './resume-builder.component.html',
     styleUrls: ['./resume-builder.component.scss']
@@ -55,6 +56,7 @@ export class ResumeBuilderComponent implements OnInit {
     isTailoring   = false;
     isLoading     = true;
     showJson      = false;           // advanced: toggle raw JSON editor
+    useAiAgent    = true;            // Toggle for Gemini AI
 
     extractedKeywords: string[] = [];
 
@@ -127,6 +129,7 @@ export class ResumeBuilderComponent implements OnInit {
         this.resumeService.tailorSections({
             jd_text: this.jdText,
             base_content: this.baseContent,
+            use_ai: this.useAiAgent,
             sections: {
                 title:   this.updateTitle,
                 summary: this.updateSummary,

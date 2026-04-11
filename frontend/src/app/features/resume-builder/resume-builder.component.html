@@ -57,6 +57,13 @@
               </div>
             </mat-card-header>
             <mat-card-content>
+              <div class="ai-status-bar" [class.ai-active]="useAiAgent">
+                <mat-icon>{{ useAiAgent ? 'auto_awesome' : 'block' }}</mat-icon>
+                <span>{{ useAiAgent ? 'AI Intelligence Active' : 'Keyword Logic Only' }}</span>
+                <span class="spacer"></span>
+                <mat-slide-toggle [(ngModel)]="useAiAgent" color="primary">Use AI</mat-slide-toggle>
+              </div>
+
               <div class="section-toggles">
                 <label class="toggle-row" matTooltip="Update job title based on the role in the JD">
                   <mat-checkbox [(ngModel)]="updateTitle" color="primary"></mat-checkbox>

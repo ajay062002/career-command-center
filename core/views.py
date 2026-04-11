@@ -1,4 +1,5 @@
 import datetime
+import google.generativeai as genai
 import json
 import re
 import subprocess
@@ -226,16 +227,85 @@ class AutomationViewSet(viewsets.ViewSet):
                 
         return "Software Engineer"
 
+    def _ai_tailor_sections(self, jd_text, base_content, sections):
+        """
+        Uses Gemini LLM to rewrite specific resume sections based on the JD.
+        """
+        api_key = getattr(settings, 'GEMINI_API_KEY', None)
+        if not api_key:
+            return None # Fallback to keyword logic
+            
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-pro')
+            
+            # Formulate the payload for the AI
+            pool = {
+                "Title": base_content.get('TITLE'),
+                "Pool_Summary": base_content.get('SUMMARY', [])[:15], # Sample pool
+                "Pool_TD": base_content.get('TD', [])[:15],
+                "Pool_CH": base_content.get('CH', [])[:15],
+                "Env": base_content.get('TD_ENV')
+            }
+            
+            prompt = f"""
+            You are a Senior Technical Recruiter and Career Coach. 
+            Act as an AI Agent for Ajay Purshotam Thota (11+ yrs Full Stack Java Developer).
+            
+            TASK: Re-write specific sections of his resume to match this Job Description (JD).
+            
+            JD: {jd_text[:3000]}
+            
+            SECTIONS TO UPDATE: {json.dumps(sections)}
+            
+            BASE DATA: {json.dumps(pool)}
+            
+            GUIDELINES:
+            1. If 'title' is requested, provide a professional matching title.
+            2. If 'summary' or 'td' or 'ch' are requested, pick and RE-WRITE the most relevant bullets to highlight matching skills. Maintain a professional, senior tone.
+            3. If 'env' is requested, build a comma-separated list of tools found in the JD that Ajay knows.
+            4. Keep all factual experience true.
+            
+            OUTPUT: Return ONLY a valid JSON object with the following keys where requested:
+            - TITLE, TITLE2, SUMMARY (array), TD (array), CH (array), TD_ENV, CH_ENV, KEYWORDS (array found in JD)
+            """
+            
+            response = model.generate_content(prompt)
+            # Find JSON in response (Gemini sometimes adds markdown blocks)
+            text = response.text
+            if "```json" in text:
+                text = text.split("```json")[1].split("```")[0].strip()
+            elif "```" in text:
+                text = text.split("```")[1].split("```")[0].strip()
+                
+            ai_data = json.loads(text)
+            return ai_data
+        except Exception as e:
+            print(f"Gemini AI Error: {e}")
+            return None
+
     @action(detail=False, methods=['post'], url_path='tailor-sections')
     def tailor_sections(self, request):
         jd_text = request.data.get('jd_text', '')
         base_content = request.data.get('base_content', {})
         sections = request.data.get('sections', {})
+        use_ai = request.data.get('use_ai', True) # Default to AI if key exists
         
         if not jd_text:
             return Response({'error': 'No job description provided'}, status=400)
 
-        # 1. Keyword Extraction
+        # Try AI First
+        if use_ai:
+            ai_result = self._ai_tailor_sections(jd_text, base_content, sections)
+            if ai_result:
+                return Response({
+                    'updated': ai_result,
+                    'keywords': ai_result.get('KEYWORDS', []),
+                    'sections_updated': len([k for k in ai_result.keys() if k != 'KEYWORDS']),
+                    'ai_powered': True
+                })
+
+        # Fallback to Keyword Extraction (Original Logic)
         KEYWORDS = [
             "Java", "Spring Boot", "Microservices", "REST", "GraphQL", "React", "Angular", "JavaScript", "TypeScript",
             "Python", "Django", "FastAPI", "Node.js", "Express", "Kafka", "RabbitMQ", "ActiveMQ",
