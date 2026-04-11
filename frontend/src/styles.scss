@@ -368,6 +368,12 @@ a { text-decoration: none; }
   backdrop-filter: var(--glass-blur) !important;
 }
 
+// Change Password dialog — teal glow accent
+.change-password-panel .mat-mdc-dialog-container {
+  border-color: rgba(38, 198, 218, 0.3) !important;
+  box-shadow: 0 0 40px rgba(38, 198, 218, 0.15), 0 20px 60px rgba(0,0,0,0.6) !important;
+}
+
 // ── Mat Chips ────────────────────────────────────────────────────────────────
 .mat-mdc-chip {
   background: var(--glass-2) !important;

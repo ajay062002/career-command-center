@@ -15,8 +15,8 @@ export class ResumeService {
         return this.http.get(`${this.apiUrl}/base-content/`);
     }
 
-    generateResume(content: any): Observable<Blob> {
-        return this.http.post(`${this.apiUrl}/generate-resume/`, content, { responseType: 'blob' });
+    generateResume(content: any, jdText: string): Observable<Blob> {
+        return this.http.post(`${this.apiUrl}/generate-resume/`, { resume_data: content, jd_text: jdText }, { responseType: 'blob' });
     }
 
     draftEmail(jdText: string): Observable<any> {

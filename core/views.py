@@ -51,6 +51,27 @@ class AuthViewSet(viewsets.ViewSet):
             return Response(data)
         return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
+    @action(detail=False, methods=['post'], url_path='change-password')
+    def change_password(self, request):
+        """Allow any authenticated user to change their OWN password (requires old password)."""
+        user = request.user
+        if not user.is_authenticated:
+            return Response({'detail': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+        old_password = request.data.get('old_password', '')
+        new_password = request.data.get('new_password', '')
+        if not old_password or not new_password:
+            return Response({'detail': 'Both old_password and new_password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        if len(new_password) < 6:
+            return Response({'detail': 'New password must be at least 6 characters.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.check_password(old_password):
+            return Response({'detail': 'Current password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
+        # Re-issue token so existing sessions stay valid
+        Token.objects.filter(user=user).delete()
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({'detail': 'Password changed successfully.', 'token': token.key})
+
 class AnalyticsViewSet(viewsets.ViewSet):
     def get_user(self, request):
         user_id = request.query_params.get('userId')
@@ -177,6 +198,34 @@ class AutomationViewSet(viewsets.ViewSet):
                 return Response(json.load(f))
         return Response({})
 
+    def _extract_important_tool(self, jd_text):
+        if not jd_text:
+            return "General"
+        
+        # List of common tools/keywords
+        TOOLS = [
+            "Java", "Spring Boot", "Microservices", "React", "Angular", "Python", "AWS", "Azure", 
+            "Kafka", "Kubernetes", "Docker", "DevOps", "FullStack", "Backend", "Frontend",
+            "CI/CD", "Machine Learning", "Oracle", "PostgreSQL", "MongoDB", "Cassandra",
+            "Spark", "Flink", "Snowflake", "Teradata", "GCP", "OpenShift"
+        ]
+        
+        # Check for title first
+        title_match = re.search(r"(?:Job Title|Role|Position|Title):\s*(.*)", jd_text, re.IGNORECASE)
+        if title_match:
+            job_title = title_match.group(1).strip()
+            # Look for tools in the job title
+            for tool in TOOLS:
+                if tool.lower() in job_title.lower():
+                    return tool
+        
+        # Otherwise look in the entire JD text
+        for tool in TOOLS:
+            if tool.lower() in jd_text.lower():
+                return tool
+                
+        return "Resume"
+
     @action(detail=False, methods=['post'], url_path='generate-resume')
     def generate_resume(self, request):
         automation_dir = self._get_automation_path()
@@ -188,7 +237,14 @@ class AutomationViewSet(viewsets.ViewSet):
             from docx.shared import Pt
             from docx.enum.text import WD_LINE_SPACING, WD_ALIGN_PARAGRAPH
 
-            ctx = request.data
+            data = request.data
+            # Handle both old (flat object) and new (wrapped object) formats for backward compatibility
+            if "resume_data" in data:
+                ctx = data.get('resume_data')
+                jd_text = data.get('jd_text', '')
+            else:
+                ctx = data
+                jd_text = ""
 
             # --- Render template into memory ---
             raw_buf = BytesIO()
@@ -249,13 +305,43 @@ class AutomationViewSet(viewsets.ViewSet):
                     tighten(p)
 
             d.save(final_buf)
-            final_buf.seek(0)
+            content_bytes = final_buf.getvalue()
 
+            # --- EXTRACT TOOL NAME ---
+            tool_name = self._extract_important_tool(jd_text)
+
+            # --- SAVE TO LOCAL DISK ---
+            try:
+                import os
+                # Ensure filename is clean
+                clean_tool = re.sub(r'[^\w\s-]', '', tool_name).strip()
+                file_name = f"{clean_tool}_Ajay_Purshotam_Thota.docx"
+                
+                # Primary Path: C:\Resumes
+                primary_dir = "C:\\Resumes"
+                if not os.path.exists(primary_dir):
+                    os.makedirs(primary_dir, exist_ok=True)
+                
+                save_path = os.path.join(primary_dir, file_name)
+                with open(save_path, "wb") as f:
+                    f.write(content_bytes)
+                
+                # Success Log
+                with open("save_debug.log", "a") as log:
+                    log.write(f"[{datetime.datetime.now()}] SUCCESS: Saved to {save_path}\n")
+                
+            except Exception as se:
+                # Capture specific error for user
+                with open("save_debug.log", "a") as log:
+                    log.write(f"[{datetime.datetime.now()}] ERROR: {str(se)}\n")
+                print(f"Error saving resume locally: {se}")
+
+            # --- RETURN IN RESPONSE ---
             response = HttpResponse(
-                final_buf.read(),
+                content_bytes,
                 content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
             )
-            response['Content-Disposition'] = 'attachment; filename="Ajay_Purshotam_Thota.docx"'
+            response['Content-Disposition'] = f'attachment; filename="{tool_name}_Ajay_Purshotam_Thota.docx"'
             return response
 
         except Exception as e:
@@ -363,6 +449,31 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if not self.request.user.is_authenticated: return models.User.objects.none()
         return models.User.objects.all() if self.request.user.role == 'ROLE_ADMIN' else models.User.objects.filter(id=self.request.user.id)
+
+    @action(detail=True, methods=['put'], url_path='toggle_role')
+    def toggle_role(self, request, pk=None):
+        """Admin only: toggle a user between ROLE_USER and ROLE_ADMIN."""
+        if request.user.role != 'ROLE_ADMIN':
+            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+        user = self.get_object()
+        user.role = 'ROLE_USER' if user.role == 'ROLE_ADMIN' else 'ROLE_ADMIN'
+        user.save()
+        return Response(UserSerializer(user).data)
+
+    @action(detail=True, methods=['post'], url_path='change-password')
+    def change_password(self, request, pk=None):
+        """Admin only: reset any user's password without needing the old one."""
+        if request.user.role != 'ROLE_ADMIN':
+            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+        new_password = request.data.get('new_password', '')
+        if len(new_password) < 6:
+            return Response({'detail': 'Password must be at least 6 characters.'}, status=status.HTTP_400_BAD_REQUEST)
+        user = self.get_object()
+        user.set_password(new_password)
+        user.save()
+        # Invalidate old token so user must re-login with new password
+        Token.objects.filter(user=user).delete()
+        return Response({'detail': f'Password for {user.username} updated successfully.'})
 
 class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer

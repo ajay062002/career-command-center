@@ -95,3 +95,11 @@
         color: #64b5f6;
     }
 }
+
+// Change password button – distinct teal color
+.pwd-btn {
+    color: #26c6da !important;
+    &:hover {
+        background: rgba(38, 198, 218, 0.1) !important;
+    }
+}

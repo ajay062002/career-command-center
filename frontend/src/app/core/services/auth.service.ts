@@ -36,4 +36,13 @@ export class AuthService {
         const user = this.getCurrentUser();
         return user && user.role === 'ROLE_ADMIN';
     }
+
+    changeOwnPassword(oldPassword: string, newPassword: string): Observable<any> {
+        return this.http.post(`${this.apiUrl}/change-password/`, { old_password: oldPassword, new_password: newPassword });
+    }
+
+    adminResetPassword(userId: string, newPassword: string): Observable<any> {
+        const usersUrl = environment.apiBaseUrl + '/users';
+        return this.http.post(`${usersUrl}/${userId}/change-password/`, { new_password: newPassword });
+    }
 }

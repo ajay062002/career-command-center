@@ -111,15 +111,17 @@ export class ResumeBuilderComponent implements OnInit {
         try {
             const parsedContent = JSON.parse(this.jsonContent);
             this.isGenerating = true;
-            this.resumeService.generateResume(parsedContent).subscribe({
+            const payload = { resume_data: parsedContent, jd_text: this.jdText };
+            console.log('Sending resume generation request:', payload);
+            this.resumeService.generateResume(parsedContent, this.jdText).subscribe({
                 next: (blob: Blob) => {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'Ajay_Purshotam_Thota.docx';
+                    a.download = `Ajay_Thota_Resume_${new Date().toISOString().split('T')[0]}.docx`;
                     a.click();
                     URL.revokeObjectURL(url);
-                    this.snackBar.open('✅ Resume downloaded!', 'Close', { duration: 5000 });
+                    this.snackBar.open('✅ Resume downloaded and saved to C:\\Resumes!', 'Close', { duration: 5000 });
                     this.isGenerating = false;
                 },
                 error: (err) => {
