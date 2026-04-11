@@ -332,7 +332,7 @@ class AutomationViewSet(viewsets.ViewSet):
             from docx.enum.text import WD_LINE_SPACING, WD_ALIGN_PARAGRAPH
 
             data = request.data
-            # Handle both old (flat object) and new (wrapped object) formats for backward compatibility
+            # Handle both wrapped and flat formats
             if "resume_data" in data:
                 ctx = data.get('resume_data')
                 jd_text = data.get('jd_text', '')
@@ -340,42 +340,42 @@ class AutomationViewSet(viewsets.ViewSet):
                 ctx = data
                 jd_text = ""
 
-            # --- Render template into memory ---
-            raw_buf = BytesIO()
+            # 1. Render template into high-level object
             doc = DocxTemplate(str(template_path))
             doc.render(ctx)
-            doc.save(raw_buf)
             
             # --- Save to server outputs folder for reference ---
+            title_slug = ctx.get('TITLE', 'Resume').replace(' ', '_').replace('/', '_')
+            filename = f"Ajay_Thota_{title_slug}_Resume.docx"
             try:
                 output_base_dir = automation_dir / "outputs" / "generated_resumes"
-                title_slug = ctx.get('TITLE', 'Resume').replace(' ', '_').replace('/', '_')
                 timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
                 folder_name = f"{title_slug}_{timestamp}"
                 target_folder = output_base_dir / folder_name
                 target_folder.mkdir(parents=True, exist_ok=True)
                 
-                filename = f"Ajay_Thota_{title_slug}_Resume.docx"
-                server_file_path = target_folder / filename
-                doc.save(str(server_file_path))
+                # Save actual copy in folder
+                doc.save(str(target_folder / filename))
                 
                 # Save JD too
                 if jd_text:
                     with open(target_folder / "job_description.txt", "w", encoding="utf-8") as f:
                         f.write(jd_text)
-            except Exception as e:
-                print(f"Error saving server copy: {e}")
+                
+                # Update latest copy
+                doc.save(str(output_base_dir / "latest_resume.docx"))
+            except Exception as se:
+                print(f"Server archive failed (continuing delivery): {se}")
 
+            # 2. Memory-based post-processing for better formatting
+            raw_buf = BytesIO()
+            doc.save(raw_buf)
             raw_buf.seek(0)
-
-            # --- Post-process: normalize bullets ---
-            final_buf = BytesIO()
+            
             d = Document(raw_buf)
+            final_buf = BytesIO()
 
-            LIST_STYLE_CANDIDATES = {
-                "List Bullet", "List Paragraph", "Bullet",
-                "List Bullet 2", "List Bullet 3", "Body Text List",
-            }
+            LIST_STYLE_CANDIDATES = {"List Bullet", "List Paragraph", "Bullet", "List Bullet 2", "List Bullet 3", "Body Text List"}
             BULLET_PREFIXES = ("•", "-", "–", "—", "*")
 
             def tighten(p):
@@ -387,26 +387,22 @@ class AutomationViewSet(viewsets.ViewSet):
                 p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
             def is_list(p):
-                try:
-                    return p.style and p.style.name in LIST_STYLE_CANDIDATES
-                except Exception:
-                    return False
+                try: return p.style and p.style.name in LIST_STYLE_CANDIDATES
+                except Exception: return False
 
-            prev_was_list = False
             to_delete = []
+            prev_was_list = False
             for p in d.paragraphs:
                 txt = p.text.strip()
                 if txt.startswith(BULLET_PREFIXES):
                     new_text = p.text.lstrip("".join(BULLET_PREFIXES)).lstrip(" \t")
                     p.text = new_text if new_text else ""
-                    try:
-                        p.style = d.styles["List Bullet"]
-                    except KeyError:
-                        p.style = d.styles["List Paragraph"]
+                    try: p.style = d.styles["List Bullet"]
+                    except KeyError: p.style = d.styles["List Paragraph"]
+                
                 if is_list(p):
                     tighten(p)
-                    if prev_was_list and txt == "":
-                        to_delete.append(p)
+                    if prev_was_list and txt == "": to_delete.append(p)
                     prev_was_list = True
                 else:
                     prev_was_list = False
@@ -415,46 +411,23 @@ class AutomationViewSet(viewsets.ViewSet):
                 el = p._element
                 el.getparent().remove(el)
 
+            # Re-tighten all lists to be sure
             for p in d.paragraphs:
-                if is_list(p):
-                    tighten(p)
+                if is_list(p): tighten(p)
 
+            # 3. Finalize and Extract labels
             d.save(final_buf)
             content_bytes = final_buf.getvalue()
-
-            # --- EXTRACT TOOL NAME ---
             tool_name = self._extract_important_tool(jd_text)
+            response_filename = f"{tool_name}_Ajay_Purshotam_Thota.docx"
 
-            # --- SAVE TO LOCAL DISK ---
-            try:
-                import os
-                # Ensure filename is clean
-                clean_tool = re.sub(r'[^\w\s-]', '', tool_name).strip()
-                file_name = f"{clean_tool}_Ajay_Purshotam_Thota.docx"
-                
-                # Primary Path: C:\Resumes
-                primary_dir = "C:\\Resumes"
-                if not os.path.exists(primary_dir):
-                    os.makedirs(primary_dir, exist_ok=True)
-                
-                save_path = os.path.join(primary_dir, file_name)
-                with open(save_path, "wb") as f:
-                    f.write(content_bytes)
-                
-                # Success Log
-                with open("save_debug.log", "a") as log:
-                    log.write(f"[{datetime.datetime.now()}] SUCCESS: Saved to {save_path}\n")
-                
-            except Exception as se:
-                # Capture specific error for user
-                with open("save_debug.log", "a") as log:
-                    log.write(f"[{datetime.datetime.now()}] ERROR: {str(se)}\n")
-                print(f"Error saving resume locally: {se}")
-
-            # --- RETURN IN RESPONSE ---
-            response = FileResponse(BytesIO(content_bytes), as_attachment=True, filename=f"{tool_name}_Ajay_Purshotam_Thota.docx")
+            # 4. Return to user
+            response = FileResponse(BytesIO(content_bytes), as_attachment=True, filename=response_filename)
             response['Access-Control-Expose-Headers'] = 'Content-Disposition'
             return response
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
             
         except Exception as e:
             return Response({'error': str(e)}, status=500)
