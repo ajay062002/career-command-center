@@ -231,13 +231,15 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     const track = this.tracks[this.currentTrackIndex];
     this.player = {
       id: 0, x: track.waypoints[0].x, y: track.waypoints[0].y, angle: 0, speed: 0, lap: 0,
-      tireWear: 1.0, health: 100, lastX: track.waypoints[0].x, lastY: track.waypoints[0].y
+      steeringAngle: 0, tireWear: 1.0, health: 100, lastX: track.waypoints[0].x, lastY: track.waypoints[0].y
     };
 
     this.aiCars = this.teams.slice(1).map((team, i) => ({
       id: i + 1, x: track.waypoints[0].x - (i+1)*50, y: track.waypoints[0].y + 20, 
-      angle: 0, speed: 0, lap: 0, targetWP: 1, color: team.color, health: 100
+      angle: 0, speed: 0, lap: 0, steeringAngle: 0, targetWP: 1, color: team.color, health: 100
     }));
+
+    // Deploy Version: 2026-04-11-23.24
 
     this.gamePhase = 'start';
     this.countdown = 3;
