@@ -16,6 +16,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatBadgeModule } from '@angular/material/badge';
 import { ActivatedRoute } from '@angular/router';
 import { ResumeService } from '../../core/services/resume.service';
 
@@ -28,35 +29,41 @@ import { ResumeService } from '../../core/services/resume.service';
         MatButtonModule, MatIconModule, MatSnackBarModule,
         MatProgressBarModule, MatProgressSpinnerModule,
         MatCheckboxModule, MatChipsModule, MatDividerModule, MatTooltipModule,
-        MatTabsModule, MatTableModule, MatSlideToggleModule
+        MatTabsModule, MatTableModule, MatSlideToggleModule, MatBadgeModule
     ],
     templateUrl: './resume-builder.component.html',
     styleUrls: ['./resume-builder.component.scss']
 })
 export class ResumeBuilderComponent implements OnInit {
-    // ── State ──────────────────────────────────────────────────────────────────
+
+    // ── Resume content state ──────────────────────────────────────────────────
     jdText: string = '';
-    baseContent: any = null;         // full base JSON loaded from server
-    editedContent: any = null;       // working copy user can edit
+    baseContent: any = null;       // original from server — never mutated
+    editedContent: any = null;     // working copy user edits & downloads
+    originalContent: any = null;   // snapshot before tailoring (for before/after)
     uploadedFileName: string = '';
-    
-    // History
+
+    // ── Before/After preview state ────────────────────────────────────────────
+    showDiff: boolean = false;     // show the diff panel after tailoring
+    aiModel: string = '';
+
+    // ── History ───────────────────────────────────────────────────────────────
     history: any[] = [];
     historyColumns: string[] = ['title', 'date', 'files', 'actions'];
 
-    // Section toggle flags — which sections to update from JD
+    // ── Section toggles ──────────────────────────────────────────────────────
     updateTitle    = true;
     updateSummary  = true;
     updateTD       = false;
     updateCH       = false;
     updateEnv      = true;
 
-    // UI flags
+    // ── UI flags ─────────────────────────────────────────────────────────────
     isGenerating  = false;
     isTailoring   = false;
     isLoading     = true;
-    showJson      = false;           // advanced: toggle raw JSON editor
-    useAiAgent    = true;            // Toggle for Gemini AI
+    showJson      = false;
+    useAiAgent    = true;
 
     extractedKeywords: string[] = [];
 
@@ -70,32 +77,35 @@ export class ResumeBuilderComponent implements OnInit {
         this.loadBaseContent();
         this.loadHistory();
         this.route.queryParams.subscribe(params => {
-            if (params['jd'] || params['email']) {
-                this.jdText = params['jd'] || '';
-                this.snackBar.open('Opportunity data loaded!', 'OK', { duration: 3000 });
+            if (params['jd']) {
+                this.jdText = params['jd'];
+                this.snackBar.open('JD loaded from context!', 'OK', { duration: 3000 });
             }
         });
     }
 
-    // ── Load base resume from server ───────────────────────────────────────────
+    // ── Data loading ──────────────────────────────────────────────────────────
+
     loadBaseContent(): void {
         this.isLoading = true;
         this.resumeService.getBaseContent().subscribe({
             next: (data) => {
                 this.baseContent = data;
-                this.editedContent = JSON.parse(JSON.stringify(data)); // deep copy
+                this.editedContent = JSON.parse(JSON.stringify(data));
                 this.isLoading = false;
             },
-            error: () => {
-                this.snackBar.open('Error loading resume content.', 'Close', { duration: 3000 });
+            error: (err) => {
+                console.error('base-content error', err);
+                this.snackBar.open('⚠️ Could not load resume base content. Check backend.', 'Close', { duration: 5000 });
                 this.isLoading = false;
             }
         });
     }
 
     loadHistory(): void {
-        this.resumeService.listGenerations().subscribe(data => {
-            this.history = data;
+        this.resumeService.listGenerations().subscribe({
+            next: (data) => { this.history = data; },
+            error: () => { this.history = []; }
         });
     }
 
@@ -110,22 +120,33 @@ export class ResumeBuilderComponent implements OnInit {
         });
     }
 
-    // ── Reset working copy to base ─────────────────────────────────────────────
+    // ── Reset ─────────────────────────────────────────────────────────────────
+
     resetToBase(): void {
         this.editedContent = JSON.parse(JSON.stringify(this.baseContent));
+        this.originalContent = null;
         this.extractedKeywords = [];
+        this.showDiff = false;
         this.snackBar.open('↩️ Reset to base content', 'OK', { duration: 2500 });
     }
 
-    // ── Smart JD Tailoring ─────────────────────────────────────────────────────
-    // Extracts keywords from JD and patches ONLY the selected sections
+    // ── AI Tailoring ──────────────────────────────────────────────────────────
+
     tailorFromJD(): void {
         if (!this.jdText.trim()) {
             this.snackBar.open('Please paste a Job Description first.', 'Close', { duration: 3000 });
             return;
         }
+        if (!this.editedContent) {
+            this.snackBar.open('Base content not loaded yet.', 'Close', { duration: 3000 });
+            return;
+        }
 
+        // Snapshot current state for before/after
+        this.originalContent = JSON.parse(JSON.stringify(this.editedContent));
         this.isTailoring = true;
+        this.showDiff = false;
+
         this.resumeService.tailorSections({
             jd_text: this.jdText,
             base_content: this.baseContent,
@@ -135,32 +156,79 @@ export class ResumeBuilderComponent implements OnInit {
                 summary: this.updateSummary,
                 td:      this.updateTD,
                 ch:      this.updateCH,
-                env:     this.updateEnv
+                env:     this.updateEnv,
             }
         }).subscribe({
             next: (res) => {
                 this.isTailoring = false;
-                // Merge only the updated sections into editedContent
-                if (res.updated) {
-                    if (this.updateTitle   && res.updated.TITLE)   this.editedContent.TITLE  = res.updated.TITLE;
-                    if (this.updateTitle   && res.updated.TITLE2)  this.editedContent.TITLE2 = res.updated.TITLE2;
-                    if (this.updateSummary && res.updated.SUMMARY) this.editedContent.SUMMARY = res.updated.SUMMARY;
-                    if (this.updateTD      && res.updated.TD)      this.editedContent.TD      = res.updated.TD;
-                    if (this.updateCH      && res.updated.CH)      this.editedContent.CH      = res.updated.CH;
-                    if (this.updateEnv     && res.updated.TD_ENV)  this.editedContent.TD_ENV  = res.updated.TD_ENV;
-                    if (this.updateEnv     && res.updated.CH_ENV)  this.editedContent.CH_ENV  = res.updated.CH_ENV;
-                }
+                const u = res.updated || {};
+
+                // Merge only toggled sections into editedContent
+                if (this.updateTitle   && u.TITLE)   this.editedContent.TITLE   = u.TITLE;
+                if (this.updateTitle   && u.TITLE2)  this.editedContent.TITLE2  = u.TITLE2;
+                if (this.updateSummary && u.SUMMARY) this.editedContent.SUMMARY = u.SUMMARY;
+                if (this.updateTD      && u.TD)      this.editedContent.TD      = u.TD;
+                if (this.updateCH      && u.CH)      this.editedContent.CH      = u.CH;
+                if (this.updateEnv     && u.TD_ENV)  this.editedContent.TD_ENV  = u.TD_ENV;
+                if (this.updateEnv     && u.CH_ENV)  this.editedContent.CH_ENV  = u.CH_ENV;
+
                 this.extractedKeywords = res.keywords || [];
-                this.snackBar.open(`✅ Tailored ${res.sections_updated} section(s) from JD!`, 'Close', { duration: 4000 });
+                this.aiModel = res.ai_model || (res.ai_powered ? 'claude-sonnet-4-6' : 'keyword-fallback');
+                this.showDiff = true;
+
+                const badge = res.ai_powered ? '🤖 Claude' : '🔍 Keyword';
+                this.snackBar.open(
+                    `${badge} — Tailored ${res.sections_updated} section(s). Review the before/after below.`,
+                    'Close', { duration: 5000 }
+                );
             },
             error: (err) => {
                 this.isTailoring = false;
-                this.snackBar.open('❌ Failed to tailor resume. ' + (err?.error?.error || ''), 'Close', { duration: 4000 });
+                this.snackBar.open('❌ Failed to tailor: ' + (err?.error?.error || 'Unknown error'), 'Close', { duration: 5000 });
             }
         });
     }
 
-    // ── JSON File Upload (advanced) ────────────────────────────────────────────
+    // ── Helpers for before/after diff display ─────────────────────────────────
+
+    getBefore(section: string): any[] {
+        if (!this.originalContent) return [];
+        const v = this.originalContent[section];
+        return Array.isArray(v) ? v : [];
+    }
+
+    getAfter(section: string): any[] {
+        if (!this.editedContent) return [];
+        const v = this.editedContent[section];
+        return Array.isArray(v) ? v : [];
+    }
+
+    /** Returns true if a bullet is new (not in originalContent's section) */
+    isNewBullet(section: string, bullet: string): boolean {
+        const before = this.getBefore(section);
+        return !before.includes(bullet);
+    }
+
+    /** Returns true if a bullet was removed (in original but not in edited) */
+    wasRemovedBullet(section: string, bullet: string): boolean {
+        const after = this.getAfter(section);
+        return !after.includes(bullet);
+    }
+
+    get sectionsUpdated(): string[] {
+        const out: string[] = [];
+        if (!this.originalContent || !this.editedContent) return out;
+        const keys: [string, string][] = [['TITLE','Title'], ['SUMMARY','Summary'], ['TD','TD Bullets'], ['CH','CH Bullets'], ['TD_ENV','Tech Env']];
+        for (const [k, label] of keys) {
+            if (JSON.stringify(this.originalContent[k]) !== JSON.stringify(this.editedContent[k])) {
+                out.push(label);
+            }
+        }
+        return out;
+    }
+
+    // ── JSON upload / editor ──────────────────────────────────────────────────
+
     onJsonFileSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
         if (!input.files?.length) return;
@@ -169,8 +237,7 @@ export class ResumeBuilderComponent implements OnInit {
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
-                const text = e.target?.result as string;
-                this.editedContent = JSON.parse(text);
+                this.editedContent = JSON.parse(e.target?.result as string);
                 this.snackBar.open(`✅ Loaded ${file.name}`, 'OK', { duration: 3000 });
             } catch {
                 this.snackBar.open('❌ Invalid JSON file', 'Close', { duration: 3000 });
@@ -182,7 +249,7 @@ export class ResumeBuilderComponent implements OnInit {
     }
 
     syncFromJsonEditor(raw: string): void {
-        try { this.editedContent = JSON.parse(raw); } catch { /* ignore invalid mid-edit */ }
+        try { this.editedContent = JSON.parse(raw); } catch { /* ignore mid-edit */ }
     }
 
     get jsonEditorContent(): string {
@@ -190,6 +257,7 @@ export class ResumeBuilderComponent implements OnInit {
     }
 
     // ── Generate DOCX ─────────────────────────────────────────────────────────
+
     generateResume(): void {
         this.isGenerating = true;
         this.resumeService.generateResume(this.editedContent, this.jdText).subscribe({
@@ -200,26 +268,26 @@ export class ResumeBuilderComponent implements OnInit {
                 a.download = `Ajay_Thota_Resume_${new Date().toISOString().split('T')[0]}.docx`;
                 a.click();
                 URL.revokeObjectURL(url);
-                this.snackBar.open('✅ Resume downloaded!', 'Close', { duration: 5000 });
                 this.isGenerating = false;
-                this.loadHistory(); // Refresh history
+                this.snackBar.open('✅ Resume downloaded!', 'Close', { duration: 5000 });
+                this.loadHistory();
             },
             error: (err) => {
-                const msg = err?.error?.error || 'Could not generate resume.';
-                this.snackBar.open('❌ ' + msg, 'Close', { duration: 5000 });
                 this.isGenerating = false;
+                this.snackBar.open('❌ ' + (err?.error?.error || 'Could not generate resume.'), 'Close', { duration: 5000 });
             }
         });
     }
 
     // ── Email Draft ───────────────────────────────────────────────────────────
+
     draftEmail(): void {
         this.resumeService.draftEmail(this.jdText).subscribe({
             next: (res) => {
                 if (res.url) window.open(res.url, '_blank');
-                this.snackBar.open('✅ Gmail draft opened!', 'Close', { duration: 3000 });
+                this.snackBar.open('✅ Email draft opened!', 'Close', { duration: 3000 });
             },
-            error: () => this.snackBar.open('❌ Failed to open Gmail draft.', 'Close', { duration: 3000 })
+            error: () => this.snackBar.open('❌ Failed to open draft.', 'Close', { duration: 3000 })
         });
     }
 

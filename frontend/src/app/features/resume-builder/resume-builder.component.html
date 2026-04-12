@@ -9,19 +9,24 @@
   <mat-progress-bar mode="indeterminate" *ngIf="isLoading || isGenerating || isTailoring"></mat-progress-bar>
 
   <mat-tab-group class="builder-tabs" mat-stretch-tabs="false">
-    
-    <!-- ══ TAB 1: Tailoring & Engineering ════════════════════════════════════ -->
+
+    <!-- ══ TAB 1: Tailor & Engineer ══════════════════════════════════════════ -->
     <mat-tab>
       <ng-template mat-tab-label>
         <mat-icon class="tab-icon">auto_awesome</mat-icon> Tailor &amp; Engineer
       </ng-template>
 
+      <div *ngIf="isLoading" class="loading-state">
+        <mat-progress-spinner diameter="48" mode="indeterminate"></mat-progress-spinner>
+        <p>Loading base resume content…</p>
+      </div>
+
       <div class="builder-layout" *ngIf="!isLoading">
 
-        <!-- ══ LEFT PANEL: JD Input + Tailoring Controls ══════════════════════════ -->
+        <!-- ══ LEFT PANEL ══════════════════════════════════════════════════════ -->
         <div class="left-panel">
 
-          <!-- JD Input Card -->
+          <!-- JD Input -->
           <mat-card class="glass-panel section-card">
             <mat-card-header>
               <div class="card-icon jd-icon"><mat-icon>article</mat-icon></div>
@@ -34,12 +39,15 @@
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Paste JD / Recruiter Email</mat-label>
                 <textarea matInput [(ngModel)]="jdText" rows="12"
-                  placeholder="Paste the job description here..."></textarea>
+                  placeholder="Paste the job description here…"></textarea>
               </mat-form-field>
 
-              <!-- Keyword chips after tailoring -->
+              <!-- Keyword chips -->
               <div class="keyword-chips" *ngIf="extractedKeywords.length > 0">
-                <span class="chips-label">Detected Keywords:</span>
+                <span class="chips-label">
+                  <mat-icon>label</mat-icon>
+                  Matched Keywords ({{ extractedKeywords.length }}):
+                </span>
                 <mat-chip-set>
                   <mat-chip *ngFor="let kw of extractedKeywords" class="kw-chip">{{ kw }}</mat-chip>
                 </mat-chip-set>
@@ -47,7 +55,7 @@
             </mat-card-content>
           </mat-card>
 
-          <!-- Section Selector Card -->
+          <!-- Section Selector -->
           <mat-card class="glass-panel section-card">
             <mat-card-header>
               <div class="card-icon ctrl-icon"><mat-icon>tune</mat-icon></div>
@@ -58,10 +66,10 @@
             </mat-card-header>
             <mat-card-content>
               <div class="ai-status-bar" [class.ai-active]="useAiAgent">
-                <mat-icon>{{ useAiAgent ? 'auto_awesome' : 'block' }}</mat-icon>
-                <span>{{ useAiAgent ? 'AI Intelligence Active' : 'Keyword Logic Only' }}</span>
+                <mat-icon>{{ useAiAgent ? 'smart_toy' : 'block' }}</mat-icon>
+                <span>{{ useAiAgent ? 'Claude AI Active (claude-sonnet-4-6)' : 'Keyword Logic Only' }}</span>
                 <span class="spacer"></span>
-                <mat-slide-toggle [(ngModel)]="useAiAgent" color="primary">Use AI</mat-slide-toggle>
+                <mat-slide-toggle [(ngModel)]="useAiAgent" color="primary">Use Claude</mat-slide-toggle>
               </div>
 
               <div class="section-toggles">
@@ -73,35 +81,35 @@
                   </div>
                 </label>
 
-                <label class="toggle-row" matTooltip="Pick the most relevant summary bullets matching JD keywords">
+                <label class="toggle-row" matTooltip="Pick the most relevant summary bullets">
                   <mat-checkbox [(ngModel)]="updateSummary" color="primary"></mat-checkbox>
                   <div class="toggle-info">
                     <span class="toggle-name"><mat-icon class="toggle-icon">format_list_bulleted</mat-icon> Summary Bullets</span>
-                    <span class="toggle-val preview-text">{{ getSummaryPreview() | slice:0:60 }}...</span>
+                    <span class="toggle-val preview-text">{{ getSummaryPreview() | slice:0:60 }}…</span>
                   </div>
                 </label>
 
-                <label class="toggle-row" matTooltip="Tailor Tech Domain (banking) experience bullets">
+                <label class="toggle-row" matTooltip="Tailor Tech Domain banking experience bullets">
                   <mat-checkbox [(ngModel)]="updateTD" color="accent"></mat-checkbox>
                   <div class="toggle-info">
-                    <span class="toggle-name"><mat-icon class="toggle-icon">account_balance</mat-icon> Tech Domain Bullets (Banking)</span>
+                    <span class="toggle-name"><mat-icon class="toggle-icon">account_balance</mat-icon> TD Bullets (Banking)</span>
                     <span class="toggle-val">{{ editedContent?.TD?.length || 0 }} bullets</span>
                   </div>
                 </label>
 
-                <label class="toggle-row" matTooltip="Tailor Care Health experience bullets">
+                <label class="toggle-row" matTooltip="Tailor Cardinal Health experience bullets">
                   <mat-checkbox [(ngModel)]="updateCH" color="accent"></mat-checkbox>
                   <div class="toggle-info">
-                    <span class="toggle-name"><mat-icon class="toggle-icon">local_hospital</mat-icon> Care Health Bullets</span>
+                    <span class="toggle-name"><mat-icon class="toggle-icon">local_hospital</mat-icon> CH Bullets (Cardinal Health)</span>
                     <span class="toggle-val">{{ editedContent?.CH?.length || 0 }} bullets</span>
                   </div>
                 </label>
 
-                <label class="toggle-row" matTooltip="Update the tech environment/skills line based on JD tools">
+                <label class="toggle-row" matTooltip="Update tech environment line based on JD tools">
                   <mat-checkbox [(ngModel)]="updateEnv" color="primary"></mat-checkbox>
                   <div class="toggle-info">
                     <span class="toggle-name"><mat-icon class="toggle-icon">settings</mat-icon> Tech Environment Line</span>
-                    <span class="toggle-val preview-text">{{ editedContent?.TD_ENV | slice:0:50 }}...</span>
+                    <span class="toggle-val preview-text">{{ (editedContent?.TD_ENV || '') | slice:0:50 }}…</span>
                   </div>
                 </label>
               </div>
@@ -111,20 +119,119 @@
                       [disabled]="!jdText || isTailoring">
                 <mat-progress-spinner diameter="20" mode="indeterminate" *ngIf="isTailoring"></mat-progress-spinner>
                 <mat-icon *ngIf="!isTailoring">auto_awesome</mat-icon>
-                <span>{{ isTailoring ? 'Tailoring...' : 'Tailor Selected Sections' }}</span>
+                <span>{{ isTailoring ? 'Claude is thinking…' : 'Tailor with AI' }}</span>
               </button>
-              <button mat-stroked-button class="reset-btn" (click)="resetToBase()" matTooltip="Reset all sections back to base content">
-                <mat-icon>restart_alt</mat-icon> Reset to Base
+              <button mat-stroked-button class="reset-btn" (click)="resetToBase()" matTooltip="Reset all sections">
+                <mat-icon>restart_alt</mat-icon> Reset
               </button>
             </mat-card-actions>
           </mat-card>
 
         </div>
 
-        <!-- ══ RIGHT PANEL: Preview + Generate ════════════════════════════════════ -->
+        <!-- ══ RIGHT PANEL ═════════════════════════════════════════════════════ -->
         <div class="right-panel">
 
-          <!-- Live Preview Card -->
+          <!-- ── Before/After Diff Panel (shown after tailoring) ─────────────── -->
+          <mat-card class="glass-panel section-card diff-card" *ngIf="showDiff && originalContent">
+            <mat-card-header>
+              <div class="card-icon diff-icon"><mat-icon>compare_arrows</mat-icon></div>
+              <div class="diff-header-text">
+                <mat-card-title>Before / After Review</mat-card-title>
+                <mat-card-subtitle>
+                  {{ aiModel === 'keyword-fallback' ? '🔍 Keyword Match' : '🤖 ' + aiModel }}
+                  &nbsp;·&nbsp;
+                  Sections changed: <strong>{{ sectionsUpdated.join(', ') || 'none' }}</strong>
+                </mat-card-subtitle>
+              </div>
+              <span class="spacer"></span>
+              <button mat-icon-button (click)="showDiff = false" matTooltip="Dismiss comparison">
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-card-header>
+
+            <mat-card-content class="diff-content">
+
+              <!-- Title diff -->
+              <div class="diff-section" *ngIf="updateTitle">
+                <div class="diff-label"><mat-icon>badge</mat-icon> Job Title</div>
+                <div class="diff-row">
+                  <div class="diff-col before">
+                    <span class="col-tag before-tag">BEFORE</span>
+                    <p class="diff-text removed">{{ originalContent?.TITLE }}</p>
+                  </div>
+                  <mat-icon class="diff-arrow">arrow_forward</mat-icon>
+                  <div class="diff-col after">
+                    <span class="col-tag after-tag">AFTER</span>
+                    <p class="diff-text added">{{ editedContent?.TITLE }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Summary diff -->
+              <div class="diff-section" *ngIf="updateSummary">
+                <div class="diff-label"><mat-icon>format_list_bulleted</mat-icon> Summary Bullets</div>
+                <div class="diff-row bullets-row">
+                  <div class="diff-col before">
+                    <span class="col-tag before-tag">BEFORE ({{ getBefore('SUMMARY').length }})</span>
+                    <ul class="diff-bullets">
+                      <li *ngFor="let b of getBefore('SUMMARY') | slice:0:5"
+                          [class.removed]="wasRemovedBullet('SUMMARY', b)">{{ b }}</li>
+                    </ul>
+                  </div>
+                  <mat-icon class="diff-arrow">arrow_forward</mat-icon>
+                  <div class="diff-col after">
+                    <span class="col-tag after-tag">AFTER ({{ getAfter('SUMMARY').length }})</span>
+                    <ul class="diff-bullets">
+                      <li *ngFor="let b of getAfter('SUMMARY') | slice:0:5"
+                          [class.added]="isNewBullet('SUMMARY', b)">{{ b }}</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TD diff -->
+              <div class="diff-section" *ngIf="updateTD">
+                <div class="diff-label"><mat-icon>account_balance</mat-icon> TD Bullets</div>
+                <div class="diff-row bullets-row">
+                  <div class="diff-col before">
+                    <span class="col-tag before-tag">BEFORE ({{ getBefore('TD').length }})</span>
+                    <ul class="diff-bullets">
+                      <li *ngFor="let b of getBefore('TD') | slice:0:5"
+                          [class.removed]="wasRemovedBullet('TD', b)">{{ b }}</li>
+                    </ul>
+                  </div>
+                  <mat-icon class="diff-arrow">arrow_forward</mat-icon>
+                  <div class="diff-col after">
+                    <span class="col-tag after-tag">AFTER ({{ getAfter('TD').length }})</span>
+                    <ul class="diff-bullets">
+                      <li *ngFor="let b of getAfter('TD') | slice:0:5"
+                          [class.added]="isNewBullet('TD', b)">{{ b }}</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tech env diff -->
+              <div class="diff-section" *ngIf="updateEnv">
+                <div class="diff-label"><mat-icon>settings</mat-icon> Tech Environment</div>
+                <div class="diff-row">
+                  <div class="diff-col before">
+                    <span class="col-tag before-tag">BEFORE</span>
+                    <p class="diff-text removed">{{ originalContent?.TD_ENV }}</p>
+                  </div>
+                  <mat-icon class="diff-arrow">arrow_forward</mat-icon>
+                  <div class="diff-col after">
+                    <span class="col-tag after-tag">AFTER</span>
+                    <p class="diff-text added">{{ editedContent?.TD_ENV }}</p>
+                  </div>
+                </div>
+              </div>
+
+            </mat-card-content>
+          </mat-card>
+
+          <!-- ── Live Preview Card ───────────────────────────────────────────── -->
           <mat-card class="glass-panel section-card preview-card">
             <mat-card-header>
               <div class="card-icon preview-icon"><mat-icon>preview</mat-icon></div>
@@ -139,43 +246,42 @@
             </mat-card-header>
 
             <mat-card-content class="preview-content">
-
-              <!-- ── Friendly section preview ── -->
               <div *ngIf="!showJson">
-
                 <!-- Title -->
                 <div class="preview-section">
                   <div class="preview-section-label"><mat-icon>badge</mat-icon> Job Title</div>
                   <div class="preview-title-val">{{ editedContent?.TITLE }}</div>
                   <div class="preview-title-val2">{{ editedContent?.TITLE2 }}</div>
                 </div>
-
                 <mat-divider></mat-divider>
 
                 <!-- Summary -->
                 <div class="preview-section">
-                  <div class="preview-section-label"><mat-icon>format_list_bulleted</mat-icon> Summary ({{ editedContent?.SUMMARY?.length }} bullets)</div>
+                  <div class="preview-section-label">
+                    <mat-icon>format_list_bulleted</mat-icon>
+                    Summary ({{ editedContent?.SUMMARY?.length }} bullets)
+                  </div>
                   <ul class="preview-bullets">
                     <li *ngFor="let s of editedContent?.SUMMARY | slice:0:4">{{ s }}</li>
                     <li *ngIf="(editedContent?.SUMMARY?.length || 0) > 4" class="more-indicator">
-                      + {{ (editedContent?.SUMMARY?.length || 0) - 4 }} more bullets...
+                      + {{ (editedContent?.SUMMARY?.length || 0) - 4 }} more…
                     </li>
                   </ul>
                 </div>
-
                 <mat-divider></mat-divider>
 
-                <!-- Tech Environment -->
+                <!-- Tech Env -->
                 <div class="preview-section">
                   <div class="preview-section-label"><mat-icon>settings</mat-icon> Tech Environment</div>
                   <div class="env-tags">
-                    <span class="env-tag" *ngFor="let tag of (editedContent?.TD_ENV || '').split(',')">{{ tag.trim() }}</span>
+                    <span class="env-tag" *ngFor="let tag of (editedContent?.TD_ENV || '').split(',')">
+                      {{ tag.trim() }}
+                    </span>
                   </div>
                 </div>
-
               </div>
 
-              <!-- ── Raw JSON editor (advanced) ── -->
+              <!-- Raw JSON editor -->
               <div *ngIf="showJson">
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Raw JSON (advanced edit)</mat-label>
@@ -185,16 +291,14 @@
                     rows="22"></textarea>
                 </mat-form-field>
                 <div class="json-hint">
-                  <mat-icon>info</mat-icon> Edit JSON directly. Changes sync immediately to the preview.
+                  <mat-icon>info</mat-icon> Changes sync immediately to preview.
                 </div>
               </div>
-
             </mat-card-content>
           </mat-card>
 
-          <!-- Action Cards Row -->
+          <!-- Action Row -->
           <div class="action-row">
-
             <!-- Generate Resume -->
             <mat-card class="glass-panel action-card">
               <div class="action-card-inner">
@@ -206,7 +310,7 @@
                 <button mat-raised-button class="gen-btn" (click)="generateResume()" [disabled]="isGenerating">
                   <mat-progress-spinner diameter="18" mode="indeterminate" *ngIf="isGenerating"></mat-progress-spinner>
                   <mat-icon *ngIf="!isGenerating">download</mat-icon>
-                  <span>{{ isGenerating ? 'Building...' : 'Download' }}</span>
+                  <span>{{ isGenerating ? 'Building…' : 'Download' }}</span>
                 </button>
               </div>
             </mat-card>
@@ -217,7 +321,7 @@
                 <div class="action-icon email-icon"><mat-icon>mail</mat-icon></div>
                 <div class="action-text">
                   <strong>Email Drafter</strong>
-                  <span>Launch Gmail draft from JD</span>
+                  <span>Open pre-filled mailto</span>
                 </div>
                 <button mat-raised-button class="email-btn" (click)="draftEmail()" [disabled]="!jdText">
                   <mat-icon>send</mat-icon> Launch
@@ -239,10 +343,9 @@
                 <input #jsonFileInput type="file" accept=".json" style="display:none" (change)="onJsonFileSelected($event)">
               </div>
             </mat-card>
-
           </div>
-        </div>
 
+        </div>
       </div>
     </mat-tab>
 
@@ -256,9 +359,8 @@
         <mat-card class="glass-panel history-card" style="margin-top: 20px;">
           <mat-table [dataSource]="history" class="history-table">
 
-            <!-- Title Column -->
             <ng-container matColumnDef="title">
-              <mat-header-cell *matHeaderCellDef> Generation Purpose / Role </mat-header-cell>
+              <mat-header-cell *matHeaderCellDef>Generation / Timestamp</mat-header-cell>
               <mat-cell *matCellDef="let gen">
                 <div class="gen-title-wrap">
                   <div class="gen-title">{{ gen.title }}</div>
@@ -267,15 +369,13 @@
               </mat-cell>
             </ng-container>
 
-            <!-- Date Column -->
             <ng-container matColumnDef="date">
-              <mat-header-cell *matHeaderCellDef> Date Generated </mat-header-cell>
-              <mat-cell *matCellDef="let gen"> {{ gen.date * 1000 | date:'MMM d, y, h:mm a' }} </mat-cell>
+              <mat-header-cell *matHeaderCellDef>Date Generated</mat-header-cell>
+              <mat-cell *matCellDef="let gen">{{ gen.date * 1000 | date:'MMM d, y, h:mm a' }}</mat-cell>
             </ng-container>
 
-            <!-- Files Column -->
             <ng-container matColumnDef="files">
-              <mat-header-cell *matHeaderCellDef> Files </mat-header-cell>
+              <mat-header-cell *matHeaderCellDef>Files</mat-header-cell>
               <mat-cell *matCellDef="let gen">
                 <div class="file-badges">
                   <span class="file-badge docx" *ngIf="gen.files.length > 0">DOCX</span>
@@ -284,15 +384,15 @@
               </mat-cell>
             </ng-container>
 
-            <!-- Actions Column -->
             <ng-container matColumnDef="actions">
-              <mat-header-cell *matHeaderCellDef> Actions </mat-header-cell>
+              <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
               <mat-cell *matCellDef="let gen">
                 <div class="history-actions">
-                  <button mat-icon-button color="primary" matTooltip="Download Resume" (click)="downloadFile(gen.id, gen.files[0])">
+                  <button mat-icon-button color="primary" matTooltip="Download Resume"
+                          (click)="downloadFile(gen.id, gen.files[0])">
                     <mat-icon>download</mat-icon>
                   </button>
-                  <button mat-icon-button color="accent" matTooltip="View JD" 
+                  <button mat-icon-button color="accent" matTooltip="View JD"
                           *ngIf="gen.files.includes('job_description.txt')"
                           (click)="downloadFile(gen.id, 'job_description.txt')">
                     <mat-icon>visibility</mat-icon>
@@ -307,7 +407,7 @@
 
           <div class="empty-history" *ngIf="history.length === 0">
             <mat-icon>folder_off</mat-icon>
-            <p>No archived resumes found yet. Generate one to see it here!</p>
+            <p>No archived resumes yet. Generate one to see it here!</p>
           </div>
         </mat-card>
       </div>
