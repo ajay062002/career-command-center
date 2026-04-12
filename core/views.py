@@ -1,11 +1,15 @@
 import json
 import re
 import os
+import datetime
+import urllib.parse
 from io import BytesIO
 from pathlib import Path
 
 from django.conf import settings
-from django.http import HttpResponse, FileResponse, StreamingHttpResponse
+from django.http import HttpResponse, FileResponse
+from django.utils import timezone
+from django.db.models import Count, Sum
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -87,24 +91,119 @@ class AnalyticsViewSet(viewsets.ViewSet):
         user = self._get_user(request)
         if not user.is_authenticated:
             return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
         rtr_count = models.RTR.objects.filter(user=user).count()
         sub_count = models.Submission.objects.filter(user=user).count()
         sub_rate = (sub_count / rtr_count * 100) if rtr_count > 0 else 0
+
         vendor_set = (
             set(models.RTR.objects.filter(user=user).values_list('vendorCompany', flat=True)) |
             set(models.Submission.objects.filter(user=user).values_list('submittedByVendor', flat=True))
         )
         vendor_count = len([v for v in vendor_set if v])
-        return Response({
+
+        week_start = timezone.now().date() - datetime.timedelta(days=7)
+        study_minutes = models.StudySession.objects.filter(
+            user=user, date__gte=week_start
+        ).aggregate(total=Sum('timeSpentMinutes'))['total'] or 0
+
+        overdue_count = models.Reminder.objects.filter(
+            user=user, completed=False, dueDate__lt=timezone.now().date()
+        ).count()
+
+        data = {
             'totalJobs': models.Job.objects.filter(user=user).count(),
             'activeSubmissions': sub_count,
             'rtrPending': rtr_count,
+            'offers': models.Job.objects.filter(user=user, status='OFFER').count(),
+            'rejected': models.Job.objects.filter(user=user, status='REJECTED').count(),
+            'studyMinutesThisWeek': study_minutes,
+            'overdueReminders': overdue_count,
             'totalVendors': vendor_count,
             'submissionRate': round(sub_rate, 1),
             'interviewConversions': models.Submission.objects.filter(
                 user=user, submissionStatus__in=['INTERVIEW', 'INTERVIEW_SCHEDULED']
             ).count(),
-        })
+        }
+        if request.user.role == 'ROLE_ADMIN':
+            data['totalUsers'] = models.User.objects.count()
+        return Response(data)
+
+    @action(detail=False, methods=['get'], url_path='jobs-by-status')
+    def jobs_by_status(self, request):
+        user = self._get_user(request)
+        if not user.is_authenticated:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+        counts = (
+            models.Job.objects.filter(user=user)
+            .values('status')
+            .annotate(count=Count('id'))
+            .order_by('-count')
+        )
+        return Response([{'status': r['status'], 'count': r['count']} for r in counts])
+
+    @action(detail=False, methods=['get'], url_path='study-trend')
+    def study_trend(self, request):
+        user = self._get_user(request)
+        if not user.is_authenticated:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+        week_start = timezone.now().date() - datetime.timedelta(days=6)
+        rows = (
+            models.StudySession.objects.filter(user=user, date__gte=week_start)
+            .values('date')
+            .annotate(totalMinutes=Sum('timeSpentMinutes'))
+            .order_by('date')
+        )
+        return Response([{'date': str(r['date']), 'totalMinutes': r['totalMinutes'] or 0} for r in rows])
+
+    @action(detail=False, methods=['get'], url_path='rtr-timeline')
+    def rtr_timeline(self, request):
+        user = self._get_user(request)
+        if not user.is_authenticated:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+        week_start = timezone.now().date() - datetime.timedelta(days=6)
+        rtr_map = {
+            str(r['date']): r['count']
+            for r in models.RTR.objects.filter(user=user, date__gte=week_start)
+            .values('date').annotate(count=Count('id'))
+        }
+        sub_map = {
+            str(r['submissionDate']): r['count']
+            for r in models.Submission.objects.filter(user=user, submissionDate__gte=week_start)
+            .values('submissionDate').annotate(count=Count('id'))
+        }
+        all_dates = sorted(set(rtr_map) | set(sub_map))
+        return Response([
+            {'date': d, 'rtrs': rtr_map.get(d, 0), 'submissions': sub_map.get(d, 0)}
+            for d in all_dates
+        ])
+
+    @action(detail=False, methods=['get'], url_path='vendor-performance')
+    def vendor_performance(self, request):
+        user = self._get_user(request)
+        if not user.is_authenticated:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+        vendors = (
+            models.RTR.objects.filter(user=user)
+            .values('vendorCompany').annotate(totalRtrs=Count('id')).order_by('-totalRtrs')
+        )
+        result = []
+        for v in vendors:
+            company = v['vendorCompany']
+            if not company:
+                continue
+            subs = models.Submission.objects.filter(user=user, submittedByVendor=company).count()
+            interviews = models.Submission.objects.filter(
+                user=user, submittedByVendor=company,
+                submissionStatus__in=['INTERVIEW', 'INTERVIEW_SCHEDULED']
+            ).count()
+            result.append({
+                'vendorCompany': company,
+                'totalRtrs': v['totalRtrs'],
+                'totalSubmissions': subs,
+                'interviewsOrOffers': interviews,
+            })
+        return Response(result)
 
 
 # ── Automation / Resume Builder ───────────────────────────────────────────────
@@ -150,35 +249,51 @@ class AutomationViewSet(viewsets.ViewSet):
         if sections.get('env'):
             section_instructions.append("- TD_ENV: List only the tech tools from TD_ENV that appear in the JD, adding any critical JD tools not already listed.")
 
-        prompt = f"""You are an expert technical recruiter and resume writer.
+        prompt = f"""You are a senior resume writer specializing in enterprise banking and healthcare clients (TD Bank, Cardinal Health, etc.).
 
 TASK: Tailor Ajay Purshotam Thota's resume for the following Job Description.
 
 JOB DESCRIPTION:
 {jd_text[:4000]}
 
-BASE RESUME CONTENT (your bullet pool to select from):
+BASE RESUME CONTENT (your bullet pool — select and rewrite from this only):
 {json.dumps(base_content, indent=2)[:6000]}
 
 SECTIONS TO UPDATE:
 {chr(10).join(section_instructions) if section_instructions else "All sections"}
 
-RULES:
-1. Only UPDATE sections listed above. Copy others unchanged from base.
-2. Do NOT invent new bullets — select and lightly rewrite from the pool only.
-3. Match JD keywords and technology names precisely.
-4. KEYWORDS: Extract 8-12 technical keywords found in the JD.
+STRICT OUTPUT REQUIREMENTS:
+- SUMMARY: exactly 25 points — strong, ATS-optimized, covers full-stack, microservices, APIs, cloud
+- TD (TD Bank experience): exactly 30 points — senior-level, real production tone
+  * First 4 points: generic Senior Java Full Stack / API Engineer points, reusable across any project
+  * Remaining 26: heavy focus on REST APIs (primary) and GraphQL (secondary), banking/payment systems context
+  * Naturally weave in: Java, Spring Boot, REST, GraphQL, Microservices, API security, resilience patterns, CI/CD (Jenkins), Git, JUnit, Cucumber, Azure
+  * Write about: failure handling, latency, API contracts, schema evolution, real problems solved
+- CH (Cardinal Health experience): exactly 30 points — healthcare/capital markets context, same quality level
+- TD_ENV / CH_ENV: comma-separated tech stacks for each company matched to JD
 
-Return ONLY a valid JSON object with this exact structure (no markdown, no explanation):
+WRITING RULES (MANDATORY):
+- Each point must be 2-3 lines, detailed, not short one-liners
+- No numbering, no bullet characters, no headings in the text
+- Strong senior-level tone — avoid "worked on", "responsible for", "helped with"
+- Every point introduces a new concept — zero repetition
+- Mix: design, development, performance tuning, security, testing, deployment, troubleshooting
+- Use real engineering language: mention specific patterns, tools, decisions, outcomes
+- Banking context for TD: payment processing, transaction APIs, PCI compliance, financial data
+- Healthcare context for CH: pharmacy systems, supply chain APIs, healthcare data, HIPAA
+
+KEYWORDS: Extract 8-12 technical keywords from the JD.
+
+Return ONLY a valid JSON object, no markdown, no explanation:
 {{
   "TITLE": "...",
   "TITLE2": "...",
-  "SUMMARY": ["bullet 1", "bullet 2", "..."],
-  "TD": ["bullet 1", "..."],
-  "CH": ["bullet 1", "..."],
+  "SUMMARY": ["point 1", "point 2", "... 25 total"],
+  "TD": ["point 1", "... 30 total"],
+  "CH": ["point 1", "... 30 total"],
   "TD_ENV": "Java, Spring Boot, ...",
   "CH_ENV": "...",
-  "KEYWORDS": ["keyword1", "keyword2", "..."]
+  "KEYWORDS": ["keyword1", "..."]
 }}"""
 
         try:
@@ -261,11 +376,11 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no expla
         if sections.get('title'):
             updated['TITLE'] = base_content.get('TITLE', '')
         if sections.get('summary'):
-            updated['SUMMARY'] = self._rank_bullets(base_content.get('SUMMARY', []), found_keywords, 6)
+            updated['SUMMARY'] = self._rank_bullets(base_content.get('SUMMARY', []), found_keywords, 25)
         if sections.get('td'):
-            updated['TD'] = self._rank_bullets(base_content.get('TD', []), found_keywords, 10)
+            updated['TD'] = self._rank_bullets(base_content.get('TD', []), found_keywords, 30)
         if sections.get('ch'):
-            updated['CH'] = self._rank_bullets(base_content.get('CH', []), found_keywords, 8)
+            updated['CH'] = self._rank_bullets(base_content.get('CH', []), found_keywords, 30)
         if sections.get('env'):
             updated['TD_ENV'] = ', '.join(found_keywords) if found_keywords else base_content.get('TD_ENV', '')
 
@@ -278,6 +393,88 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no expla
             'ai_model': 'keyword-fallback',
         })
 
+    def _repair_template(self, src_path: Path) -> Path:
+        """
+        Fix DOCX templates where Word has split Jinja2 tags across multiple XML runs.
+        Returns path to a temporary repaired copy.
+        """
+        import zipfile, tempfile, shutil
+        from lxml import etree
+
+        tmp = Path(tempfile.mktemp(suffix='.docx'))
+        shutil.copy2(str(src_path), str(tmp))
+
+        WNS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
+
+        with zipfile.ZipFile(str(tmp), 'r') as z:
+            all_files = {n: z.read(n) for n in z.namelist()}
+
+        xml_bytes = all_files.get('word/document.xml', b'')
+        tree = etree.fromstring(xml_bytes)
+
+        # Pass 1: merge broken Jinja2 tags (Word splits {{ }} across XML runs)
+        endfor_count = 0
+        for para in tree.iter(f'{{{WNS}}}p'):
+            t_elems = para.findall(f'.//{{{WNS}}}t')
+            combined = ''.join((t.text or '') for t in t_elems)
+
+            if '{{' not in combined and '{%' not in combined:
+                continue
+
+            runs = para.findall(f'.//{{{WNS}}}r')
+            if not runs:
+                continue
+
+            first_run = runs[0]
+            first_t_elems = first_run.findall(f'{{{WNS}}}t')
+
+            if first_t_elems:
+                first_t_elems[0].text = combined
+                first_t_elems[0].set(
+                    '{http://www.w3.org/XML/1998/namespace}space', 'preserve'
+                )
+                for t in first_t_elems[1:]:
+                    first_run.remove(t)
+            else:
+                t_new = etree.SubElement(first_run, f'{{{WNS}}}t')
+                t_new.text = combined
+                t_new.set(
+                    '{http://www.w3.org/XML/1998/namespace}space', 'preserve'
+                )
+
+            for child in list(para):
+                tag = etree.QName(child.tag).localname
+                if tag in ('r', 'proofErr', 'bookmarkStart', 'bookmarkEnd') and child is not first_run:
+                    para.remove(child)
+
+            if '{% endfor %}' in combined:
+                endfor_count += 1
+
+        # Pass 2: fix missing {% for b in CH %} — the template has endfor for CH
+        # but is missing its for opener. Prepend it to the second endfor paragraph.
+        endfor_seen = 0
+        for para in tree.iter(f'{{{WNS}}}p'):
+            t_elems = para.findall(f'.//{{{WNS}}}t')
+            combined = ''.join((t.text or '') for t in t_elems)
+            if '{% endfor %}' not in combined:
+                continue
+            endfor_seen += 1
+            if endfor_seen == 2:
+                # This is the CH endfor paragraph — prepend the missing for tag
+                first_t = para.find(f'.//{{{WNS}}}t')
+                if first_t is not None and '{% for b in CH %}' not in (first_t.text or ''):
+                    first_t.text = '{% for b in CH %}' + (first_t.text or '')
+                break
+
+        fixed_xml = etree.tostring(tree, xml_declaration=True, encoding='UTF-8', standalone=True)
+        all_files['word/document.xml'] = fixed_xml
+
+        with zipfile.ZipFile(str(tmp), 'w', zipfile.ZIP_DEFLATED) as zout:
+            for name, data in all_files.items():
+                zout.writestr(name, data)
+
+        return tmp
+
     @action(detail=False, methods=['post'], url_path='generate-resume')
     def generate_resume(self, request):
         """POST /api/automation/generate-resume/ — render DOCX and stream download"""
@@ -285,13 +482,16 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no expla
         if not template_path.exists():
             return Response({'error': f'Template not found at {template_path}'}, status=404)
 
+        repaired_path = None
         try:
             from docxtpl import DocxTemplate
             from docx import Document
             from docx.shared import Pt
-            import datetime
 
-            doc = DocxTemplate(str(template_path))
+            # Repair broken Jinja2 tags in the template XML
+            repaired_path = self._repair_template(template_path)
+
+            doc = DocxTemplate(str(repaired_path))
             raw_ctx = request.data.get('resume_data', {})
             jd_text = request.data.get('jd_text', '')
 
@@ -342,6 +542,13 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no expla
             )
         except Exception as e:
             return Response({'error': str(e)}, status=500)
+        finally:
+            # Always clean up the temp repaired file
+            if repaired_path and repaired_path.exists():
+                try:
+                    repaired_path.unlink()
+                except Exception:
+                    pass
 
     @action(detail=False, methods=['get'], url_path='list-generations')
     def list_generations(self, request):
@@ -400,7 +607,6 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no expla
             "Best regards,\nAjay Purshotam Thota\najaythota2209@gmail.com"
         )
 
-        import urllib.parse
         mailto_url = (
             "mailto:?subject=" + urllib.parse.quote(subject) +
             "&body=" + urllib.parse.quote(body)
@@ -487,6 +693,24 @@ class ReminderViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_authenticated:
             return models.Reminder.objects.none()
         return models.Reminder.objects.filter(user=self.request.user).select_related('job')
+
+    @action(detail=False, methods=['get'], url_path='overdue')
+    def overdue(self, request):
+        if not request.user.is_authenticated:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+        qs = models.Reminder.objects.filter(
+            user=request.user,
+            completed=False,
+            dueDate__lt=timezone.now().date()
+        ).select_related('job')
+        return Response(ReminderSerializer(qs, many=True).data)
+
+    @action(detail=True, methods=['put', 'patch'], url_path='complete')
+    def complete(self, request, pk=None):
+        reminder = self.get_object()
+        reminder.completed = True
+        reminder.save()
+        return Response(ReminderSerializer(reminder).data)
 
 
 class StudySessionViewSet(viewsets.ModelViewSet):
