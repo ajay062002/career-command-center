@@ -1,10 +1,8 @@
 // ── Toolbar ──────────────────────────────────────────────────────────────────
 .main-toolbar {
-  height: 64px;
-  background: rgba(2, 6, 15, 0.92) !important;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  height: 56px;
+  background: #161b22 !important;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -14,9 +12,9 @@
 }
 
 .menu-trigger {
-  color: rgba(255,255,255,0.6) !important;
-  transition: all 0.2s ease !important;
-  &:hover { color: white !important; transform: scale(1.1); }
+  color: rgba(255,255,255,0.5) !important;
+  transition: color 0.15s ease !important;
+  &:hover { color: #4fc3f7 !important; }
 }
 
 // ── Brand ────────────────────────────────────────────────────────────────────
@@ -24,29 +22,29 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-left: 6px;
+  margin-left: 4px;
 
   .brand-icon {
-    width: 34px; height: 34px;
-    background: linear-gradient(135deg, #0059B3 0%, #FF6B00 100%);
-    border-radius: 10px;
+    width: 30px; height: 30px;
+    background: #5d9e3f;
+    border-radius: 4px;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,89,179,0.4);
+    box-shadow: 0 3px 0 #2f5819;
+    flex-shrink: 0;
 
-    mat-icon { font-size: 18px; width: 18px; height: 18px; color: white; }
+    mat-icon { font-size: 16px; width: 16px; height: 16px; color: white; }
   }
 
   .logo-text {
-    font-family: 'Outfit', sans-serif;
-    font-size: 1.45rem;
-    font-weight: 900;
-    letter-spacing: -0.5px;
-    color: white;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.65rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: #e6edf3;
+    line-height: 1.4;
 
     .highlight {
-      background: linear-gradient(135deg, #FF6B00 0%, #FFB347 100%);
-      -webkit-background-clip: text; background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: #4fc3f7;
     }
   }
 }
@@ -57,53 +55,58 @@
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .live-badge {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(34,197,94,0.1);
-  border: 1px solid rgba(34,197,94,0.25);
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 0.65rem;
-  font-weight: 800;
+  gap: 5px;
+  background: rgba(80,195,90,0.1);
+  border: 1px solid rgba(80,195,90,0.25);
+  border-radius: 4px;
+  padding: 3px 10px;
+  font-size: 0.6rem;
+  font-weight: 700;
   letter-spacing: 1.5px;
-  color: #22c55e;
+  color: #50c35a;
   text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
 
   .live-dot {
     width: 6px; height: 6px;
-    background: #22c55e;
+    background: #50c35a;
     border-radius: 50%;
     animation: blink 1.5s infinite ease-in-out;
-    box-shadow: 0 0 6px #22c55e;
+    box-shadow: 0 0 6px #50c35a;
   }
 }
 
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0.3; }
+}
+
 .user-btn {
-  width: 40px !important; height: 40px !important;
+  width: 36px !important; height: 36px !important;
   padding: 0 !important;
-  border-radius: 12px !important;
+  border-radius: 4px !important;
   overflow: hidden;
-  transition: all 0.2s ease !important;
+  transition: transform 0.15s ease !important;
 
   &:hover { transform: scale(1.08); }
 }
 
 .user-avatar {
-  width: 40px; height: 40px;
+  width: 36px; height: 36px;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 12px;
-  border: 2px solid rgba(255,255,255,0.15);
-  font-size: 0.85rem;
-  font-weight: 900;
-  font-family: 'Outfit', sans-serif;
+  border-radius: 4px;
+  border: 2px solid rgba(255,255,255,0.12);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
   color: white;
-  letter-spacing: -0.5px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.4);
 }
 
 // ── Menu User Header ─────────────────────────────────────────────────────────
@@ -114,47 +117,46 @@
   padding: 14px 16px;
 
   .menu-avatar {
-    width: 44px; height: 44px;
-    border-radius: 13px;
+    width: 40px; height: 40px;
+    border-radius: 4px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    font-size: 1rem;
-    font-weight: 900;
-    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
     color: white;
-    letter-spacing: -0.5px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.4);
   }
 
   .menu-name {
     font-weight: 700;
-    font-size: 0.95rem;
-    color: white;
+    font-size: 0.9rem;
+    color: #e6edf3;
   }
 
   .menu-role {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.45);
-    letter-spacing: 0.5px;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.3px;
   }
 }
 
 .logout-menu-item {
-  color: #ef9a9a !important;
-  mat-icon { color: #ef9a9a !important; }
+  color: #e05252 !important;
+  mat-icon { color: #e05252 !important; }
 }
 
 // ── Layout Container ──────────────────────────────────────────────────────────
 .sidenav-container {
-  height: calc(100vh - 64px);
-  background-color: #050a14;
+  height: calc(100vh - 56px);
+  background-color: #0d1117;
 }
 
 // ── Sidenav ───────────────────────────────────────────────────────────────────
 .sidenav {
-  width: 260px;
-  background: linear-gradient(180deg, #001529 0%, #000d1a 100%) !important;
-  border-right: 1px solid rgba(255,255,255,0.06) !important;
+  width: 248px;
+  background: #161b22 !important;
+  border-right: 1px solid rgba(255,255,255,0.08) !important;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -165,24 +167,27 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 20px 12px 8px;
+  padding: 16px 10px 8px;
 
   &::-webkit-scrollbar { width: 3px; }
-  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+  }
 }
 
 // ── Nav Section ───────────────────────────────────────────────────────────────
 .nav-section {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 
   .nav-section-label {
-    font-size: 0.6rem;
-    font-weight: 800;
-    letter-spacing: 2px;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 1.8px;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.2);
-    padding: 12px 12px 6px;
-    font-family: 'Outfit', sans-serif;
+    color: rgba(255,255,255,0.18);
+    padding: 10px 10px 5px;
+    font-family: 'Inter', sans-serif;
   }
 }
 
@@ -190,93 +195,95 @@
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  margin-bottom: 2px;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 4px;
+  margin-bottom: 1px;
   cursor: pointer;
   text-decoration: none;
-  color: rgba(255,255,255,0.55);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: rgba(255,255,255,0.5);
+  transition: all 0.15s ease;
   position: relative;
   border: 1px solid transparent;
   background: none;
   width: 100%;
   font-family: 'Inter', sans-serif;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-weight: 500;
 
   &:hover {
     background: rgba(255,255,255,0.04);
-    color: rgba(255,255,255,0.9);
+    color: rgba(255,255,255,0.85);
     border-color: rgba(255,255,255,0.06);
-    transform: translateX(3px);
   }
 
   &.active {
-    background: linear-gradient(90deg, rgba(0,89,179,0.2) 0%, rgba(0,89,179,0.05) 100%);
-    color: #64b5f6;
-    border-color: rgba(0,89,179,0.2);
+    background: rgba(79,195,247,0.1);
+    color: #4fc3f7;
+    border-color: rgba(79,195,247,0.2);
     font-weight: 600;
 
     &::before {
       content: '';
       position: absolute;
-      left: 0; top: 15%; height: 70%;
+      left: 0; top: 0; height: 100%;
       width: 3px;
-      background: linear-gradient(180deg, #4dabff, #0059B3);
-      border-radius: 0 3px 3px 0;
-      box-shadow: 0 0 10px rgba(0,89,179,0.6);
+      background: #4fc3f7;
+      border-radius: 0;
     }
 
     .nav-icon-wrap {
-      box-shadow: 0 4px 12px rgba(0,89,179,0.4);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.3);
     }
   }
 }
 
 // ── Nav Icon Wraps ────────────────────────────────────────────────────────────
 .nav-icon-wrap {
-  width: 34px; height: 34px;
-  border-radius: 10px;
+  width: 30px; height: 30px;
+  border-radius: 4px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.4);
 
-  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
 
-  &.icon-blue   { background: rgba(0,89,179,0.2);   color: #64b5f6; }
-  &.icon-orange { background: rgba(255,107,0,0.2);  color: #ffb347; }
-  &.icon-green  { background: rgba(34,197,94,0.2);  color: #4ade80; }
-  &.icon-purple { background: rgba(168,85,247,0.2); color: #c084fc; }
-  &.icon-yellow { background: rgba(245,158,11,0.2); color: #fbbf24; }
-  &.icon-red    { background: rgba(225, 6, 0, 0.15); color: #e10600; }
+  &.icon-blue   { background: rgba(79,195,247,0.2);  color: #4fc3f7; }
+  &.icon-orange { background: rgba(249,115,22,0.2);  color: #fb923c; }
+  &.icon-green  { background: rgba(93,158,63,0.25);  color: #7ec850; }
+  &.icon-purple { background: rgba(156,77,204,0.2);  color: #c084fc; }
+  &.icon-yellow { background: rgba(240,180,41,0.2);  color: #f0b429; }
+  &.icon-red    { background: rgba(224,82,82,0.2);   color: #f07070; }
+  &.icon-teal   { background: rgba(20,184,166,0.2);  color: #2dd4bf; }
 }
 
 .nav-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 // ── Sidenav Footer ────────────────────────────────────────────────────────────
 .sidenav-footer {
-  padding: 8px 12px 16px;
+  padding: 8px 10px 14px;
   flex-shrink: 0;
 
   .footer-divider {
     height: 1px;
     background: rgba(255,255,255,0.06);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .logout-item {
+    color: rgba(224,82,82,0.7) !important;
     &:hover {
-      background: rgba(239,68,68,0.08) !important;
-      color: #f87171 !important;
+      background: rgba(224,82,82,0.08) !important;
+      color: #e05252 !important;
+      border-color: rgba(224,82,82,0.2) !important;
     }
   }
 }
 
 // ── Main Content ──────────────────────────────────────────────────────────────
 .main-content {
-  background: #050a14;
+  background: #0d1117;
   min-height: 100%;
   overflow-y: auto;
 }
@@ -285,11 +292,11 @@
 @media (max-width: 768px) {
   .main-toolbar {
     padding: 0 8px;
-    height: 56px;
+    height: 52px;
   }
 
   .brand .logo-text {
-    font-size: 1.1rem;
+    font-size: 0.55rem;
   }
 
   .live-badge {
@@ -297,48 +304,38 @@
   }
 
   .sidenav-container {
-    height: calc(100vh - 56px);
-    height: calc(100dvh - 56px); // dynamic viewport height for iOS
+    height: calc(100vh - 52px);
+    height: calc(100dvh - 52px);
   }
 
-  // Sidenav takes 85% width on mobile — feels native
   .sidenav {
-    width: 85vw !important;
-    max-width: 320px !important;
-    box-shadow: 8px 0 32px rgba(0,0,0,0.6) !important;
+    width: 82vw !important;
+    max-width: 300px !important;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.7) !important;
   }
 
-  // Bigger touch targets in the nav
   .nav-item {
-    padding: 13px 12px !important;
-    margin-bottom: 3px !important;
-    font-size: 0.95rem !important;
+    padding: 12px 10px !important;
+    margin-bottom: 2px !important;
+    font-size: 0.9rem !important;
 
-    &:hover { transform: none !important; } // no hover translate on touch
+    &:hover { transform: none !important; }
   }
 
   .nav-icon-wrap {
-    width: 38px !important;
-    height: 38px !important;
+    width: 34px !important;
+    height: 34px !important;
 
-    mat-icon { font-size: 20px !important; width: 20px !important; height: 20px !important; }
+    mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; }
   }
 
   .nav-section-label {
-    font-size: 0.65rem !important;
-    padding: 14px 12px 8px !important;
+    font-size: 0.6rem !important;
+    padding: 12px 10px 6px !important;
   }
 
-  // User avatar larger for touch
   .user-btn {
-    width: 44px !important;
-    height: 44px !important;
-  }
-
-  .user-avatar {
-    width: 36px !important;
-    height: 36px !important;
-    font-size: 0.8rem !important;
+    width: 40px !important;
+    height: 40px !important;
   }
 }
-
