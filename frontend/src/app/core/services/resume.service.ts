@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { retry } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -10,7 +11,10 @@ export class ResumeService {
     constructor(private http: HttpClient) {}
 
     getBaseContent(): Observable<any> {
-        return this.http.get(`${this.apiUrl}/base-content/`);
+        // Retry up to 3 times with 3s delay — handles Render free tier cold starts
+        return this.http.get(`${this.apiUrl}/base-content/`).pipe(
+            retry({ count: 3, delay: 3000 })
+        );
     }
 
     generateResume(content: any, jdText: string): Observable<Blob> {
