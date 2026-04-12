@@ -450,20 +450,28 @@ Return ONLY a valid JSON object, no markdown, no explanation:
             if '{% endfor %}' in combined:
                 endfor_count += 1
 
-        # Pass 2: fix missing {% for b in CH %} — the template has endfor for CH
-        # but is missing its for opener. Prepend it to the second endfor paragraph.
+        # Pass 2: fix missing {% for b in CH %}.
+        # The template has {{ b }}{% endfor %} for CH but is missing the {% for b in CH %} opener.
+        # The TD section works because {% for b in TD %} sits at the END of the paragraph
+        # immediately before the bullet paragraph. We replicate that pattern for CH:
+        # append {% for b in CH %} as a new run on the paragraph BEFORE the CH bullet paragraph.
         endfor_seen = 0
-        for para in tree.iter(f'{{{WNS}}}p'):
+        all_body_paras = list(tree.iter(f'{{{WNS}}}p'))
+        for idx, para in enumerate(all_body_paras):
             t_elems = para.findall(f'.//{{{WNS}}}t')
             combined = ''.join((t.text or '') for t in t_elems)
             if '{% endfor %}' not in combined:
                 continue
             endfor_seen += 1
-            if endfor_seen == 2:
-                # This is the CH endfor paragraph — prepend the missing for tag
-                first_t = para.find(f'.//{{{WNS}}}t')
-                if first_t is not None and '{% for b in CH %}' not in (first_t.text or ''):
-                    first_t.text = '{% for b in CH %}' + (first_t.text or '')
+            if endfor_seen == 2 and '{% for b in CH %}' not in combined:
+                # Found the CH bullet paragraph ({{ b }}{% endfor %}).
+                # Append {% for b in CH %} to the paragraph immediately before this one.
+                if idx > 0:
+                    prev_para = all_body_paras[idx - 1]
+                    new_run = etree.SubElement(prev_para, f'{{{WNS}}}r')
+                    new_t = etree.SubElement(new_run, f'{{{WNS}}}t')
+                    new_t.text = '{% for b in CH %}'
+                    new_t.set('{http://www.w3.org/XML/1998/namespace}space', 'preserve')
                 break
 
         fixed_xml = etree.tostring(tree, xml_declaration=True, encoding='UTF-8', standalone=True)
