@@ -84,38 +84,18 @@ class AnalyticsViewSet(viewsets.ViewSet):
     def dashboard(self, request):
         user = self.get_user(request)
         if not user.is_authenticated: return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
-        
         rtr_count = models.RTR.objects.filter(user=user).count()
         sub_count = models.Submission.objects.filter(user=user).count()
         sub_rate = (sub_count / rtr_count * 100) if rtr_count > 0 else 0
-        
         vendor_set = set(models.RTR.objects.filter(user=user).values_list('vendorCompany', flat=True)) | \
                      set(models.Submission.objects.filter(user=user).values_list('submittedByVendor', flat=True))
         vendor_count = len([v for v in vendor_set if v])
-        
         return Response({
             'totalJobs': models.Job.objects.filter(user=user).count(),
-            'activeSubmissions': sub_count,
-            'rtrPending': rtr_count,
-            'offers': models.Job.objects.filter(user=user, status=models.JobWorkflowStatus.OFFER).count(),
-            'rejected': models.Job.objects.filter(user=user, status=models.JobWorkflowStatus.REJECTED).count(),
-            'totalVendors': vendor_count,
+            'activeSubmissions': sub_count, 'rtrPending': rtr_count, 'totalVendors': vendor_count,
             'submissionRate': round(sub_rate, 1),
             'interviewConversions': models.Submission.objects.filter(user=user, submissionStatus__in=['INTERVIEW', 'INTERVIEW_SCHEDULED']).count()
         })
-
-    @action(detail=False, methods=['get'], url_path='jobs-by-status')
-    def jobs_by_status(self, request):
-        user = self.get_user(request)
-        counts = models.Job.objects.filter(user=user).values('status').annotate(count=Count('id'))
-        return Response(counts)
-
-    @action(detail=False, methods=['get'], url_path='study-trend')
-    def study_trend(self, request):
-        user = self.get_user(request)
-        last_7_days = timezone.now() - datetime.timedelta(days=7)
-        trend = models.StudySession.objects.filter(user=user, date__gte=last_7_days).values('date').annotate(totalMinutes=Sum('timeSpentMinutes')).order_by('date')
-        return Response(trend)
 
 class AutomationViewSet(viewsets.ViewSet):
     def _get_automation_path(self):
@@ -123,7 +103,7 @@ class AutomationViewSet(viewsets.ViewSet):
 
     def _extract_important_tool(self, jd_text):
         if not jd_text: return "SoftwareEngineer"
-        tools = ["Java", "Spring", "Angular", "React", "Python", "AWS", "Kafka", "Docker", "DevOps", "Microservices"]
+        tools = ["Java", "Spring", "Angular", "React", "Python", "AWS", "Kafka", "Docker", "Kubernetes", "Microservices"]
         for t in tools:
             if t.lower() in jd_text.lower(): return t
         return "SoftwareEngineer"
@@ -136,70 +116,107 @@ class AutomationViewSet(viewsets.ViewSet):
             model = genai.GenerativeModel('gemini-1.5-flash')
             prompt = f"""
             You are a World-Class Recruiter. Rewrite Ajay Purshotam Thota's resume for this JD.
-            JD: {jd_text[:3500]}
-            TOGGLES: {json.dumps(sections)}
-            DATA: {json.dumps(base_content)}
+            JD: {jd_text[:3000]}
+            SECTION TOGGLES: {json.dumps(sections)}
+            BASE CONTENT: {json.dumps(base_content)}
+            
+            DIRECTIONS:
+            1. ONLY update sections that are 'true' in SECTION TOGGLES.
+            2. SUMMARY: 5-6 bullets matching JD keywords.
+            3. TD/CH: Pick best bullets highlighting relevant tech (Kafka, Spring, etc).
+            4. KEYWORDS: Return a list of 10 matched keywords found in JD.
+            
             Return ONLY a valid JSON object:
-            {{"TITLE": "...", "SUMMARY": ["...", "..."], "TD": ["...", "..."], "CH": ["...", "..."], "TD_ENV": "..."}}
+            {{"TITLE": "...", "SUMMARY": ["...", "..."], "TD": ["...", "..."], "CH": ["...", "..."], "TD_ENV": "...", "KEYWORDS": ["...", "..."]}}
             """
             response = model.generate_content(prompt)
             raw = response.text.strip()
             if "```json" in raw: raw = raw.split("```json")[-1].split("```")[0].strip()
             return json.loads(raw)
-        except Exception as e:
-            print(f"[AI-ERROR] {e}")
-            return None
+        except: return None
 
     @action(detail=False, methods=['post'], url_path='tailor-sections')
     def tailor_sections(self, request):
         jd_text = request.data.get('jd_text', '')
         base_content = request.data.get('base_content', {})
         sections = request.data.get('sections', {})
-        
-        # Try AI First
-        ai_res = self._ai_tailor_sections(jd_text, base_content, sections)
-        if ai_res:
-            return Response({'updated': ai_res, 'ai_powered': True})
+        use_ai = request.data.get('use_ai', True)
 
-        # Fallback keyword logic
-        updated = {"TITLE": "Senior Java Developer", "SUMMARY": base_content.get('SUMMARY', [])[:5]}
-        return Response({'updated': updated, 'ai_powered': False})
+        # 1. Keyword Extraction (Always for Rating)
+        KEYWORDS = ["Java", "Spring Boot", "Microservices", "REST", "Kafka", "AWS", "Docker", "Kubernetes", "Angular", "React", "PostgreSQL", "CI/CD", "Redis", "Oracle"]
+        found_keywords = [kw for kw in KEYWORDS if re.search(r'\b' + re.escape(kw) + r'\b', jd_text, re.IGNORECASE)]
+
+        # 2. Try AI Tailoring
+        if use_ai:
+            ai_data = self._ai_tailor_sections(jd_text, base_content, sections)
+            if ai_data:
+                return Response({
+                    'updated': ai_data,
+                    'keywords': ai_data.get('KEYWORDS', found_keywords),
+                    'sections_updated': len([k for k in ai_data.keys() if k != 'KEYWORDS']),
+                    'ai_powered': True
+                })
+
+        # 3. Fallback Ranking Logic
+        def rank_bullets(pool, keywords, limit=6):
+            if not pool: return []
+            scored = []
+            for b in pool:
+                score = sum([3 for kw in keywords if kw.lower() in b.lower()])
+                scored.append((score, b))
+            scored.sort(key=lambda x: x[0], reverse=True)
+            return [b for s, b in scored[:limit]]
+
+        updated = {}
+        if sections.get('summary'): updated['SUMMARY'] = rank_bullets(base_content.get('SUMMARY', []), found_keywords)
+        if sections.get('td'): updated['TD'] = rank_bullets(base_content.get('TD', []), found_keywords, 10)
+        if sections.get('env'): updated['TD_ENV'] = ", ".join(found_keywords)
+
+        return Response({
+            'updated': updated,
+            'keywords': found_keywords,
+            'sections_updated': len(updated),
+            'ai_powered': False
+        })
 
     @action(detail=False, methods=['post'], url_path='generate-resume')
     def generate_resume(self, request):
         root = self._get_automation_path()
         template_path = root / "reference" / "Ajay Purshotam Thota.docx"
-        if not template_path.exists():
-            return Response({'error': 'Template missing'}, status=404)
+        if not template_path.exists(): return Response({'error': 'Template missing'}, status=404)
         
         try:
             from docxtpl import DocxTemplate
             from docx import Document
             from docx.shared import Pt
-            from docx.enum.text import WD_LINE_SPACING
-            
             doc = DocxTemplate(str(template_path))
-            doc.render(request.data.get('resume_data', {}))
             
+            # Sanitization
+            raw_ctx = request.data.get('resume_data', {})
+            ctx = {}
+            for k, v in raw_ctx.items():
+                if isinstance(v, list):
+                    ctx[k] = v
+                    ctx[f"{k}_STR"] = "\n".join([f"• {i}" for i in v])
+                else: ctx[k] = v
+            
+            doc.render(ctx)
             buf = BytesIO()
             doc.save(buf)
             buf.seek(0)
             
-            # Post-processing tighten up
+            # Post-Process Formatting
             d = Document(buf)
             for p in d.paragraphs:
                 pf = p.paragraph_format
-                pf.space_before = Pt(0)
-                pf.space_after = Pt(0)
+                pf.space_before = pf.space_after = Pt(0)
                 pf.line_spacing = 1.0
             
             final_buf = BytesIO()
             d.save(final_buf)
             final_buf.seek(0)
-            
             return FileResponse(final_buf, as_attachment=True, filename="Ajay_Thota_Tailored.docx")
-        except Exception as e:
-            return Response({'error': str(e)}, status=500)
+        except Exception as e: return Response({'error': str(e)}, status=500)
 
 class ScrapedJobViewSet(viewsets.ModelViewSet):
     serializer_class = ScrapedJobSerializer
