@@ -16,7 +16,17 @@
         "Experienced in Agile collaboration with cross-functional teams including product owners, QA engineers, architects, and release stakeholders.",
         "Strong ability to modernize enterprise applications while balancing scalability, performance, maintainability, and operational support needs.",
         "Proficient in implementing secure, reusable, and maintainable service contracts across frontend, backend, mobile, and integration components.",
-        "Experienced in delivering high-quality applications aligned with enterprise deployment practices, release controls, and change management expectations."
+        "Experienced in delivering high-quality applications aligned with enterprise deployment practices, release controls, and change management expectations.",
+        "Skilled in Python scripting and automation for backend data processing, infrastructure tooling, and workflow orchestration across enterprise environments.",
+        "Experienced in relational database design and optimization using PostgreSQL, MySQL, and Oracle with stored procedures, indexing strategies, and query tuning.",
+        "Proficient in cloud infrastructure management using AWS services including EC2, S3, Lambda, RDS, ECS, and API Gateway for scalable application deployment.",
+        "Strong experience with API gateway configuration, service mesh patterns, and secure inter-service communication in distributed microservices environments.",
+        "Hands-on experience implementing observability strategies using structured logging, distributed tracing, and monitoring dashboards for production application support.",
+        "Experienced in security-aware development practices including OAuth2, SAML, JWT-based authentication, and role-based access control for enterprise applications.",
+        "Proficient in CI/CD pipeline design and implementation using Jenkins, GitHub Actions, and cloud-native pipeline tools for automated testing and delivery workflows.",
+        "Strong background in system design, capacity planning, and performance engineering for high-throughput transactional applications across regulated industry environments.",
+        "Experienced in technical leadership activities including architecture reviews, design documentation, mentoring junior engineers, and cross-team delivery coordination.",
+        "Demonstrated ability to translate complex business requirements into scalable, maintainable technical solutions across multi-tier enterprise application landscapes."
     ],
     "TD": [
         "Engineered full-stack banking applications using Java, Spring Boot, React.js, and JavaScript to support customer-facing workflows across account servicing and transaction management.",
@@ -43,7 +53,12 @@
         "Contributed to cloud-based deployment patterns for full-stack services, aligning scalability, reliability, and supportability requirements with banking platform expectations.",
         "Implemented observability-friendly logging and operational diagnostics across backend APIs and event consumers to simplify production support and audit investigations.",
         "Helped modernize legacy servicing capabilities by exposing them through Spring Boot APIs and integrating them with React-driven user interfaces and mobile-compatible flows.",
-        "Partnered with cross-functional stakeholders to deliver scalable applications supporting payments, customer servicing, audit traceability, and platform reliability in a banking context."
+        "Partnered with cross-functional stakeholders to deliver scalable applications supporting payments, customer servicing, audit traceability, and platform reliability in a banking context.",
+        "Designed and implemented API gateway configurations to manage routing, rate limiting, and security policies for customer-facing banking microservices.",
+        "Built transaction reconciliation and financial reporting backend services that aggregated multi-source data into audit-ready summaries for operations and compliance teams.",
+        "Applied OWASP-aligned security practices and penetration-tested API hardening measures to protect sensitive financial data across customer servicing endpoints.",
+        "Developed real-time account activity dashboards using React.js with WebSocket-backed data feeds, enabling operations teams to monitor transaction health and alerts.",
+        "Contributed to blue-green and canary deployment strategies for zero-downtime releases of critical banking APIs, reducing production risk during high-traffic periods."
     ],
     "CH": [
         "Developed enterprise healthcare applications using Java, Spring Boot, and React.js to support provider, member, and patient-facing workflows across secure digital platforms.",
@@ -70,7 +85,12 @@
         "Helped deliver CI/CD-ready application changes that supported repeatable deployments, testing discipline, and controlled release movement across environments.",
         "Collaborated with QA and business stakeholders to validate care workflow functionality, eligibility-related use cases, and secure provider-facing interactions.",
         "Enhanced application observability through structured logging and support-focused diagnostics to simplify troubleshooting in distributed healthcare systems.",
-        "Contributed to enterprise application delivery across frontend, backend, APIs, messaging, containers, and cloud-based deployment practices in a healthcare setting."
+        "Contributed to enterprise application delivery across frontend, backend, APIs, messaging, containers, and cloud-based deployment practices in a healthcare setting.",
+        "Developed HIPAA-compliance-aware backend services applying data minimization, access controls, and audit logging to protect PHI across healthcare APIs.",
+        "Built pharmacy and supply chain integration APIs that connected Cardinal Health operational systems with provider-facing portals and downstream logistics workflows.",
+        "Implemented HL7 FHIR-compatible data transformation services to standardize patient and clinical record exchange across heterogeneous healthcare system integrations.",
+        "Designed eligibility verification and prior authorization workflow services using Spring Boot, reducing manual processing overhead for provider and member servicing teams.",
+        "Contributed to analytics dashboard backends aggregating claims, utilization, and member engagement data to support operational reporting and care management insights."
     ],
     "TD_ENV": "Java, Spring Boot, Node.js, React.js, JavaScript, HTML, CSS, REST API, GraphQL, Apache Kafka, Azure Cosmos DB, Docker, Kubernetes, Microservices, CI/CD, Git, Agile, Mobile Integration, Distributed Systems",
     "CH_ENV": "Java, Spring Boot, Node.js, React.js, JavaScript, HTML, CSS, REST API, GraphQL, Apache Kafka, Azure Cosmos DB, Docker, Kubernetes, Microservices, CI/CD, Git, Agile, Mobile Development, Distributed Systems, Secure Integrations"

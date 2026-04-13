@@ -254,10 +254,10 @@ class AutomationViewSet(viewsets.ViewSet):
 TASK: Tailor Ajay Purshotam Thota's resume for the following Job Description.
 
 JOB DESCRIPTION:
-{jd_text[:4000]}
+{jd_text[:6000]}
 
 BASE RESUME CONTENT (your bullet pool — select and rewrite from this only):
-{json.dumps(base_content, indent=2)[:6000]}
+{json.dumps(base_content, indent=2)[:8000]}
 
 SECTIONS TO UPDATE:
 {chr(10).join(section_instructions) if section_instructions else "All sections"}
@@ -299,7 +299,7 @@ Return ONLY a valid JSON object, no markdown, no explanation:
         try:
             message = client.messages.create(
                 model="claude-sonnet-4-6",
-                max_tokens=4096,
+                max_tokens=16000,
                 messages=[{"role": "user", "content": prompt}]
             )
             raw = message.content[0].text.strip()
