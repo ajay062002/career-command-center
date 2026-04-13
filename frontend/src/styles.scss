@@ -1,14 +1,9 @@
 @use '@angular/material' as mat;
-
 @include mat.core();
 
-// ── Minecraft Color Palette ─────────────────────────────────────────────────
-$mc-grass:    #5d9e3f;
-$mc-diamond:  #4fc3f7;
-$mc-gold:     #f0b429;
-$mc-redstone: #e05252;
-$mc-emerald:  #50c35a;
-$mc-obsidian: #0d1117;
+// ── Minecraft Material Palette ───────────────────────────────────────────────
+$mc-grass:   #5d9e3f;
+$mc-diamond: #5ecfdf;
 
 $mc-primary: (
   50:  #edf7e8, 100: #d0ecbe, 200: #b0e093, 300: #8fd368,
@@ -17,120 +12,150 @@ $mc-primary: (
   contrast: (
     50: rgba(black,.87), 100: rgba(black,.87), 200: rgba(black,.87),
     300: rgba(black,.87), 400: rgba(black,.87), 500: white,
-    600: white,          700: white,           800: white, 900: white
+    600: white, 700: white, 800: white, 900: white
   )
 );
 $mc-accent: (
-  50:  #e0f7ff, 100: #b3ecff, 200: #80e0ff, 300: #4dd4ff,
-  400: #26caff, 500: #4fc3f7, 600: #039be5, 700: #0288d1,
-  800: #0277bd, 900: #01579b,
+  50: #e0fafa, 100: #b3f2f5, 200: #80e9ee, 300: #4ddfea,
+  400: #26d8e2, 500: #5ecfdf, 600: #00b8c9, 700: #009fb0,
+  800: #008898, 900: #006070,
   contrast: (
     50: rgba(black,.87), 100: rgba(black,.87), 200: rgba(black,.87),
     300: rgba(black,.87), 400: rgba(black,.87), 500: rgba(black,.87),
-    600: white,          700: white,           800: white, 900: white
+    600: white, 700: white, 800: white, 900: white
   )
 );
 
 $primary-palette: mat.define-palette($mc-primary);
 $accent-palette:  mat.define-palette($mc-accent, 500, 300, 700);
-
 $mc-dark-theme: mat.define-dark-theme((
   color: (primary: $primary-palette, accent: $accent-palette),
   typography: mat.define-typography-config($font-family: 'Inter, sans-serif'),
   density: 0,
 ));
-
 @include mat.all-component-themes($mc-dark-theme);
 
-// ── CSS Variables ───────────────────────────────────────────────────────────
+// ── CSS Variables ────────────────────────────────────────────────────────────
 :root {
-  // Minecraft material colors
-  --mc-grass:    #5d9e3f;
-  --mc-diamond:  #4fc3f7;
-  --mc-gold:     #f0b429;
-  --mc-redstone: #e05252;
-  --mc-emerald:  #50c35a;
-  --mc-lapis:    #1a6fa8;
-  --mc-purple:   #9c4dcc;
-  --mc-orange:   #f97316;
+  // ── True Minecraft palette ──
+  --mc-grass:     #5d9e3f;
+  --mc-grass-dark:#2f5819;
+  --mc-dirt:      #866043;
+  --mc-diamond:   #5ecfdf;
+  --mc-diamond-dk:#005f6b;
+  --mc-gold:      #fead27;
+  --mc-gold-dk:   #7a5000;
+  --mc-redstone:  #c41e3a;
+  --mc-redstone-dk:#6b0010;
+  --mc-emerald:   #17dd62;
+  --mc-lapis:     #1d4f91;
+  --mc-lapis-dk:  #0a1f40;
+  --mc-purple:    #7b00c8;
+  --mc-xp:        #80c920;
+  --mc-xp-dk:     #3a5e00;
+  --mc-iron:      #c8c8c8;
+  --mc-netherite: #4b4044;
+  --mc-orange:    #e07a10;
 
-  // Tinted dimmed variants
-  --mc-grass-dim:    rgba(93, 158, 63, 0.15);
-  --mc-diamond-dim:  rgba(79, 195, 247, 0.15);
-  --mc-gold-dim:     rgba(240, 180, 41, 0.15);
-  --mc-redstone-dim: rgba(224, 82, 82, 0.15);
-  --mc-emerald-dim:  rgba(80, 195, 90, 0.15);
-  --mc-purple-dim:   rgba(156, 77, 204, 0.15);
-  --mc-orange-dim:   rgba(249, 115, 22, 0.15);
+  // ── Minecraft GUI backgrounds ──
+  --mc-void:      #111317;   // deepest bg (void)
+  --mc-obsidian:  #1a1c1f;   // main page bg
+  --mc-stone:     #262a30;   // panel background
+  --mc-cobble:    #2d3139;   // card background
+  --mc-gui:       #373c44;   // raised surface
 
-  // Backgrounds (obsidian tier)
-  --bg-deep:   #08090d;
-  --bg-main:   #0d1117;
-  --bg-card:   #161b22;
-  --bg-raised: #21262d;
-  --bg-hover:  rgba(255,255,255,0.04);
+  // ── Minecraft GUI 3D border system ──
+  // These recreate the iconic Minecraft inventory border effect
+  --mc-border-outer: #000000;
+  --mc-border-hi:    rgba(150, 160, 175, 0.40);   // top/left inner highlight
+  --mc-border-sh:    rgba(0, 0, 0, 0.60);          // bottom/right inner shadow
 
-  // Borders
-  --border:       rgba(255,255,255,0.08);
-  --border-hover: rgba(255,255,255,0.16);
-  --border-active:rgba(79,195,247,0.4);
-
-  // Typography
+  // ── Typography ──
   --font-pixel: 'Press Start 2P', monospace;
   --font-body:  'Inter', system-ui, sans-serif;
 
-  // Shadows — offset block style
-  --shadow-block: 0 4px 0 rgba(0,0,0,0.5);
-  --shadow-sm:    0 1px 4px rgba(0,0,0,0.4);
-  --shadow-md:    0 4px 16px rgba(0,0,0,0.5);
-  --shadow-lg:    0 8px 32px rgba(0,0,0,0.6);
+  // ── Shadows ──
+  --shadow-block:  0 4px 0 rgba(0,0,0,0.7);
+  --shadow-sm:     0 2px 0 rgba(0,0,0,0.6);
+  --shadow-deep:   0 8px 0 rgba(0,0,0,0.8);
+  // Minecraft inset slot (sunken look)
+  --slot-shadow:   inset 2px 2px 0 var(--mc-border-sh), inset -2px -2px 0 var(--mc-border-hi);
+  // Minecraft raised panel
+  --panel-shadow:  inset -2px -2px 0 var(--mc-border-sh), inset 2px 2px 0 var(--mc-border-hi);
 
-  // Transitions
-  --transition-fast:   all 0.15s ease;
-  --transition-normal: all 0.2s cubic-bezier(0.4,0,0.2,1);
+  // ── Borders ──
+  --border:        rgba(255,255,255,0.08);
+  --border-hover:  rgba(255,255,255,0.16);
+  --border-active: var(--mc-diamond);
 
-  // Radii — block-style (sharp but not zero)
-  --radius-xs:  2px;
-  --radius-sm:  4px;
-  --radius-md:  6px;
-  --radius-lg:  8px;
+  // ── Radius — pixel-art means ZERO ──
+  --radius-xs:  0px;
+  --radius-sm:  0px;
+  --radius-md:  2px;
+  --radius-lg:  2px;
 
-  // Legacy aliases (so feature components still compile)
-  --blue:        var(--mc-diamond);
-  --blue-light:  var(--mc-diamond);
-  --blue-dim:    var(--mc-diamond-dim);
-  --orange:      var(--mc-orange);
-  --orange-light:#fb923c;
-  --orange-dim:  var(--mc-orange-dim);
-  --green:       var(--mc-grass);
-  --green-dim:   var(--mc-grass-dim);
-  --purple:      var(--mc-purple);
-  --purple-dim:  var(--mc-purple-dim);
-  --red:         var(--mc-redstone);
-  --red-dim:     var(--mc-redstone-dim);
-  --yellow:      var(--mc-gold);
-  --yellow-dim:  var(--mc-gold-dim);
+  // ── Transitions ──
+  --t-fast:   all 0.12s ease;
+  --t-normal: all 0.2s ease;
+
+  // ── Legacy aliases (feature components) ──
+  --blue:         var(--mc-diamond);
+  --blue-light:   var(--mc-diamond);
+  --blue-dim:     rgba(94,207,223,0.15);
+  --orange:       var(--mc-orange);
+  --orange-light: #fb923c;
+  --orange-dim:   rgba(224,122,16,0.15);
+  --green:        var(--mc-grass);
+  --green-dim:    rgba(93,158,63,0.15);
+  --purple:       #9c4dcc;
+  --purple-dim:   rgba(123,0,200,0.15);
+  --red:          var(--mc-redstone);
+  --red-dim:      rgba(196,30,58,0.15);
+  --yellow:       var(--mc-gold);
+  --yellow-dim:   rgba(254,173,39,0.15);
+  --bg-main:      var(--mc-obsidian);
+  --bg-card:      var(--mc-cobble);
+  --bg-raised:    var(--mc-gui);
+  --bg-hover:     rgba(255,255,255,0.05);
+  --bg-deep:      var(--mc-void);
   --glass-border:       var(--border);
   --glass-border-hover: var(--border-hover);
-  --glass-1: var(--bg-card);
-  --glass-2: var(--bg-raised);
+  --glass-1: var(--mc-cobble);
+  --glass-2: var(--mc-gui);
   --glass-3: rgba(255,255,255,0.06);
   --glass-blur: none;
-  --navy:       #0d1117;
-  --navy-light: #161b22;
+  --navy:       var(--mc-obsidian);
+  --navy-light: var(--mc-stone);
   --font-heading: var(--font-body);
+  --transition-fast:   var(--t-fast);
+  --transition-normal: var(--t-normal);
 }
 
-// ── Base Reset ──────────────────────────────────────────────────────────────
+// ── Base Reset ───────────────────────────────────────────────────────────────
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body {
   height: 100%;
   margin: 0;
   font-family: var(--font-body);
-  background-color: var(--bg-main);
-  color: #e6edf3;
+  background-color: var(--mc-obsidian);
+  color: #e8eaed;
   overflow-x: hidden;
+}
+
+// Subtle pixel grid texture on the page bg — like stone/bedrock
+body {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px, transparent 7px,
+      rgba(0,0,0,0.10) 7px, rgba(0,0,0,0.10) 8px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px, transparent 7px,
+      rgba(0,0,0,0.10) 7px, rgba(0,0,0,0.10) 8px
+    );
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -140,454 +165,384 @@ h1, h2, h3, h4, h5, h6 {
 
 a { text-decoration: none; }
 
-// ── Global Keyframes ────────────────────────────────────────────────────────
+// ── Minecraft 3D Panel (raised — like an inventory box) ───────────────────────
+.mc-panel {
+  background: var(--mc-cobble);
+  border: 2px solid var(--mc-border-outer);
+  box-shadow: var(--panel-shadow);
+}
+
+// ── Minecraft Slot (sunken — like an item slot) ───────────────────────────────
+.mc-slot {
+  background: var(--mc-stone);
+  border: 2px solid var(--mc-border-outer);
+  box-shadow: var(--slot-shadow);
+}
+
+// ── Block Card (used by feature components) ───────────────────────────────────
+.block-card, .glass-card {
+  background: var(--mc-cobble);
+  border: 2px solid #000;
+  box-shadow: var(--panel-shadow), 0 4px 0 rgba(0,0,0,0.5);
+  border-radius: 0;
+  transition: var(--t-normal);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--panel-shadow), 0 6px 0 rgba(0,0,0,0.5);
+  }
+}
+
+// ── Pixel text helper ─────────────────────────────────────────────────────────
+.pixel-text {
+  font-family: var(--font-pixel);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+}
+
+// ── Gradient text (kept for headers) ─────────────────────────────────────────
+.gradient-text-blue   { color: var(--mc-diamond); text-shadow: 0 0 8px rgba(94,207,223,0.4); }
+.gradient-text-orange { color: var(--mc-gold);    text-shadow: 0 0 8px rgba(254,173,39,0.4); }
+
+// ── Keyframes ────────────────────────────────────────────────────────────────
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from { opacity: 0; } to { opacity: 1; }
 }
-
-@keyframes float {
-  0%,100% { transform: translate(0,0) scale(1); }
-  33%     { transform: translate(30px,-20px) scale(1.04); }
-  66%     { transform: translate(-20px,30px) scale(1.02); }
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 @keyframes countUp {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-16px); }
+  from { opacity: 0; transform: translateX(-12px); }
   to   { opacity: 1; transform: translateX(0); }
 }
-
-@keyframes pulse {
-  0%,100% { transform: scale(1); }
-  50%     { transform: scale(1.05); }
-}
-
 @keyframes blink {
   0%,100% { opacity: 1; }
-  50%     { opacity: 0.3; }
+  50%     { opacity: 0.2; }
 }
-
+@keyframes xpPulse {
+  0%,100% { box-shadow: 0 0 4px var(--mc-xp), inset 0 0 4px rgba(128,201,32,0.3); }
+  50%     { box-shadow: 0 0 10px var(--mc-xp), inset 0 0 8px rgba(128,201,32,0.5); }
+}
 @keyframes shimmer {
   0%   { background-position: -200% center; }
   100% { background-position:  200% center; }
 }
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
-// ── Utility Animations ──────────────────────────────────────────────────────
-.fade-in-up    { animation: fadeInUp    0.5s cubic-bezier(0.4,0,0.2,1) both; }
-.fade-in       { animation: fadeIn      0.35s ease both; }
-.slide-in-left { animation: slideInLeft 0.4s cubic-bezier(0.4,0,0.2,1) both; }
+.fade-in-up    { animation: fadeInUp    0.4s ease both; }
+.fade-in       { animation: fadeIn      0.3s ease both; }
+.slide-in-left { animation: slideInLeft 0.35s ease both; }
 
 @for $i from 1 through 12 {
-  .stagger-#{$i} { animation-delay: #{$i * 70}ms; }
+  .stagger-#{$i} { animation-delay: #{$i * 60}ms; }
 }
 
-// ── Block Card ──────────────────────────────────────────────────────────────
-// The Minecraft-style card: solid fill, sharp corners, offset shadow
-.block-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-block);
-  transition: var(--transition-normal);
-
-  &:hover {
-    transform: translateY(-2px);
-    border-color: var(--border-hover);
-    box-shadow: 0 6px 0 rgba(0,0,0,0.5), var(--shadow-md);
-  }
-}
-
-// Legacy alias
-.glass-card {
-  @extend .block-card;
-}
-
-// ── Gradient Text (kept for page headers that use it) ───────────────────────
-.gradient-text-blue {
-  color: var(--mc-diamond);
-}
-.gradient-text-orange {
-  color: var(--mc-gold);
-}
-
-// ── Scrollbar ───────────────────────────────────────────────────────────────
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: var(--bg-deep); }
+// ── Scrollbar ────────────────────────────────────────────────────────────────
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--mc-void); }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1);
-  border-radius: 2px;
+  background: #3a3f48;
+  border: 1px solid #000;
   &:hover { background: var(--mc-grass); }
 }
 
-// ── Toolbar ─────────────────────────────────────────────────────────────────
+// ── Material Toolbar override ─────────────────────────────────────────────────
 .mat-toolbar.mat-primary {
-  background: var(--bg-card) !important;
-  border-bottom: 1px solid var(--border) !important;
+  background: var(--mc-stone) !important;
+  border-bottom: 2px solid #000 !important;
   z-index: 1000;
 }
 
-// ── Material Card Override ───────────────────────────────────────────────────
+// ── Material Card ─────────────────────────────────────────────────────────────
 .mat-mdc-card {
-  background: var(--bg-card) !important;
-  border: 1px solid var(--border) !important;
-  box-shadow: var(--shadow-block) !important;
-  border-radius: var(--radius-lg) !important;
+  background: var(--mc-cobble) !important;
+  border: 2px solid #000 !important;
+  box-shadow: var(--panel-shadow) !important;
+  border-radius: 0 !important;
 }
 
-// ── Buttons ─────────────────────────────────────────────────────────────────
+// ── Buttons ──────────────────────────────────────────────────────────────────
 .mat-mdc-raised-button.mat-primary {
   background: var(--mc-grass) !important;
-  border-radius: var(--radius-sm) !important;
-  padding: 10px 24px;
-  font-family: var(--font-body);
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  box-shadow: 0 4px 0 #2f5819 !important;
-  transition: var(--transition-fast) !important;
+  border-radius: 0 !important;
+  border: 2px solid #000 !important;
+  box-shadow: 0 4px 0 var(--mc-grass-dark) !important;
+  font-family: var(--font-body) !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+  transition: var(--t-fast) !important;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 0 #2f5819 !important;
+    box-shadow: 0 6px 0 var(--mc-grass-dark) !important;
+    background: #6db84a !important;
   }
   &:active {
     transform: translateY(2px);
-    box-shadow: 0 2px 0 #2f5819 !important;
+    box-shadow: 0 1px 0 var(--mc-grass-dark) !important;
   }
 }
 
 .mat-mdc-raised-button.mat-accent {
   background: var(--mc-diamond) !important;
   color: #000 !important;
-  border-radius: var(--radius-sm) !important;
-  font-family: var(--font-body);
-  font-weight: 700;
-  box-shadow: 0 4px 0 #01579b !important;
-  transition: var(--transition-fast) !important;
+  border-radius: 0 !important;
+  border: 2px solid #000 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 0 var(--mc-diamond-dk) !important;
+  transition: var(--t-fast) !important;
 
-  &:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #01579b !important; }
-  &:active { transform: translateY(2px); box-shadow: 0 2px 0 #01579b !important; }
+  &:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--mc-diamond-dk) !important; }
+  &:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--mc-diamond-dk) !important; }
 }
 
 .mat-mdc-icon-button {
-  transition: var(--transition-normal) !important;
+  transition: var(--t-normal) !important;
   &:hover { color: var(--mc-diamond) !important; }
 }
 
-// ── Form Fields ──────────────────────────────────────────────────────────────
+// ── Form Fields ───────────────────────────────────────────────────────────────
 .mat-mdc-form-field {
-  .mdc-text-field--outlined {
-    border-radius: var(--radius-sm) !important;
-  }
+  .mdc-text-field--outlined { border-radius: 0 !important; }
   .mdc-notched-outline__leading,
   .mdc-notched-outline__notch,
-  .mdc-notched-outline__trailing {
-    border-color: var(--border) !important;
-  }
+  .mdc-notched-outline__trailing { border-color: rgba(255,255,255,0.12) !important; }
   &:hover .mdc-notched-outline__leading,
   &:hover .mdc-notched-outline__notch,
-  &:hover .mdc-notched-outline__trailing {
-    border-color: var(--border-hover) !important;
-  }
+  &:hover .mdc-notched-outline__trailing { border-color: var(--mc-diamond) !important; }
 }
 
-// ── Sidenav ─────────────────────────────────────────────────────────────────
+// ── Sidenav ───────────────────────────────────────────────────────────────────
 .sidenav {
-  background: var(--bg-card) !important;
-  border-right: 1px solid var(--border) !important;
+  background: var(--mc-stone) !important;
+  border-right: 2px solid #000 !important;
 }
 
-// ── Active Nav Item ──────────────────────────────────────────────────────────
+// ── Active nav ────────────────────────────────────────────────────────────────
 .mat-mdc-list-item.active {
-  background: var(--mc-diamond-dim) !important;
+  background: rgba(94,207,223,0.12) !important;
   color: var(--mc-diamond) !important;
-
   &::before {
     content: '';
     position: absolute;
-    left: 0; top: 10%; height: 80%;
+    left: 0; top: 0; height: 100%;
     width: 3px;
     background: var(--mc-diamond);
-    border-radius: 0;
   }
 }
 
-// ── Mat Menu ─────────────────────────────────────────────────────────────────
+// ── Mat Menu ──────────────────────────────────────────────────────────────────
 .mat-mdc-menu-panel {
-  background: var(--bg-raised) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--radius-md) !important;
-  box-shadow: var(--shadow-lg) !important;
+  background: var(--mc-stone) !important;
+  border: 2px solid #000 !important;
+  box-shadow: var(--panel-shadow), 0 8px 0 rgba(0,0,0,0.7) !important;
+  border-radius: 0 !important;
 }
-.mat-mdc-menu-item { color: rgba(255,255,255,0.8) !important; }
-.mat-mdc-menu-item:hover { background: var(--bg-hover) !important; }
+.mat-mdc-menu-item { color: rgba(255,255,255,0.85) !important; }
+.mat-mdc-menu-item:hover { background: rgba(255,255,255,0.06) !important; }
 
-// ── Mat Table ────────────────────────────────────────────────────────────────
+// ── Mat Table ─────────────────────────────────────────────────────────────────
 .mat-mdc-table {
   background: transparent !important;
-
   .mat-mdc-header-cell {
-    background: rgba(79,195,247,0.06) !important;
+    background: rgba(94,207,223,0.08) !important;
     color: var(--mc-diamond) !important;
     font-weight: 700 !important;
-    font-size: 0.7rem !important;
+    font-size: 0.68rem !important;
     letter-spacing: 1.5px !important;
     text-transform: uppercase !important;
-    border-bottom: 1px solid var(--border) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
   }
-
   .mat-mdc-cell {
     border-bottom: 1px solid rgba(255,255,255,0.04) !important;
     color: rgba(255,255,255,0.75) !important;
   }
-
   .mat-mdc-row {
-    transition: var(--transition-fast) !important;
-    &:hover { background: var(--bg-hover) !important; }
+    transition: var(--t-fast) !important;
+    &:hover { background: rgba(255,255,255,0.04) !important; }
   }
 }
 
-// ── Mat Paginator ────────────────────────────────────────────────────────────
+// ── Mat Paginator ─────────────────────────────────────────────────────────────
 .mat-mdc-paginator {
   background: transparent !important;
-  color: rgba(255,255,255,0.4) !important;
-  border-top: 1px solid var(--border);
+  color: rgba(255,255,255,0.35) !important;
+  border-top: 1px solid rgba(255,255,255,0.06);
 }
-.mat-mdc-paginator-icon { fill: rgba(255,255,255,0.4) !important; }
+.mat-mdc-paginator-icon { fill: rgba(255,255,255,0.35) !important; }
 .mat-mdc-select-value   { color: rgba(255,255,255,0.6) !important; }
 
-// ── Mat Dialog ───────────────────────────────────────────────────────────────
+// ── Mat Dialog ────────────────────────────────────────────────────────────────
 .mat-mdc-dialog-container {
-  --mdc-dialog-container-color: var(--bg-raised) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--radius-lg) !important;
+  --mdc-dialog-container-color: var(--mc-stone) !important;
+  border: 2px solid #000 !important;
+  box-shadow: var(--panel-shadow), 0 12px 0 rgba(0,0,0,0.8) !important;
+  border-radius: 0 !important;
 }
-
-// Change Password dialog
 .change-password-panel .mat-mdc-dialog-container {
-  border-color: rgba(79,195,247,0.3) !important;
-  box-shadow: 0 0 40px rgba(79,195,247,0.1), 0 20px 60px rgba(0,0,0,0.6) !important;
+  border-color: var(--mc-diamond) !important;
 }
 
-// ── Mat Chips ────────────────────────────────────────────────────────────────
+// ── Mat Chips ─────────────────────────────────────────────────────────────────
 .mat-mdc-chip {
-  background: var(--bg-raised) !important;
-  border: 1px solid var(--border) !important;
+  background: var(--mc-gui) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
   color: rgba(255,255,255,0.8) !important;
-  border-radius: var(--radius-xs) !important;
+  border-radius: 0 !important;
 }
 
-// ── Mat Tooltip ──────────────────────────────────────────────────────────────
+// ── Mat Tooltip ───────────────────────────────────────────────────────────────
 .mat-mdc-tooltip {
-  background: var(--bg-raised) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--radius-sm) !important;
-  font-size: 0.8rem !important;
-  color: rgba(255,255,255,0.9) !important;
+  background: #100010 !important;
+  border: 2px solid #000 !important;
+  box-shadow:
+    inset -1px -1px 0 #9A5CFF,
+    inset 1px 1px 0 #1E0033 !important;
+  border-radius: 0 !important;
+  font-size: 0.75rem !important;
+  color: rgba(255,255,255,0.95) !important;
+  font-family: var(--font-body) !important;
 }
 
-// ── Snackbar ─────────────────────────────────────────────────────────────────
+// ── Snackbar ──────────────────────────────────────────────────────────────────
 .mat-mdc-snack-bar-container {
-  --mdc-snackbar-container-color: var(--bg-raised) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--radius-md) !important;
+  --mdc-snackbar-container-color: var(--mc-stone) !important;
+  border: 2px solid #000 !important;
+  border-radius: 0 !important;
 }
 
-// ── Global Status Badges ─────────────────────────────────────────────────────
+// ── XP Bar — reusable progress style ─────────────────────────────────────────
+.xp-bar {
+  height: 6px;
+  background: #1a1c1f;
+  border: 1px solid #000;
+  position: relative;
+  overflow: hidden;
+
+  .xp-fill {
+    height: 100%;
+    background: var(--mc-xp);
+    box-shadow: 0 0 6px var(--mc-xp);
+    animation: xpPulse 2s infinite ease-in-out;
+    transition: width 0.6s ease;
+  }
+}
+
+// ── Status Badges ─────────────────────────────────────────────────────────────
 .status-badge {
-  padding: 4px 12px;
-  border-radius: var(--radius-xs);
-  font-size: 0.62rem;
+  padding: 3px 10px;
+  border-radius: 0;
+  font-size: 0.6rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   display: inline-block;
-  min-width: 90px;
+  min-width: 80px;
   text-align: center;
+  border: 1px solid;
 
-  &.applied       { color: var(--mc-diamond); background: var(--mc-diamond-dim); border:1px solid rgba(79,195,247,0.25); }
+  &.applied       { color: var(--mc-diamond);  background: rgba(94,207,223,0.12);  border-color: rgba(94,207,223,0.3); }
   &.interviewing,
-  &.screening     { color: var(--mc-grass); background: var(--mc-grass-dim); border:1px solid rgba(93,158,63,0.25); }
-  &.offer         { color: var(--mc-gold); background: var(--mc-gold-dim); border:1px solid rgba(240,180,41,0.3); }
-  &.rejected      { color: var(--mc-redstone); background: var(--mc-redstone-dim); border:1px solid rgba(224,82,82,0.25); }
+  &.screening     { color: var(--mc-emerald);  background: rgba(23,221,98,0.12);   border-color: rgba(23,221,98,0.3); }
+  &.offer         { color: var(--mc-gold);     background: rgba(254,173,39,0.12);  border-color: rgba(254,173,39,0.35); }
+  &.rejected      { color: var(--mc-redstone); background: rgba(196,30,58,0.12);   border-color: rgba(196,30,58,0.3); }
   &.onhold,
   &.rtrpending,
   &.rtrsent,
-  &.submitted     { color: var(--mc-purple); background: var(--mc-purple-dim); border:1px solid rgba(156,77,204,0.25); }
+  &.submitted     { color: #c084fc;            background: rgba(123,0,200,0.12);   border-color: rgba(123,0,200,0.3); }
   &.active,
-  &.pending       { color: var(--mc-gold); background: var(--mc-gold-dim); border:1px solid rgba(240,180,41,0.25); }
+  &.pending       { color: var(--mc-gold);     background: rgba(254,173,39,0.12);  border-color: rgba(254,173,39,0.3); }
 }
 
-// ── Skeleton Loader ──────────────────────────────────────────────────────────
+// ── Skeleton ─────────────────────────────────────────────────────────────────
 .skeleton {
   background: linear-gradient(90deg,
-    var(--bg-card) 0%,
-    var(--bg-raised) 50%,
-    var(--bg-card) 100%);
+    var(--mc-cobble) 0%,
+    var(--mc-gui) 50%,
+    var(--mc-cobble) 100%);
   background-size: 200% 100%;
-  animation: shimmer 1.8s infinite linear;
-  border-radius: var(--radius-sm);
+  animation: shimmer 1.6s infinite linear;
+  border-radius: 0;
 }
 
-// ── Page container utility ───────────────────────────────────────────────────
+// ── Page Container ────────────────────────────────────────────────────────────
 .page-container {
   padding: 32px;
   max-width: 1400px;
   margin: 0 auto;
-  animation: fadeInUp 0.5s both;
+  animation: fadeInUp 0.4s both;
 }
 
-// ── Page Header utility ──────────────────────────────────────────────────────
+// ── Page Header ───────────────────────────────────────────────────────────────
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 36px;
+  margin-bottom: 32px;
 
   h1 {
-    font-size: 2.2rem;
+    font-size: 2rem;
     margin: 0 0 8px;
-    color: #e6edf3;
+    color: #e8eaed;
     letter-spacing: -0.5px;
   }
-
   .sub-label {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.4);
-    background: var(--bg-raised);
-    padding: 3px 12px;
-    border-radius: var(--radius-xs);
-    border: 1px solid var(--border);
-    letter-spacing: 1px;
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.35);
+    background: var(--mc-stone);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 2px 10px;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
     display: inline-block;
   }
 }
 
-// ── Mobile Responsive (≤ 768px) ──────────────────────────────────────────────
+// ── Mobile ────────────────────────────────────────────────────────────────────
 @media (max-width: 768px) {
-
-  .page-container {
-    padding: 16px !important;
-  }
-
+  .page-container { padding: 16px !important; }
   .page-header {
     flex-direction: column !important;
-    align-items: flex-start !important;
     gap: 12px !important;
     margin-bottom: 20px !important;
-
-    h1 {
-      font-size: 1.6rem !important;
-      letter-spacing: -0.5px !important;
-    }
+    h1 { font-size: 1.5rem !important; }
   }
-
-  .table-container,
-  .mat-mdc-table-container {
+  .table-container, .mat-mdc-table-container {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
-
     table { min-width: 600px; }
-
     .mat-mdc-header-cell,
-    .mat-mdc-cell {
-      padding: 12px 10px !important;
-      font-size: 0.8rem !important;
-    }
+    .mat-mdc-cell { padding: 12px 8px !important; font-size: 0.78rem !important; }
   }
-
-  .block-card,
-  .glass-card,
-  .mat-mdc-card {
-    box-shadow: none !important;
+  .block-card, .glass-card, .mat-mdc-card {
+    box-shadow: var(--panel-shadow) !important;
     &:hover { transform: none !important; }
   }
-
-  .kpi-grid,
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
-  }
-
-  .action-btn,
-  .mat-mdc-raised-button.full-mobile {
-    width: 100% !important;
-  }
-
-  .mat-mdc-icon-button {
-    width: 44px !important;
-    height: 44px !important;
-  }
-
-  .mat-mdc-form-field {
-    width: 100% !important;
-  }
-
-  .mat-mdc-dialog-container {
-    border-radius: var(--radius-sm) !important;
-  }
-
-  .cdk-overlay-pane {
-    max-width: 95vw !important;
-    width: 95vw !important;
-  }
-
-  .mat-mdc-snack-bar-container {
-    margin: 8px !important;
-  }
-
-  .builder-grid,
-  .two-col-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  canvas {
-    max-width: 100% !important;
-  }
-
+  .kpi-grid, .stats-grid { grid-template-columns: repeat(2,1fr) !important; gap: 8px !important; }
+  .action-btn, .mat-mdc-raised-button.full-mobile { width: 100% !important; }
+  .mat-mdc-icon-button { width: 44px !important; height: 44px !important; }
+  .mat-mdc-form-field { width: 100% !important; }
+  .cdk-overlay-pane { max-width: 95vw !important; width: 95vw !important; }
+  .builder-grid, .two-col-grid { grid-template-columns: 1fr !important; }
+  canvas { max-width: 100% !important; }
   .desktop-only { display: none !important; }
 }
 
-// ── Extra Small (≤ 480px) ─────────────────────────────────────────────────────
 @media (max-width: 480px) {
-  .page-header h1 {
-    font-size: 1.4rem !important;
-  }
-
-  .kpi-grid,
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-
-  .mat-mdc-tab-label {
-    min-width: 80px !important;
-    padding: 0 12px !important;
-    font-size: 0.75rem !important;
-  }
-
+  .page-header h1 { font-size: 1.3rem !important; }
+  .kpi-grid, .stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+  .mat-mdc-tab-label { min-width: 80px !important; padding: 0 10px !important; font-size: 0.72rem !important; }
   .action-label { display: none; }
 }
 
-// ── Safe area for notched phones ──────────────────────────────────────────────
 @supports (padding: env(safe-area-inset-bottom)) {
-  .sidenav-footer {
-    padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
-  }
-  .main-toolbar {
-    padding-top: env(safe-area-inset-top);
-  }
+  .sidenav-footer { padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important; }
+  .main-toolbar   { padding-top: env(safe-area-inset-top); }
 }

@@ -1,8 +1,14 @@
-// ── Toolbar ──────────────────────────────────────────────────────────────────
+// ── Toolbar ───────────────────────────────────────────────────────────────────
+// Looks like a Minecraft inventory title bar
 .main-toolbar {
   height: 56px;
-  background: #161b22 !important;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: #1e2228 !important;
+  border-bottom: 2px solid #000 !important;
+  // Classic MC 3D bottom edge
+  box-shadow:
+    inset 0 -2px 0 rgba(0,0,0,0.8),
+    inset 0 2px 0 rgba(150,160,175,0.15),
+    0 2px 0 rgba(0,0,0,0.9) !important;
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -12,41 +18,50 @@
 }
 
 .menu-trigger {
-  color: rgba(255,255,255,0.5) !important;
-  transition: color 0.15s ease !important;
-  &:hover { color: #4fc3f7 !important; }
+  color: rgba(255,255,255,0.45) !important;
+  transition: color 0.12s ease !important;
+  &:hover { color: #5ecfdf !important; }
 }
 
-// ── Brand ────────────────────────────────────────────────────────────────────
+// ── Brand ─────────────────────────────────────────────────────────────────────
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-left: 4px;
+}
 
-  .brand-icon {
-    width: 30px; height: 30px;
-    background: #5d9e3f;
-    border-radius: 4px;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 3px 0 #2f5819;
-    flex-shrink: 0;
+// Grass block icon — green top, brown side, black border, 3D shadow
+.brand-icon {
+  width: 32px; height: 32px;
+  position: relative;
+  flex-shrink: 0;
+  border: 2px solid #000;
+  box-shadow:
+    inset -2px -2px 0 rgba(0,0,0,0.5),
+    inset 2px 2px 0 rgba(150,160,175,0.3);
+  // Grass block: top half green, bottom half dirt brown
+  background: linear-gradient(180deg, #5d9e3f 0%, #5d9e3f 45%, #7a5330 45%, #7a5330 100%);
+  display: flex; align-items: center; justify-content: center;
 
-    mat-icon { font-size: 16px; width: 16px; height: 16px; color: white; }
+  mat-icon {
+    font-size: 15px; width: 15px; height: 15px;
+    color: rgba(255,255,255,0.9);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    margin-top: 4px; // Push icon into the "dirt" section
   }
+}
 
-  .logo-text {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.65rem;
-    font-weight: 400;
-    letter-spacing: 0;
-    color: #e6edf3;
-    line-height: 1.4;
+.logo-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.58rem;
+  font-weight: 400;
+  color: #e8eaed;
+  line-height: 1.6;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+  letter-spacing: 0;
 
-    .highlight {
-      color: #4fc3f7;
-    }
-  }
+  .highlight { color: #5ecfdf; }
 }
 
 .spacer { flex: 1 1 auto; }
@@ -58,58 +73,63 @@
   gap: 10px;
 }
 
+// ── LIVE badge ────────────────────────────────────────────────────────────────
+// Styled like a Minecraft status effect badge
 .live-badge {
   display: flex;
   align-items: center;
   gap: 5px;
-  background: rgba(80,195,90,0.1);
-  border: 1px solid rgba(80,195,90,0.25);
-  border-radius: 4px;
+  background: rgba(93,158,63,0.15);
+  border: 1px solid rgba(93,158,63,0.4);
+  border-radius: 0;
   padding: 3px 10px;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 1.5px;
-  color: #50c35a;
+  color: #5d9e3f;
   text-transform: uppercase;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Press Start 2P', monospace;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
 
   .live-dot {
-    width: 6px; height: 6px;
-    background: #50c35a;
-    border-radius: 50%;
+    width: 5px; height: 5px;
+    background: #80c920;
+    border-radius: 0; // square pixel
     animation: blink 1.5s infinite ease-in-out;
-    box-shadow: 0 0 6px #50c35a;
+    box-shadow: 0 0 4px #80c920;
   }
 }
 
 @keyframes blink {
   0%,100% { opacity: 1; }
-  50%     { opacity: 0.3; }
+  50%     { opacity: 0.2; }
 }
 
+// ── User Avatar Button ────────────────────────────────────────────────────────
 .user-btn {
   width: 36px !important; height: 36px !important;
   padding: 0 !important;
-  border-radius: 4px !important;
+  border-radius: 0 !important;
   overflow: hidden;
-  transition: transform 0.15s ease !important;
+  transition: transform 0.12s ease !important;
+  border: 2px solid #000 !important;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.6) !important;
 
-  &:hover { transform: scale(1.08); }
+  &:hover { transform: translateY(-2px); box-shadow: 0 5px 0 rgba(0,0,0,0.6) !important; }
+  &:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.6) !important; }
 }
 
 .user-avatar {
-  width: 36px; height: 36px;
+  width: 32px; height: 32px;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 4px;
-  border: 2px solid rgba(255,255,255,0.12);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
   font-family: 'Inter', sans-serif;
   color: white;
-  box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
 }
 
-// ── Menu User Header ─────────────────────────────────────────────────────────
+// ── Menu User Header ──────────────────────────────────────────────────────────
 .menu-user-header {
   display: flex;
   align-items: center;
@@ -118,45 +138,54 @@
 
   .menu-avatar {
     width: 40px; height: 40px;
-    border-radius: 4px;
+    border: 2px solid #000;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.6);
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 700;
     font-family: 'Inter', sans-serif;
     color: white;
-    box-shadow: 0 3px 0 rgba(0,0,0,0.4);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
   }
-
   .menu-name {
     font-weight: 700;
-    font-size: 0.9rem;
-    color: #e6edf3;
+    font-size: 0.88rem;
+    color: #e8eaed;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
   }
-
   .menu-role {
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.4);
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.35);
     letter-spacing: 0.3px;
   }
 }
 
 .logout-menu-item {
-  color: #e05252 !important;
-  mat-icon { color: #e05252 !important; }
+  color: #c41e3a !important;
+  mat-icon { color: #c41e3a !important; }
 }
 
-// ── Layout Container ──────────────────────────────────────────────────────────
+// ── Sidenav Container ─────────────────────────────────────────────────────────
 .sidenav-container {
   height: calc(100vh - 56px);
-  background-color: #0d1117;
+  background-color: #111317;
+  // Subtle pixel grid on main content bg
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0px, transparent 7px, rgba(0,0,0,0.08) 7px, rgba(0,0,0,0.08) 8px),
+    repeating-linear-gradient(90deg, transparent 0px, transparent 7px, rgba(0,0,0,0.08) 7px, rgba(0,0,0,0.08) 8px);
 }
 
-// ── Sidenav ───────────────────────────────────────────────────────────────────
+// ── Sidenav Panel ─────────────────────────────────────────────────────────────
+// Styled as the Minecraft inventory side panel
 .sidenav {
-  width: 248px;
-  background: #161b22 !important;
-  border-right: 1px solid rgba(255,255,255,0.08) !important;
+  width: 252px;
+  background: #1e2228 !important;
+  border-right: 2px solid #000 !important;
+  // 3D panel effect — right side shadow, left side highlight
+  box-shadow:
+    inset -2px 0 0 rgba(0,0,0,0.7),
+    inset 2px 0 0 rgba(150,160,175,0.12) !important;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -167,60 +196,64 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 16px 10px 8px;
+  padding: 12px 8px 8px;
 
-  &::-webkit-scrollbar { width: 3px; }
+  &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.08);
-    border-radius: 2px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 0;
   }
 }
 
 // ── Nav Section ───────────────────────────────────────────────────────────────
 .nav-section {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 
   .nav-section-label {
-    font-size: 0.58rem;
-    font-weight: 700;
-    letter-spacing: 1.8px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.42rem;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.18);
-    padding: 10px 10px 5px;
-    font-family: 'Inter', sans-serif;
+    color: rgba(255,255,255,0.2);
+    padding: 10px 8px 6px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
   }
 }
 
-// ── Nav Item ──────────────────────────────────────────────────────────────────
+// ── Nav Item — looks like an inventory slot ───────────────────────────────────
 .nav-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 10px;
-  border-radius: 4px;
-  margin-bottom: 1px;
+  padding: 8px 8px;
+  margin-bottom: 2px;
   cursor: pointer;
   text-decoration: none;
   color: rgba(255,255,255,0.5);
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
   position: relative;
   border: 1px solid transparent;
-  background: none;
+  background: transparent;
   width: 100%;
   font-family: 'Inter', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.83rem;
   font-weight: 500;
 
   &:hover {
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.05);
     color: rgba(255,255,255,0.85);
-    border-color: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
   }
 
+  // Selected hotbar slot look — bright border + highlight bg
   &.active {
-    background: rgba(79,195,247,0.1);
-    color: #4fc3f7;
-    border-color: rgba(79,195,247,0.2);
+    background: rgba(94,207,223,0.1);
+    color: #5ecfdf;
+    // Minecraft selected slot: lighter outer border with inner glow
+    border: 1px solid rgba(94,207,223,0.4);
+    box-shadow:
+      inset 0 0 0 1px rgba(94,207,223,0.15),
+      0 0 8px rgba(94,207,223,0.1);
     font-weight: 600;
 
     &::before {
@@ -228,114 +261,96 @@
       position: absolute;
       left: 0; top: 0; height: 100%;
       width: 3px;
-      background: #4fc3f7;
-      border-radius: 0;
-    }
-
-    .nav-icon-wrap {
-      box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+      background: #5ecfdf;
+      box-shadow: 0 0 6px rgba(94,207,223,0.6);
     }
   }
 }
 
-// ── Nav Icon Wraps ────────────────────────────────────────────────────────────
+// ── Nav Icon Wrap — looks like an item icon ───────────────────────────────────
 .nav-icon-wrap {
-  width: 30px; height: 30px;
-  border-radius: 4px;
+  width: 28px; height: 28px;
+  border: 1px solid rgba(0,0,0,0.6);
+  // Sunken slot look
+  box-shadow:
+    inset 1px 1px 0 rgba(0,0,0,0.5),
+    inset -1px -1px 0 rgba(150,160,175,0.2);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  transition: all 0.15s ease;
-  box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+  transition: all 0.12s ease;
 
-  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  mat-icon { font-size: 15px; width: 15px; height: 15px; }
 
-  &.icon-blue   { background: rgba(79,195,247,0.2);  color: #4fc3f7; }
-  &.icon-orange { background: rgba(249,115,22,0.2);  color: #fb923c; }
-  &.icon-green  { background: rgba(93,158,63,0.25);  color: #7ec850; }
-  &.icon-purple { background: rgba(156,77,204,0.2);  color: #c084fc; }
-  &.icon-yellow { background: rgba(240,180,41,0.2);  color: #f0b429; }
-  &.icon-red    { background: rgba(224,82,82,0.2);   color: #f07070; }
-  &.icon-teal   { background: rgba(20,184,166,0.2);  color: #2dd4bf; }
+  &.icon-blue   { background: rgba(94,207,223,0.18);   color: #5ecfdf; }
+  &.icon-orange { background: rgba(224,122,16,0.2);    color: #fead27; }
+  &.icon-green  { background: rgba(93,158,63,0.22);    color: #80c920; }
+  &.icon-purple { background: rgba(123,0,200,0.2);     color: #c084fc; }
+  &.icon-yellow { background: rgba(254,173,39,0.2);    color: #fead27; }
+  &.icon-red    { background: rgba(196,30,58,0.2);     color: #e05252; }
+  &.icon-teal   { background: rgba(20,184,166,0.18);   color: #2dd4bf; }
 }
 
-.nav-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+}
 
 // ── Sidenav Footer ────────────────────────────────────────────────────────────
 .sidenav-footer {
-  padding: 8px 10px 14px;
+  padding: 6px 8px 12px;
   flex-shrink: 0;
 
   .footer-divider {
     height: 1px;
-    background: rgba(255,255,255,0.06);
-    margin-bottom: 8px;
+    background: rgba(255,255,255,0.05);
+    margin-bottom: 6px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.5);
   }
 
   .logout-item {
-    color: rgba(224,82,82,0.7) !important;
+    color: rgba(196,30,58,0.7) !important;
     &:hover {
-      background: rgba(224,82,82,0.08) !important;
-      color: #e05252 !important;
-      border-color: rgba(224,82,82,0.2) !important;
+      background: rgba(196,30,58,0.08) !important;
+      color: #c41e3a !important;
+      border-color: rgba(196,30,58,0.25) !important;
     }
   }
 }
 
 // ── Main Content ──────────────────────────────────────────────────────────────
 .main-content {
-  background: #0d1117;
+  background: transparent;
   min-height: 100%;
   overflow-y: auto;
 }
 
 // ── Mobile ────────────────────────────────────────────────────────────────────
 @media (max-width: 768px) {
-  .main-toolbar {
-    padding: 0 8px;
-    height: 52px;
-  }
-
-  .brand .logo-text {
-    font-size: 0.55rem;
-  }
-
-  .live-badge {
-    display: none;
-  }
-
+  .main-toolbar { padding: 0 10px; height: 52px; }
+  .brand .logo-text { font-size: 0.5rem; }
+  .live-badge { display: none; }
   .sidenav-container {
     height: calc(100vh - 52px);
     height: calc(100dvh - 52px);
   }
-
   .sidenav {
-    width: 82vw !important;
-    max-width: 300px !important;
-    box-shadow: 4px 0 20px rgba(0,0,0,0.7) !important;
+    width: 80vw !important;
+    max-width: 290px !important;
+    box-shadow:
+      inset -2px 0 0 rgba(0,0,0,0.7),
+      4px 0 32px rgba(0,0,0,0.9) !important;
   }
-
   .nav-item {
-    padding: 12px 10px !important;
-    margin-bottom: 2px !important;
-    font-size: 0.9rem !important;
-
+    padding: 11px 8px !important;
+    font-size: 0.88rem !important;
     &:hover { transform: none !important; }
   }
-
   .nav-icon-wrap {
-    width: 34px !important;
-    height: 34px !important;
-
-    mat-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; }
+    width: 32px !important; height: 32px !important;
+    mat-icon { font-size: 17px !important; width: 17px !important; height: 17px !important; }
   }
-
-  .nav-section-label {
-    font-size: 0.6rem !important;
-    padding: 12px 10px 6px !important;
-  }
-
-  .user-btn {
-    width: 40px !important;
-    height: 40px !important;
-  }
+  .user-btn { width: 40px !important; height: 40px !important; }
 }

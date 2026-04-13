@@ -1,69 +1,75 @@
 .dashboard-container {
-  padding: 32px 32px 48px;
+  padding: 28px 28px 48px;
   max-width: 1500px;
   margin: 0 auto;
   min-height: 100%;
 }
 
-// ── Welcome Header ─────────────────────────────────────────────────────────
+// ── Welcome Header ─────────────────────────────────────────────────────────────
 .welcome-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 36px;
+  margin-bottom: 32px;
   gap: 20px;
   flex-wrap: wrap;
 }
 
+// Minecraft status effect tag / achievement toast
 .greeting-tag {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  background: rgba(93,158,63,0.1);
-  border: 1px solid rgba(93,158,63,0.25);
-  border-radius: 4px;
+  gap: 6px;
+  background: rgba(93,158,63,0.12);
+  border: 1px solid rgba(93,158,63,0.35);
+  // Minecraft raised button look
+  box-shadow:
+    inset -1px -1px 0 rgba(0,0,0,0.5),
+    inset 1px 1px 0 rgba(150,160,175,0.2);
   padding: 4px 12px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #7ec850;
-  letter-spacing: 1.2px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  letter-spacing: 1px;
+  color: #80c920;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 
   .greeting-dot {
-    width: 6px; height: 6px;
-    background: #50c35a;
-    border-radius: 50%;
-    box-shadow: 0 0 6px #50c35a;
-    animation: blink 2s infinite ease-in-out;
+    width: 5px; height: 5px;
+    background: #80c920;
+    border-radius: 0; // pixel square
+    box-shadow: 0 0 4px #80c920;
+    animation: blink 1.8s infinite;
   }
 }
 
 @keyframes blink {
   0%,100% { opacity: 1; }
-  50%     { opacity: 0.3; }
+  50%     { opacity: 0.15; }
 }
 
+// Big pixel title — like a Minecraft screen heading
 .dashboard-title {
   font-family: 'Press Start 2P', monospace;
-  font-size: 1.35rem;
+  font-size: 1.3rem;
   font-weight: 400;
+  color: #e8eaed;
+  line-height: 1.7;
+  margin: 0 0 12px;
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 2px 2px 0 rgba(0,0,0,0.6);
   letter-spacing: 0;
-  margin: 0 0 10px;
-  color: #e6edf3;
-  line-height: 1.6;
 
-  .title-accent {
-    color: #4fc3f7;
-  }
+  .title-accent { color: #5ecfdf; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 16px rgba(94,207,223,0.4); }
 }
 
 .dashboard-subtitle {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: rgba(255,255,255,0.3);
   margin: 0;
   font-weight: 400;
   font-family: 'Inter', sans-serif;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
 }
 
 .welcome-right {
@@ -73,251 +79,293 @@
   flex-shrink: 0;
 }
 
+// ── Minecraft Button style ─────────────────────────────────────────────────────
 .quick-link-btn {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 9px 18px;
-  border-radius: 4px;
-  font-size: 0.82rem;
-  font-weight: 600;
+  padding: 9px 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
   font-family: 'Inter', sans-serif;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
+  // Minecraft button: raised 3D look
   background: #5d9e3f;
-  color: white;
-  border: 1px solid rgba(93,158,63,0.5);
-  box-shadow: 0 4px 0 #2f5819;
+  color: #fff;
+  border: 2px solid #000;
+  box-shadow:
+    0 4px 0 #2f5819,
+    inset -2px -2px 0 rgba(0,0,0,0.3),
+    inset 2px 2px 0 rgba(150,200,100,0.25);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
 
   mat-icon { font-size: 16px; width: 16px; height: 16px; }
 
   &:hover {
+    background: #6db84a;
     transform: translateY(-2px);
-    box-shadow: 0 6px 0 #2f5819;
+    box-shadow:
+      0 6px 0 #2f5819,
+      inset -2px -2px 0 rgba(0,0,0,0.3),
+      inset 2px 2px 0 rgba(150,200,100,0.3);
   }
   &:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 0 #2f5819;
+    transform: translateY(3px);
+    box-shadow:
+      0 1px 0 #2f5819,
+      inset -2px -2px 0 rgba(0,0,0,0.4),
+      inset 2px 2px 0 rgba(0,0,0,0.2);
   }
 
+  // Secondary: ghost style
   &.secondary {
     background: rgba(255,255,255,0.04);
-    border-color: rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.6);
-    box-shadow: 0 4px 0 rgba(0,0,0,0.4);
+    border-color: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.55);
+    box-shadow:
+      0 4px 0 rgba(0,0,0,0.5),
+      inset -2px -2px 0 rgba(0,0,0,0.3),
+      inset 2px 2px 0 rgba(255,255,255,0.06);
+    text-shadow: none;
 
     &:hover {
-      background: rgba(255,255,255,0.07);
-      color: rgba(255,255,255,0.85);
-      box-shadow: 0 6px 0 rgba(0,0,0,0.4);
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.8);
+      box-shadow:
+        0 6px 0 rgba(0,0,0,0.5),
+        inset -2px -2px 0 rgba(0,0,0,0.3),
+        inset 2px 2px 0 rgba(255,255,255,0.08);
     }
   }
 }
 
-// ── Loading Screen ─────────────────────────────────────────────────────────
+// ── Loading Screen ─────────────────────────────────────────────────────────────
 .loading-screen {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 100px 0;
-  gap: 16px;
+  gap: 20px;
 
-  h3 { margin: 0; color: #e6edf3; font-size: 1rem; }
-  p  { margin: 0; color: rgba(255,255,255,0.35); font-size: 0.85rem; }
+  h3 {
+    margin: 0;
+    color: #e8eaed;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.7rem;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+    animation: blink 2s infinite;
+  }
+  p {
+    margin: 0;
+    color: rgba(255,255,255,0.3);
+    font-size: 0.82rem;
+  }
 }
 
-.loading-orbs {
-  display: none; // No glassmorphism orbs in MC theme
-}
-
-.orb { display: none; }
+.loading-orbs, .orb { display: none; }
 
 ::ng-deep .custom-spinner circle {
-  stroke: #4fc3f7 !important;
+  stroke: #5ecfdf !important;
 }
 
-// ── Error State ────────────────────────────────────────────────────────────
+// ── Error State ────────────────────────────────────────────────────────────────
 .error-state {
   text-align: center;
   padding: 80px 0;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.35);
 
   mat-icon {
-    font-size: 56px; width: 56px; height: 56px;
+    font-size: 52px; width: 52px; height: 52px;
     display: block; margin: 0 auto 16px;
-    color: #e05252;
+    color: #c41e3a;
+    filter: drop-shadow(0 0 8px rgba(196,30,58,0.4));
   }
-  h3 { margin: 0 0 8px; color: #e6edf3; font-size: 1.2rem; }
-  p  { margin: 0; font-size: 0.85rem; }
+  h3 {
+    margin: 0 0 8px;
+    color: #e8eaed;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.8rem;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+  }
+  p { margin: 0; font-size: 0.83rem; }
 }
 
-// ── Stats Grid ─────────────────────────────────────────────────────────────
+// ── Stats Grid ─────────────────────────────────────────────────────────────────
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(188px, 1fr));
-  gap: 14px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
-// ── Stat Card ──────────────────────────────────────────────────────────────
+// ── Stat Card — Minecraft inventory slot / item frame ─────────────────────────
 .stat-card {
   position: relative;
-  border-radius: 4px;
-  padding: 20px;
+  padding: 16px 16px 14px;
   cursor: pointer;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.07);
-  background: #161b22;
-  box-shadow: 0 4px 0 rgba(0,0,0,0.4);
-  transition: all 0.15s ease;
+  // Minecraft inventory panel borders
+  background: #232830;
+  border: 2px solid #000;
+  box-shadow:
+    inset -2px -2px 0 rgba(0,0,0,0.7),
+    inset 2px 2px 0 rgba(150,160,175,0.18),
+    0 4px 0 rgba(0,0,0,0.7);
+  transition: all 0.12s ease;
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 7px 0 rgba(0,0,0,0.4);
-    border-color: rgba(255,255,255,0.12);
-
-    .stat-card__glow { opacity: 1; }
+    box-shadow:
+      inset -2px -2px 0 rgba(0,0,0,0.7),
+      inset 2px 2px 0 rgba(150,160,175,0.22),
+      0 7px 0 rgba(0,0,0,0.7);
     .stat-card__bar-fill { width: 100%; }
   }
   &:active {
     transform: translateY(2px);
-    box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+    box-shadow:
+      inset -2px -2px 0 rgba(0,0,0,0.7),
+      inset 2px 2px 0 rgba(0,0,0,0.3),
+      0 2px 0 rgba(0,0,0,0.7);
   }
 }
 
 .stat-card__glow {
   position: absolute;
   inset: 0;
-  border-radius: inherit;
-  opacity: 0;
-  transition: opacity 0.2s ease;
   pointer-events: none;
 }
 
 .stat-card__top {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 14px;
+  justify-content: flex-start;
+  margin-bottom: 10px;
 }
 
+// Item icon — looks like a Minecraft inventory item square
 .stat-card__icon {
-  width: 38px; height: 38px;
-  border-radius: 4px;
+  width: 36px; height: 36px;
+  border: 1px solid #000;
+  box-shadow:
+    inset 1px 1px 0 rgba(0,0,0,0.5),
+    inset -1px -1px 0 rgba(150,160,175,0.2);
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 3px 0 rgba(0,0,0,0.4);
 
-  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  mat-icon { font-size: 19px; width: 19px; height: 19px; }
 }
 
+// Big pixel number — the most important Minecraft touch
 .stat-card__value {
-  font-size: 2.2rem;
-  font-weight: 800;
-  font-family: 'Inter', sans-serif;
-  letter-spacing: -2px;
-  margin-bottom: 4px;
-  line-height: 1;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1.45rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  margin-bottom: 8px;
+  line-height: 1.2;
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.8);
   animation: countUp 0.4s both;
 }
 
 @keyframes countUp {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 .stat-card__label {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 1px;
-  opacity: 0.5;
+  opacity: 0.45;
   text-transform: uppercase;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
+  font-family: 'Inter', sans-serif;
 }
 
+// XP bar style progress bar — a true Minecraft touch
 .stat-card__bar {
-  height: 3px;
-  border-radius: 1px;
-  background: rgba(255,255,255,0.06);
+  height: 5px;
+  background: #0d0f12;
+  border: 1px solid #000;
   overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(0,0,0,0.5);
 }
 
 .stat-card__bar-fill {
   height: 100%;
   width: 35%;
-  border-radius: 1px;
   transition: width 0.5s ease;
 }
 
-// ── Color variants ─────────────────────────────────────────────────────────
+// ── Color variants — Minecraft item rarity colors ─────────────────────────────
 .stat-card--blue {
-  .stat-card__glow     { background: linear-gradient(135deg, rgba(79,195,247,0.07) 0%, transparent 60%); }
-  .stat-card__icon     { background: rgba(79,195,247,0.18); color: #4fc3f7; }
-  .stat-card__value    { color: #4fc3f7; }
-  .stat-card__bar-fill { background: linear-gradient(90deg, #0277bd, #4fc3f7); }
-  &:hover { border-color: rgba(79,195,247,0.3); box-shadow: 0 7px 0 rgba(0,0,0,0.4), 0 0 20px rgba(79,195,247,0.1); }
+  .stat-card__icon     { background: rgba(94,207,223,0.18); color: #5ecfdf; }
+  .stat-card__value    { color: #5ecfdf; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(94,207,223,0.3); }
+  .stat-card__bar-fill { background: #5ecfdf; box-shadow: 0 0 4px #5ecfdf; }
+  &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(94,207,223,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
 .stat-card--orange {
-  .stat-card__glow     { background: linear-gradient(135deg, rgba(249,115,22,0.08) 0%, transparent 60%); }
-  .stat-card__icon     { background: rgba(249,115,22,0.2); color: #fb923c; }
-  .stat-card__value    { color: #fb923c; }
-  .stat-card__bar-fill { background: linear-gradient(90deg, #c2410c, #fb923c); }
-  &:hover { border-color: rgba(249,115,22,0.3); box-shadow: 0 7px 0 rgba(0,0,0,0.4), 0 0 20px rgba(249,115,22,0.1); }
+  .stat-card__icon     { background: rgba(224,122,16,0.2); color: #fead27; }
+  .stat-card__value    { color: #fead27; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(254,173,39,0.3); }
+  .stat-card__bar-fill { background: #fead27; box-shadow: 0 0 4px #fead27; }
+  &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(254,173,39,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
 .stat-card--green {
-  .stat-card__glow     { background: linear-gradient(135deg, rgba(93,158,63,0.08) 0%, transparent 60%); }
-  .stat-card__icon     { background: rgba(93,158,63,0.2); color: #7ec850; }
-  .stat-card__value    { color: #7ec850; }
-  .stat-card__bar-fill { background: linear-gradient(90deg, #3a6e24, #7ec850); }
-  &:hover { border-color: rgba(93,158,63,0.35); box-shadow: 0 7px 0 rgba(0,0,0,0.4), 0 0 20px rgba(93,158,63,0.1); }
+  .stat-card__icon     { background: rgba(93,158,63,0.2); color: #80c920; }
+  .stat-card__value    { color: #80c920; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(128,201,32,0.3); }
+  .stat-card__bar-fill { background: #80c920; box-shadow: 0 0 4px #80c920; }
+  &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(128,201,32,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
 .stat-card--red {
-  .stat-card__glow     { background: linear-gradient(135deg, rgba(224,82,82,0.08) 0%, transparent 60%); }
-  .stat-card__icon     { background: rgba(224,82,82,0.18); color: #f07070; }
-  .stat-card__value    { color: #f07070; }
-  .stat-card__bar-fill { background: linear-gradient(90deg, #991b1b, #f07070); }
-  &:hover { border-color: rgba(224,82,82,0.3); box-shadow: 0 7px 0 rgba(0,0,0,0.4), 0 0 20px rgba(224,82,82,0.1); }
+  .stat-card__icon     { background: rgba(196,30,58,0.2); color: #e05252; }
+  .stat-card__value    { color: #e05252; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(196,30,58,0.3); }
+  .stat-card__bar-fill { background: #c41e3a; box-shadow: 0 0 4px #c41e3a; }
+  &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(196,30,58,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
 .stat-card--purple {
-  .stat-card__glow     { background: linear-gradient(135deg, rgba(156,77,204,0.08) 0%, transparent 60%); }
-  .stat-card__icon     { background: rgba(156,77,204,0.18); color: #c084fc; }
-  .stat-card__value    { color: #c084fc; }
-  .stat-card__bar-fill { background: linear-gradient(90deg, #7e22ce, #c084fc); }
-  &:hover { border-color: rgba(156,77,204,0.3); box-shadow: 0 7px 0 rgba(0,0,0,0.4), 0 0 20px rgba(156,77,204,0.1); }
+  .stat-card__icon     { background: rgba(123,0,200,0.2); color: #c084fc; }
+  .stat-card__value    { color: #c084fc; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(192,132,252,0.3); }
+  .stat-card__bar-fill { background: #9b59d0; box-shadow: 0 0 4px #9b59d0; }
+  &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(123,0,200,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
 .stat-card--yellow {
-  .stat-card__glow     { background: linear-gradient(135deg, rgba(240,180,41,0.08) 0%, transparent 60%); }
-  .stat-card__icon     { background: rgba(240,180,41,0.18); color: #f0b429; }
-  .stat-card__value    { color: #f0b429; }
-  .stat-card__bar-fill { background: linear-gradient(90deg, #92400e, #f0b429); }
-  &:hover { border-color: rgba(240,180,41,0.3); box-shadow: 0 7px 0 rgba(0,0,0,0.4), 0 0 20px rgba(240,180,41,0.1); }
+  .stat-card__icon     { background: rgba(254,173,39,0.18); color: #fead27; }
+  .stat-card__value    { color: #fead27; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(254,173,39,0.3); }
+  .stat-card__bar-fill { background: #fead27; box-shadow: 0 0 4px #fead27; }
+  &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(254,173,39,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
-// ── Charts Row ─────────────────────────────────────────────────────────────
+// ── Charts Row ─────────────────────────────────────────────────────────────────
 .charts-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 18px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
+// Chart card — Minecraft enchantment table / book panel style
 .chart-card {
-  background: #161b22;
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 4px;
-  padding: 24px;
-  box-shadow: 0 4px 0 rgba(0,0,0,0.4);
-  transition: all 0.15s ease;
+  background: #1e2228;
+  border: 2px solid #000;
+  box-shadow:
+    inset -2px -2px 0 rgba(0,0,0,0.7),
+    inset 2px 2px 0 rgba(150,160,175,0.15),
+    0 4px 0 rgba(0,0,0,0.6);
+  padding: 20px 20px 16px;
+  transition: all 0.12s ease;
 
   &:hover {
-    border-color: rgba(255,255,255,0.12);
-    box-shadow: 0 6px 0 rgba(0,0,0,0.4);
+    box-shadow:
+      inset -2px -2px 0 rgba(0,0,0,0.7),
+      inset 2px 2px 0 rgba(150,160,175,0.18),
+      0 6px 0 rgba(0,0,0,0.6);
   }
 }
 
@@ -325,177 +373,178 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 
   h2 {
-    font-size: 1rem;
-    font-weight: 700;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.58rem;
+    font-weight: 400;
     color: rgba(255,255,255,0.85);
-    margin: 0 0 4px;
-    font-family: 'Inter', sans-serif;
+    margin: 0 0 6px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+    line-height: 1.6;
   }
-
   p {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.3);
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.28);
     margin: 0;
+    font-family: 'Inter', sans-serif;
   }
 }
 
+// Item icon badge
 .chart-card__badge {
-  width: 34px; height: 34px;
-  background: rgba(79,195,247,0.1);
-  border: 1px solid rgba(79,195,247,0.2);
-  border-radius: 4px;
-  box-shadow: 0 3px 0 rgba(0,0,0,0.4);
+  width: 32px; height: 32px;
+  background: rgba(94,207,223,0.1);
+  border: 1px solid #000;
+  box-shadow:
+    inset 1px 1px 0 rgba(0,0,0,0.5),
+    inset -1px -1px 0 rgba(94,207,223,0.2);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 
-  mat-icon { font-size: 18px; color: #4fc3f7; }
+  mat-icon { font-size: 17px; color: #5ecfdf; }
 }
 
+// Gold tag — like a Minecraft name tag
 .chart-tag {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #f0b429;
-  background: rgba(240,180,41,0.1);
-  border: 1px solid rgba(240,180,41,0.25);
-  padding: 3px 10px;
-  border-radius: 4px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.42rem;
+  font-weight: 400;
+  color: #fead27;
+  background: rgba(254,173,39,0.1);
+  border: 1px solid rgba(254,173,39,0.3);
+  padding: 4px 10px;
   letter-spacing: 0.5px;
   white-space: nowrap;
   align-self: flex-start;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
 }
 
 .chart-wrapper {
-  height: 280px;
+  height: 260px;
   position: relative;
 }
 
-// ── Quick Actions ──────────────────────────────────────────────────────────
+// ── Quick Actions — Minecraft Hotbar ──────────────────────────────────────────
+// The iconic 9-slot hotbar at the bottom
 .quick-actions {
-  background: #161b22;
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 4px;
-  padding: 20px;
-  box-shadow: 0 4px 0 rgba(0,0,0,0.4);
+  background: #1a1c22;
+  border: 2px solid #000;
+  box-shadow:
+    inset -2px -2px 0 rgba(0,0,0,0.7),
+    inset 2px 2px 0 rgba(150,160,175,0.15),
+    0 4px 0 rgba(0,0,0,0.6);
+  padding: 16px 20px;
 }
 
 .quick-actions__title {
-  font-size: 0.62rem;
-  font-weight: 700;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.42rem;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: rgba(255,255,255,0.2);
   margin-bottom: 14px;
-  font-family: 'Inter', sans-serif;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
 }
 
+// Hotbar — evenly spaced slots
 .quick-actions__grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
+// Each hotbar slot — sunken, like Minecraft inventory slots
 .qa-btn {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   padding: 9px 16px;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.15s ease;
-  border: 1px solid transparent;
+  transition: all 0.12s ease;
+  // Sunken slot (like unselected hotbar item)
+  border: 2px solid #000;
+  box-shadow:
+    inset 2px 2px 0 rgba(0,0,0,0.5),
+    inset -2px -2px 0 rgba(150,160,175,0.15);
 
-  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  mat-icon { font-size: 15px; width: 15px; height: 15px; }
 
-  &:hover { transform: translateY(-2px); }
-  &:active { transform: translateY(1px); }
+  &:hover {
+    transform: translateY(-2px);
+    // Raised on hover (selected hotbar slot)
+    box-shadow:
+      inset -2px -2px 0 rgba(0,0,0,0.5),
+      inset 2px 2px 0 rgba(150,160,175,0.25),
+      0 4px 0 rgba(0,0,0,0.6);
+  }
+  &:active {
+    transform: translateY(2px);
+    box-shadow:
+      inset 2px 2px 0 rgba(0,0,0,0.6),
+      inset -2px -2px 0 rgba(0,0,0,0.1);
+  }
 
   &--blue {
-    background: rgba(79,195,247,0.12);
-    color: #4fc3f7;
-    border-color: rgba(79,195,247,0.25);
-    box-shadow: 0 3px 0 rgba(0,0,0,0.4);
-    &:hover { background: rgba(79,195,247,0.2); box-shadow: 0 5px 0 rgba(0,0,0,0.4); }
+    background: rgba(94,207,223,0.1); color: #5ecfdf;
+    border-color: rgba(94,207,223,0.25);
+    &:hover { background: rgba(94,207,223,0.18); }
   }
   &--orange {
-    background: rgba(249,115,22,0.12);
-    color: #fb923c;
-    border-color: rgba(249,115,22,0.25);
-    box-shadow: 0 3px 0 rgba(0,0,0,0.4);
-    &:hover { background: rgba(249,115,22,0.2); box-shadow: 0 5px 0 rgba(0,0,0,0.4); }
+    background: rgba(224,122,16,0.1); color: #fead27;
+    border-color: rgba(254,173,39,0.25);
+    &:hover { background: rgba(254,173,39,0.18); }
   }
   &--green {
-    background: rgba(93,158,63,0.12);
-    color: #7ec850;
-    border-color: rgba(93,158,63,0.25);
-    box-shadow: 0 3px 0 rgba(0,0,0,0.4);
-    &:hover { background: rgba(93,158,63,0.2); box-shadow: 0 5px 0 rgba(0,0,0,0.4); }
+    background: rgba(93,158,63,0.1); color: #80c920;
+    border-color: rgba(128,201,32,0.25);
+    &:hover { background: rgba(128,201,32,0.18); }
   }
   &--purple {
-    background: rgba(156,77,204,0.12);
-    color: #c084fc;
-    border-color: rgba(156,77,204,0.25);
-    box-shadow: 0 3px 0 rgba(0,0,0,0.4);
-    &:hover { background: rgba(156,77,204,0.2); box-shadow: 0 5px 0 rgba(0,0,0,0.4); }
+    background: rgba(123,0,200,0.1); color: #c084fc;
+    border-color: rgba(192,132,252,0.25);
+    &:hover { background: rgba(192,132,252,0.15); }
   }
   &--yellow {
-    background: rgba(240,180,41,0.12);
-    color: #f0b429;
-    border-color: rgba(240,180,41,0.25);
-    box-shadow: 0 3px 0 rgba(0,0,0,0.4);
-    &:hover { background: rgba(240,180,41,0.2); box-shadow: 0 5px 0 rgba(0,0,0,0.4); }
+    background: rgba(254,173,39,0.1); color: #fead27;
+    border-color: rgba(254,173,39,0.25);
+    &:hover { background: rgba(254,173,39,0.18); }
   }
   &--teal {
-    background: rgba(20,184,166,0.12);
-    color: #2dd4bf;
-    border-color: rgba(20,184,166,0.25);
-    box-shadow: 0 3px 0 rgba(0,0,0,0.4);
-    &:hover { background: rgba(20,184,166,0.2); box-shadow: 0 5px 0 rgba(0,0,0,0.4); }
+    background: rgba(20,184,166,0.1); color: #2dd4bf;
+    border-color: rgba(45,212,191,0.25);
+    &:hover { background: rgba(45,212,191,0.18); }
   }
 }
 
+// ── Animations ────────────────────────────────────────────────────────────────
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.fade-in-up { animation: fadeInUp 0.45s cubic-bezier(0.4,0,0.2,1) both; }
-.stagger-1  { animation-delay: 70ms; }
-.stagger-2  { animation-delay: 140ms; }
-.stagger-3  { animation-delay: 210ms; }
+.fade-in-up { animation: fadeInUp 0.4s ease both; }
+.stagger-1  { animation-delay: 60ms; }
+.stagger-2  { animation-delay: 120ms; }
+.stagger-3  { animation-delay: 180ms; }
 
+// ── Mobile ────────────────────────────────────────────────────────────────────
 @media (max-width: 768px) {
-  .dashboard-container {
-    padding: 16px 16px 32px;
-  }
-
-  .welcome-header {
-    margin-bottom: 20px;
-  }
-
-  .dashboard-title {
-    font-size: 0.9rem;
-  }
-
-  .welcome-right {
-    flex-wrap: wrap;
-    width: 100%;
-  }
-
+  .dashboard-container { padding: 14px 14px 32px; }
+  .welcome-header { margin-bottom: 18px; }
+  .dashboard-title { font-size: 0.85rem; }
+  .welcome-right { flex-wrap: wrap; width: 100%; }
   .quick-link-btn {
-    flex: 1;
-    justify-content: center;
-    font-size: 0.78rem;
-    padding: 8px 12px;
+    flex: 1; justify-content: center;
+    font-size: 0.76rem; padding: 8px 12px;
   }
-
-  .charts-row {
-    grid-template-columns: 1fr;
-  }
+  .charts-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .stat-card__value { font-size: 1.1rem; }
+  .chart-card__header h2 { font-size: 0.52rem; }
 }
