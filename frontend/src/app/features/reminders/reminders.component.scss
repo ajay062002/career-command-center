@@ -1,58 +1,76 @@
+/* ═══════════════════════════════════════════════════════
+   REMINDERS — MINECRAFT THEME
+   ═══════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+@keyframes mc-slideup { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
+@keyframes mc-spawn   { 0%{opacity:0;transform:scale(0.88)}60%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)} }
+@keyframes mc-blink   { 0%,100%{opacity:1}50%{opacity:0.3} }
+@keyframes mc-urgent  { 0%,100%{border-color:rgba(196,30,58,0.4)}50%{border-color:rgba(196,30,58,0.9)} }
+
 .reminders-container {
-    padding: 32px;
+    padding: 28px;
     max-width: 1400px;
     margin: 0 auto;
+    animation: mc-slideup 0.4s both;
+    font-family: 'Outfit', sans-serif;
 }
 
+/* ── Page Header ─────────────────────────────────────── */
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 40px;
+    margin-bottom: 28px;
 
     .header-left {
         h1 {
-            font-size: 2.8rem;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.85rem;
             margin: 0;
-            background: linear-gradient(135deg, #ffffff 0%, #0059b3 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -1px;
+            color: var(--mc-redstone,#c41e3a);
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.9), 0 0 18px rgba(196,30,58,0.25);
+            line-height: 1.8;
+            letter-spacing: 0;
         }
 
         .subtitle {
             margin: 8px 0 0;
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 1.1rem;
+            color: rgba(255,255,255,0.35);
+            font-size: 0.8rem;
         }
     }
 }
 
+/* ── View Toggle ─────────────────────────────────────── */
 .view-toggle {
     display: flex;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 4px;
-    border-radius: 12px;
-    border: 1px solid var(--glass-border);
-    margin-right: 16px;
+    background: #1a1e24;
+    padding: 3px;
+    border: 2px solid #2e3540;
+    box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
+    gap: 2px;
+    margin-right: 14px;
 
     button {
-        border-radius: 8px;
-        color: rgba(255, 255, 255, 0.4);
+        border-radius: 0 !important;
+        color: rgba(255,255,255,0.4);
 
         &.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--india-orange);
+            background: var(--mc-redstone,#c41e3a) !important;
+            color: white !important;
+            box-shadow: inset -1px -1px 0 rgba(0,0,0,0.5), inset 1px 1px 0 rgba(255,100,100,0.25);
         }
     }
 }
 
+/* ── Table Container ─────────────────────────────────── */
 .table-container {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    border-radius: 20px;
-    border: 1px solid var(--glass-border);
+    background: #1e2228;
+    border: 2px solid #2e3540;
+    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
+                0 4px 0 rgba(0,0,0,0.6);
     overflow: hidden;
     position: relative;
 
@@ -61,27 +79,29 @@
         background: transparent !important;
 
         th {
-            background: rgba(255, 255, 255, 0.03);
-            color: #0059b3;
-            font-weight: 700;
-            padding: 20px 16px;
+            background: #161a1f;
+            color: var(--mc-redstone,#c41e3a) !important;
+            font-family: 'Press Start 2P', monospace !important;
+            font-size: 0.42rem !important;
+            font-weight: 400 !important;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
+            padding: 14px 16px !important;
             text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
+            letter-spacing: 0 !important;
+            border-bottom: 2px solid #2e3540 !important;
         }
 
         td {
-            padding: 16px;
-            color: rgba(255, 255, 255, 0.8);
-            border-bottom: 1px solid var(--glass-border);
+            padding: 14px 16px !important;
+            color: rgba(255,255,255,0.8) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.04) !important;
         }
 
-        tr.data-row:hover {
-            background: rgba(255, 255, 255, 0.03);
-        }
+        tr.data-row:hover { background: rgba(196,30,58,0.04) !important; }
     }
 }
 
+/* ── Due Cell ────────────────────────────────────────── */
 .due-cell {
     display: flex;
     flex-direction: column;
@@ -92,198 +112,209 @@
     }
 }
 
+/* ── Task Info ───────────────────────────────────────── */
 .task-info {
     display: flex;
     flex-direction: column;
 
     .task-title {
-        font-weight: 500;
+        font-weight: 600;
         color: white;
     }
 
     .task-notes {
-        font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.4);
     }
 }
 
+/* ── Category Tags ───────────────────────────────────── */
 .category-tag {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 0;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.38rem;
+    font-weight: 400;
     text-transform: uppercase;
-    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid transparent;
+    line-height: 1.8;
 
-    &.followup {
-        color: #64b5f6;
-        background: rgba(100, 181, 246, 0.1);
-    }
-
-    &.interview {
-        color: #81c784;
-        background: rgba(129, 199, 132, 0.1);
-    }
-
-    &.study {
-        color: #ce93d8;
-        background: rgba(206, 147, 216, 0.1);
-    }
-
-    &.task {
-        color: #bdbdbd;
-        background: rgba(255, 255, 255, 0.05);
-    }
+    &.followup  { color: var(--mc-diamond,#5ecfdf); background:rgba(94,207,223,0.08); border-color:rgba(94,207,223,0.2); }
+    &.interview { color: var(--mc-xp,#80c920); background:rgba(128,201,32,0.08); border-color:rgba(128,201,32,0.2); }
+    &.study     { color: #c084fc; background:rgba(192,132,252,0.08); border-color:rgba(192,132,252,0.2); }
+    &.task      { color: rgba(255,255,255,0.5); background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1); }
 }
 
+/* ── Status Pill ─────────────────────────────────────── */
 .status-pill {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.65rem;
-    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 0;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.38rem;
+    font-weight: 400;
     text-transform: uppercase;
+    border: 1px solid transparent;
     width: fit-content;
+    line-height: 1.8;
 
     &.overdue {
-        background: rgba(244, 67, 54, 0.1);
-        color: #f44336;
-        border: 1px solid rgba(244, 67, 54, 0.2);
+        background: rgba(196,30,58,0.1);
+        color: var(--mc-redstone,#c41e3a);
+        border-color: rgba(196,30,58,0.3);
+        animation: mc-urgent 1.5s step-end infinite;
     }
 
     &.today {
-        background: rgba(255, 107, 0, 0.1);
-        color: var(--india-orange);
-        border: 1px solid rgba(255, 107, 0, 0.2);
+        background: rgba(254,173,39,0.1);
+        color: var(--mc-gold,#fead27);
+        border-color: rgba(254,173,39,0.3);
+        animation: mc-blink 2s step-end infinite;
     }
 
-    &.mini {
-        padding: 2px 8px;
-        font-size: 0.6rem;
-    }
+    &.mini { padding: 2px 6px; font-size: 0.34rem; }
 }
 
+/* ── Context Link ────────────────────────────────────── */
 .context-link {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
+    gap: 6px;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.5);
 
-    mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-    }
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
 }
 
+/* ── Complete Button ─────────────────────────────────── */
 .complete-btn {
-    color: rgba(255, 255, 255, 0.3);
-    transition: all 0.2s;
+    color: rgba(255,255,255,0.25);
+    border-radius: 0 !important;
+    transition: color 0s, transform 0s !important;
 
     &:hover {
-        color: #81c784;
-        transform: scale(1.1);
+        color: var(--mc-xp,#80c920);
+        transform: scale(1.15);
     }
 }
 
+/* ── Reminders Grid (card view) ──────────────────────── */
 .reminders-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
 }
 
 .reminder-card {
     display: flex;
     flex-direction: column;
-    padding: 24px;
+    padding: 20px;
+    background: #1e2228;
+    border: 2px solid #2e3540;
+    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
+                0 4px 0 rgba(0,0,0,0.6);
+    animation: mc-spawn 0.3s both;
+    transition: border-color 0s;
+
+    &:hover {
+        border-color: var(--mc-redstone,#c41e3a);
+    }
 
     .card-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
     }
 
     .card-content {
         flex-grow: 1;
 
         h3 {
-            margin: 0 0 12px;
-            font-size: 1.25rem;
+            margin: 0 0 10px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
             color: white;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+            line-height: 1.8;
         }
 
         .notes {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 20px;
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 16px;
+            line-height: 1.5;
         }
 
         .due-info,
         .context-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 8px;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
+            color: rgba(255,255,255,0.55);
+            font-size: 0.82rem;
 
-            mat-icon {
-                font-size: 20px;
-                width: 20px;
-                height: 20px;
-            }
+            mat-icon { font-size: 18px; width: 18px; height: 18px; }
         }
     }
 
     .card-footer {
-        margin-top: 24px;
-        padding-top: 20px;
-        border-top: 1px solid var(--glass-border);
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 2px solid #2e3540;
         display: flex;
         justify-content: flex-end;
 
         .action-done {
-            color: #81c784;
-            font-weight: 700;
-            letter-spacing: 0.5px;
+            color: var(--mc-xp,#80c920);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.42rem;
+            letter-spacing: 0;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
         }
     }
 }
 
+/* ── Empty State ─────────────────────────────────────── */
 .empty-state-wrap {
     padding: 60px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: rgba(255, 255, 255, 0.2);
+    background: #1e2228;
+    border: 2px dashed #2e3540;
 
     mat-icon {
-        font-size: 64px;
-        width: 64px;
-        height: 64px;
+        font-size: 56px;
+        width: 56px;
+        height: 56px;
         margin-bottom: 16px;
-        opacity: 0.5;
+        color: rgba(255,255,255,0.08);
     }
 
     p {
         margin: 0;
-        font-size: 1.1rem;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.42rem;
+        color: rgba(255,255,255,0.2);
+        line-height: 2;
     }
 }
 
+/* ── Loading Overlay ─────────────────────────────────── */
 .loading-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
     z-index: 100;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 16px;
-    color: white;
+    color: var(--mc-redstone,#c41e3a);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.5rem;
+    line-height: 2;
+    animation: mc-blink 1s step-end infinite;
 }
