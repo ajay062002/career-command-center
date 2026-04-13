@@ -2,7 +2,7 @@
 // Looks like a Minecraft inventory title bar
 .main-toolbar {
   height: 56px;
-  background: #1e2228 !important;
+  background: #1E1C16 !important;
   border-bottom: 2px solid #000 !important;
   // Classic MC 3D bottom edge
   box-shadow:
@@ -20,7 +20,7 @@
 .menu-trigger {
   color: rgba(255,255,255,0.45) !important;
   transition: color 0.12s ease !important;
-  &:hover { color: #5ecfdf !important; }
+  &:hover { color: var(--mc-diamond,#50CCE8) !important; }
 }
 
 // ── Brand ─────────────────────────────────────────────────────────────────────
@@ -41,7 +41,7 @@
     inset -2px -2px 0 rgba(0,0,0,0.5),
     inset 2px 2px 0 rgba(150,160,175,0.3);
   // Grass block: top half green, bottom half dirt brown
-  background: linear-gradient(180deg, #5d9e3f 0%, #5d9e3f 45%, #7a5330 45%, #7a5330 100%);
+  background: linear-gradient(180deg, var(--mc-grass,#62B418) 0%, var(--mc-grass,#62B418) 45%, #7a5330 45%, #7a5330 100%);
   display: flex; align-items: center; justify-content: center;
 
   mat-icon {
@@ -61,7 +61,7 @@
   text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
   letter-spacing: 0;
 
-  .highlight { color: #5ecfdf; }
+  .highlight { color: var(--mc-diamond,#50CCE8); }
 }
 
 .spacer { flex: 1 1 auto; }
@@ -86,17 +86,17 @@
   font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 1.5px;
-  color: #5d9e3f;
+  color: var(--mc-grass,#62B418);
   text-transform: uppercase;
   font-family: 'Press Start 2P', monospace;
   text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
 
   .live-dot {
     width: 5px; height: 5px;
-    background: #80c920;
+    background: var(--mc-xp,#7ED420);
     border-radius: 0; // square pixel
     animation: blink 1.5s infinite ease-in-out;
-    box-shadow: 0 0 4px #80c920;
+    box-shadow: 0 0 4px var(--mc-xp,#7ED420);
   }
 }
 
@@ -169,7 +169,7 @@
 // ── Sidenav Container ─────────────────────────────────────────────────────────
 .sidenav-container {
   height: calc(100vh - 56px);
-  background-color: #111317;
+  background-color: #0E0C0A;
   // Subtle pixel grid on main content bg
   background-image:
     repeating-linear-gradient(0deg, transparent 0px, transparent 7px, rgba(0,0,0,0.08) 7px, rgba(0,0,0,0.08) 8px),
@@ -180,7 +180,7 @@
 // Styled as the Minecraft inventory side panel
 .sidenav {
   width: 252px;
-  background: #1e2228 !important;
+  background: #1E1C16 !important;
   border-right: 2px solid #000 !important;
   // 3D panel effect — right side shadow, left side highlight
   box-shadow:
@@ -248,7 +248,7 @@
   // Selected hotbar slot look — bright border + highlight bg
   &.active {
     background: rgba(94,207,223,0.1);
-    color: #5ecfdf;
+    color: var(--mc-diamond,#50CCE8);
     // Minecraft selected slot: lighter outer border with inner glow
     border: 1px solid rgba(94,207,223,0.4);
     box-shadow:
@@ -261,7 +261,7 @@
       position: absolute;
       left: 0; top: 0; height: 100%;
       width: 3px;
-      background: #5ecfdf;
+      background: var(--mc-diamond,#50CCE8);
       box-shadow: 0 0 6px rgba(94,207,223,0.6);
     }
   }
@@ -281,11 +281,11 @@
 
   mat-icon { font-size: 15px; width: 15px; height: 15px; }
 
-  &.icon-blue   { background: rgba(94,207,223,0.18);   color: #5ecfdf; }
-  &.icon-orange { background: rgba(224,122,16,0.2);    color: #fead27; }
-  &.icon-green  { background: rgba(93,158,63,0.22);    color: #80c920; }
+  &.icon-blue   { background: rgba(94,207,223,0.18);   color: var(--mc-diamond,#50CCE8); }
+  &.icon-orange { background: rgba(224,122,16,0.2);    color: var(--mc-gold,#F0AA1C); }
+  &.icon-green  { background: rgba(93,158,63,0.22);    color: var(--mc-xp,#7ED420); }
   &.icon-purple { background: rgba(123,0,200,0.2);     color: #c084fc; }
-  &.icon-yellow { background: rgba(254,173,39,0.2);    color: #fead27; }
+  &.icon-yellow { background: rgba(254,173,39,0.2);    color: var(--mc-gold,#F0AA1C); }
   &.icon-red    { background: rgba(196,30,58,0.2);     color: #e05252; }
   &.icon-teal   { background: rgba(20,184,166,0.18);   color: #2dd4bf; }
 }

@@ -28,7 +28,7 @@
             font-family: 'Press Start 2P', monospace;
             font-size: 0.85rem;
             margin: 0;
-            color: var(--mc-gold,#fead27);
+            color: var(--mc-gold,#F0AA1C);
             text-shadow: 3px 3px 0 rgba(0,0,0,0.9), 0 0 18px rgba(254,173,39,0.2);
             line-height: 1.8;
             letter-spacing: 0;
@@ -41,9 +41,9 @@
             font-family: 'Press Start 2P', monospace;
             font-size: 0.42rem;
             color: rgba(255,255,255,0.4);
-            background: #1a1e24;
+            background: #181612;
             padding: 6px 14px;
-            border: 1px solid #2e3540;
+            border: 1px solid #3C3228;
             box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
             letter-spacing: 0.08em;
         }
@@ -59,9 +59,9 @@
 /* ── View Toggle ─────────────────────────────────────── */
 .view-toggle {
     display: flex;
-    background: #1a1e24;
+    background: #181612;
     padding: 3px;
-    border: 2px solid #2e3540;
+    border: 2px solid #3C3228;
     box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
     gap: 2px;
 
@@ -70,7 +70,7 @@
         color: rgba(255,255,255,0.4);
 
         &.active {
-            background: var(--mc-gold,#fead27) !important;
+            background: var(--mc-gold,#F0AA1C) !important;
             color: #000 !important;
             box-shadow: inset -1px -1px 0 rgba(0,0,0,0.5), inset 1px 1px 0 rgba(255,220,100,0.3);
         }
@@ -79,8 +79,8 @@
 
 /* ── Form Panel ──────────────────────────────────────── */
 .form-panel {
-    background: #1e2228;
-    border: 2px solid #2e3540;
+    background: #1E1C16;
+    border: 2px solid #3C3228;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
                 0 4px 0 rgba(0,0,0,0.6);
     padding: 24px;
@@ -96,7 +96,7 @@
             margin: 0;
             font-family: 'Press Start 2P', monospace;
             font-size: 0.6rem;
-            color: var(--mc-gold,#fead27);
+            color: var(--mc-gold,#F0AA1C);
             text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
             line-height: 1.8;
             display: flex;
@@ -123,7 +123,7 @@
         gap: 14px;
         margin-top: 20px;
         padding-top: 20px;
-        border-top: 2px solid #2e3540;
+        border-top: 2px solid #3C3228;
     }
 }
 
@@ -145,9 +145,9 @@
 
             ::ng-deep {
                 .mat-mdc-text-field-wrapper {
-                    background: #1a1e24 !important;
+                    background: #181612 !important;
                     border-radius: 0 !important;
-                    border: 2px solid #2e3540 !important;
+                    border: 2px solid #3C3228 !important;
                     box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5) !important;
                 }
                 .mdc-text-field--outlined .mdc-notched-outline__leading,
@@ -170,8 +170,8 @@
 
 /* ── Table View ──────────────────────────────────────── */
 .table-container {
-    background: #1e2228;
-    border: 2px solid #2e3540;
+    background: #1E1C16;
+    border: 2px solid #3C3228;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
                 0 4px 0 rgba(0,0,0,0.6);
     overflow: hidden;
@@ -181,8 +181,8 @@
         background: transparent !important;
 
         th {
-            background: #161a1f;
-            color: var(--mc-gold,#fead27) !important;
+            background: #141210;
+            color: var(--mc-gold,#F0AA1C) !important;
             font-family: 'Press Start 2P', monospace !important;
             font-size: 0.42rem !important;
             font-weight: 400 !important;
@@ -190,12 +190,12 @@
             text-transform: uppercase;
             letter-spacing: 0 !important;
             padding: 14px 16px !important;
-            border-bottom: 2px solid #2e3540 !important;
+            border-bottom: 2px solid #3C3228 !important;
         }
 
         td {
             padding: 14px 16px !important;
-            color: rgba(255,255,255,0.8) !important;
+            color: rgba(232,224,208,0.85) !important;
             border-bottom: 1px solid rgba(255,255,255,0.04) !important;
         }
     }
@@ -210,8 +210,8 @@
 
 /* ── Vendor Group ────────────────────────────────────── */
 .vendor-group {
-    background: #1e2228;
-    border: 2px solid #2e3540;
+    background: #1E1C16;
+    border: 2px solid #3C3228;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
                 0 4px 0 rgba(0,0,0,0.6);
     overflow: hidden;
@@ -223,8 +223,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 22px;
-    background: #161a1f;
-    border-bottom: 2px solid #2e3540;
+    background: #141210;
+    border-bottom: 2px solid #3C3228;
 
     .vendor-header-left {
         display: flex;
@@ -280,10 +280,10 @@
     border: 1px solid transparent;
     line-height: 1.8;
 
-    &.submitted { color: var(--mc-diamond,#5ecfdf); background:rgba(94,207,223,0.08); border-color:rgba(94,207,223,0.2); }
-    &.screening { color: var(--mc-gold,#fead27); background:rgba(254,173,39,0.08); border-color:rgba(254,173,39,0.2); }
+    &.submitted { color: var(--mc-diamond,#50CCE8); background:rgba(94,207,223,0.08); border-color:rgba(94,207,223,0.2); }
+    &.screening { color: var(--mc-gold,#F0AA1C); background:rgba(254,173,39,0.08); border-color:rgba(254,173,39,0.2); }
     &.interview,
-    &.interviewscheduled { color: var(--mc-xp,#80c920); background:rgba(128,201,32,0.08); border-color:rgba(128,201,32,0.2); }
+    &.interviewscheduled { color: var(--mc-xp,#7ED420); background:rgba(128,201,32,0.08); border-color:rgba(128,201,32,0.2); }
     &.rejected  { color: var(--mc-redstone,#c41e3a); background:rgba(196,30,58,0.08); border-color:rgba(196,30,58,0.2); }
     &.withdrawn { color: rgba(255,255,255,0.4); background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1); }
 }
@@ -300,8 +300,8 @@
 .empty-state {
     text-align: center;
     padding: 64px 32px;
-    background: #1e2228;
-    border: 2px dashed #2e3540;
+    background: #1E1C16;
+    border: 2px dashed #3C3228;
 
     mat-icon {
         font-size: 56px;

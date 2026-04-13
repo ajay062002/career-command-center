@@ -28,7 +28,7 @@
             font-family: 'Press Start 2P', monospace;
             font-size: 0.85rem;
             margin: 0;
-            color: var(--mc-xp,#80c920);
+            color: var(--mc-xp,#7ED420);
             text-shadow: 3px 3px 0 rgba(0,0,0,0.9), 0 0 18px rgba(128,201,32,0.2);
             line-height: 1.8;
             letter-spacing: 0;
@@ -42,9 +42,9 @@
             font-family: 'Press Start 2P', monospace;
             font-size: 0.42rem;
             color: rgba(255,255,255,0.4);
-            background: #1a1e24;
+            background: #181612;
             padding: 6px 14px;
-            border: 1px solid #2e3540;
+            border: 1px solid #3C3228;
             box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
             letter-spacing: 0.08em;
         }
@@ -60,9 +60,9 @@
 /* ── View Toggle ─────────────────────────────────────── */
 .view-toggle {
     display: flex;
-    background: #1a1e24;
+    background: #181612;
     padding: 3px;
-    border: 2px solid #2e3540;
+    border: 2px solid #3C3228;
     box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
     gap: 2px;
 
@@ -73,7 +73,7 @@
         font-size: 0.4rem !important;
 
         &.active {
-            background: var(--mc-xp,#80c920) !important;
+            background: var(--mc-xp,#7ED420) !important;
             color: #000 !important;
             box-shadow: inset -1px -1px 0 rgba(0,0,0,0.5), inset 1px 1px 0 rgba(200,255,100,0.3);
         }
@@ -82,8 +82,8 @@
 
 /* ── Form Panel ──────────────────────────────────────── */
 .form-panel {
-    background: #1e2228;
-    border: 2px solid #2e3540;
+    background: #1E1C16;
+    border: 2px solid #3C3228;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
                 0 4px 0 rgba(0,0,0,0.6);
     padding: 24px;
@@ -99,7 +99,7 @@
             margin: 0;
             font-family: 'Press Start 2P', monospace;
             font-size: 0.6rem;
-            color: var(--mc-xp,#80c920);
+            color: var(--mc-xp,#7ED420);
             text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
             line-height: 1.8;
         }
@@ -123,7 +123,7 @@
         gap: 14px;
         margin-top: 20px;
         padding-top: 20px;
-        border-top: 2px solid #2e3540;
+        border-top: 2px solid #3C3228;
     }
 }
 
@@ -134,10 +134,10 @@
     height: 8px;
     border-radius: 0;
     margin-right: 8px;
-    &.submitted { background: var(--mc-diamond,#5ecfdf); }
-    &.interview { background: var(--mc-xp,#80c920); }
+    &.submitted { background: var(--mc-diamond,#50CCE8); }
+    &.interview { background: var(--mc-xp,#7ED420); }
     &.rejected  { background: var(--mc-redstone,#c41e3a); }
-    &.onhold    { background: var(--mc-gold,#fead27); }
+    &.onhold    { background: var(--mc-gold,#F0AA1C); }
 }
 
 /* ── Filters Bar ─────────────────────────────────────── */
@@ -149,9 +149,9 @@
 
         ::ng-deep {
             .mat-mdc-text-field-wrapper {
-                background: #1a1e24 !important;
+                background: #181612 !important;
                 border-radius: 0 !important;
-                border: 2px solid #2e3540 !important;
+                border: 2px solid #3C3228 !important;
                 box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5) !important;
             }
             .mdc-text-field--outlined .mdc-notched-outline__leading,
@@ -167,8 +167,8 @@
 
 /* ── Table View ──────────────────────────────────────── */
 .table-container {
-    background: #1e2228;
-    border: 2px solid #2e3540;
+    background: #1E1C16;
+    border: 2px solid #3C3228;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
                 0 4px 0 rgba(0,0,0,0.6);
     overflow-x: auto;
@@ -179,20 +179,20 @@
         background: transparent !important;
 
         th {
-            background: #161a1f;
-            color: var(--mc-xp,#80c920) !important;
+            background: #141210;
+            color: var(--mc-xp,#7ED420) !important;
             font-family: 'Press Start 2P', monospace !important;
             font-size: 0.42rem !important;
             font-weight: 400 !important;
             text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
             padding: 14px 16px !important;
-            border-bottom: 2px solid #2e3540 !important;
+            border-bottom: 2px solid #3C3228 !important;
             text-transform: uppercase;
         }
 
         td {
             padding: 14px 16px !important;
-            color: rgba(255,255,255,0.8) !important;
+            color: rgba(232,224,208,0.85) !important;
             border-bottom: 1px solid rgba(255,255,255,0.04) !important;
         }
 
@@ -202,8 +202,8 @@
 
 /* ── Vendor Groups ───────────────────────────────────── */
 .vendor-group {
-    background: #1e2228;
-    border: 2px solid #2e3540;
+    background: #1E1C16;
+    border: 2px solid #3C3228;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
                 0 4px 0 rgba(0,0,0,0.6);
     margin-bottom: 16px;
@@ -212,11 +212,11 @@
 
     .vendor-header {
         padding: 18px 24px;
-        background: #161a1f;
+        background: #141210;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 2px solid #2e3540;
+        border-bottom: 2px solid #3C3228;
 
         .vendor-header-left {
             display: flex;
@@ -263,10 +263,10 @@
     border: 1px solid transparent;
     line-height: 1.8;
 
-    &.submitted { color: var(--mc-diamond,#5ecfdf); background:rgba(94,207,223,0.08); border-color:rgba(94,207,223,0.2); }
-    &.interview { color: var(--mc-xp,#80c920); background:rgba(128,201,32,0.08); border-color:rgba(128,201,32,0.2); }
+    &.submitted { color: var(--mc-diamond,#50CCE8); background:rgba(94,207,223,0.08); border-color:rgba(94,207,223,0.2); }
+    &.interview { color: var(--mc-xp,#7ED420); background:rgba(128,201,32,0.08); border-color:rgba(128,201,32,0.2); }
     &.rejected  { color: var(--mc-redstone,#c41e3a); background:rgba(196,30,58,0.08); border-color:rgba(196,30,58,0.2); }
-    &.onhold    { color: var(--mc-gold,#fead27); background:rgba(254,173,39,0.08); border-color:rgba(254,173,39,0.2); }
+    &.onhold    { color: var(--mc-gold,#F0AA1C); background:rgba(254,173,39,0.08); border-color:rgba(254,173,39,0.2); }
 }
 
 .mini-badge {

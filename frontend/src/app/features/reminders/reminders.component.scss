@@ -46,9 +46,9 @@
 /* ── View Toggle ─────────────────────────────────────── */
 .view-toggle {
     display: flex;
-    background: #1a1e24;
+    background: #181612;
     padding: 3px;
-    border: 2px solid #2e3540;
+    border: 2px solid #3C3228;
     box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
     gap: 2px;
     margin-right: 14px;
@@ -67,8 +67,8 @@
 
 /* ── Table Container ─────────────────────────────────── */
 .table-container {
-    background: #1e2228;
-    border: 2px solid #2e3540;
+    background: #1E1C16;
+    border: 2px solid #3C3228;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
                 0 4px 0 rgba(0,0,0,0.6);
     overflow: hidden;
@@ -79,7 +79,7 @@
         background: transparent !important;
 
         th {
-            background: #161a1f;
+            background: #141210;
             color: var(--mc-redstone,#c41e3a) !important;
             font-family: 'Press Start 2P', monospace !important;
             font-size: 0.42rem !important;
@@ -88,12 +88,12 @@
             padding: 14px 16px !important;
             text-transform: uppercase;
             letter-spacing: 0 !important;
-            border-bottom: 2px solid #2e3540 !important;
+            border-bottom: 2px solid #3C3228 !important;
         }
 
         td {
             padding: 14px 16px !important;
-            color: rgba(255,255,255,0.8) !important;
+            color: rgba(232,224,208,0.85) !important;
             border-bottom: 1px solid rgba(255,255,255,0.04) !important;
         }
 
@@ -139,8 +139,8 @@
     border: 1px solid transparent;
     line-height: 1.8;
 
-    &.followup  { color: var(--mc-diamond,#5ecfdf); background:rgba(94,207,223,0.08); border-color:rgba(94,207,223,0.2); }
-    &.interview { color: var(--mc-xp,#80c920); background:rgba(128,201,32,0.08); border-color:rgba(128,201,32,0.2); }
+    &.followup  { color: var(--mc-diamond,#50CCE8); background:rgba(94,207,223,0.08); border-color:rgba(94,207,223,0.2); }
+    &.interview { color: var(--mc-xp,#7ED420); background:rgba(128,201,32,0.08); border-color:rgba(128,201,32,0.2); }
     &.study     { color: #c084fc; background:rgba(192,132,252,0.08); border-color:rgba(192,132,252,0.2); }
     &.task      { color: rgba(255,255,255,0.5); background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1); }
 }
@@ -166,7 +166,7 @@
 
     &.today {
         background: rgba(254,173,39,0.1);
-        color: var(--mc-gold,#fead27);
+        color: var(--mc-gold,#F0AA1C);
         border-color: rgba(254,173,39,0.3);
         animation: mc-blink 2s step-end infinite;
     }
@@ -192,7 +192,7 @@
     transition: color 0s, transform 0s !important;
 
     &:hover {
-        color: var(--mc-xp,#80c920);
+        color: var(--mc-xp,#7ED420);
         transform: scale(1.15);
     }
 }
@@ -208,8 +208,8 @@
     display: flex;
     flex-direction: column;
     padding: 20px;
-    background: #1e2228;
-    border: 2px solid #2e3540;
+    background: #1E1C16;
+    border: 2px solid #3C3228;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
                 0 4px 0 rgba(0,0,0,0.6);
     animation: mc-spawn 0.3s both;
@@ -261,12 +261,12 @@
     .card-footer {
         margin-top: 20px;
         padding-top: 16px;
-        border-top: 2px solid #2e3540;
+        border-top: 2px solid #3C3228;
         display: flex;
         justify-content: flex-end;
 
         .action-done {
-            color: var(--mc-xp,#80c920);
+            color: var(--mc-xp,#7ED420);
             font-family: 'Press Start 2P', monospace;
             font-size: 0.42rem;
             letter-spacing: 0;
@@ -281,8 +281,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #1e2228;
-    border: 2px dashed #2e3540;
+    background: #1E1C16;
+    border: 2px dashed #3C3228;
 
     mat-icon {
         font-size: 56px;

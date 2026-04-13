@@ -30,16 +30,16 @@
   font-family: 'Press Start 2P', monospace;
   font-size: 0.45rem;
   letter-spacing: 1px;
-  color: #80c920;
+  color: var(--mc-xp,#7ED420);
   text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
   text-transform: uppercase;
   margin-bottom: 14px;
 
   .greeting-dot {
     width: 5px; height: 5px;
-    background: #80c920;
+    background: var(--mc-xp,#7ED420);
     border-radius: 0; // pixel square
-    box-shadow: 0 0 4px #80c920;
+    box-shadow: 0 0 4px var(--mc-xp,#7ED420);
     animation: blink 1.8s infinite;
   }
 }
@@ -60,7 +60,7 @@
   text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 2px 2px 0 rgba(0,0,0,0.6);
   letter-spacing: 0;
 
-  .title-accent { color: #5ecfdf; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 16px rgba(94,207,223,0.4); }
+  .title-accent { color: var(--mc-diamond,#50CCE8); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 16px rgba(94,207,223,0.4); }
 }
 
 .dashboard-subtitle {
@@ -92,7 +92,7 @@
   cursor: pointer;
   transition: all 0.12s ease;
   // Minecraft button: raised 3D look
-  background: #5d9e3f;
+  background: var(--mc-grass,#62B418);
   color: #fff;
   border: 2px solid #000;
   box-shadow:
@@ -148,7 +148,7 @@
   gap: 8px;
   margin-top: 20px;
   padding: 10px 22px;
-  background: #5d9e3f;
+  background: var(--mc-grass,#62B418);
   color: #fff;
   border: 2px solid #000;
   box-shadow:
@@ -202,7 +202,7 @@
 .loading-orbs, .orb { display: none; }
 
 ::ng-deep .custom-spinner circle {
-  stroke: #5ecfdf !important;
+  stroke: var(--mc-diamond,#50CCE8) !important;
 }
 
 // ── Error State ────────────────────────────────────────────────────────────────
@@ -246,7 +246,7 @@
   border: 2px solid #000;
   box-shadow:
     inset -2px -2px 0 rgba(0,0,0,0.7),
-    inset 2px 2px 0 rgba(150,160,175,0.18),
+    inset 2px 2px 0 rgba(200,185,140,0.22),
     0 4px 0 rgba(0,0,0,0.7);
   transition: all 0.12s ease;
 
@@ -335,23 +335,23 @@
 
 // ── Color variants — Minecraft item rarity colors ─────────────────────────────
 .stat-card--blue {
-  .stat-card__icon     { background: rgba(94,207,223,0.18); color: #5ecfdf; }
-  .stat-card__value    { color: #5ecfdf; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(94,207,223,0.3); }
-  .stat-card__bar-fill { background: #5ecfdf; box-shadow: 0 0 4px #5ecfdf; }
+  .stat-card__icon     { background: rgba(94,207,223,0.18); color: var(--mc-diamond,#50CCE8); }
+  .stat-card__value    { color: var(--mc-diamond,#50CCE8); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(94,207,223,0.3); }
+  .stat-card__bar-fill { background: var(--mc-diamond,#50CCE8); box-shadow: 0 0 4px var(--mc-diamond,#50CCE8); }
   &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(94,207,223,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
 .stat-card--orange {
-  .stat-card__icon     { background: rgba(224,122,16,0.2); color: #fead27; }
-  .stat-card__value    { color: #fead27; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(254,173,39,0.3); }
-  .stat-card__bar-fill { background: #fead27; box-shadow: 0 0 4px #fead27; }
+  .stat-card__icon     { background: rgba(224,122,16,0.2); color: var(--mc-gold,#F0AA1C); }
+  .stat-card__value    { color: var(--mc-gold,#F0AA1C); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(254,173,39,0.3); }
+  .stat-card__bar-fill { background: var(--mc-gold,#F0AA1C); box-shadow: 0 0 4px var(--mc-gold,#F0AA1C); }
   &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(254,173,39,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
 .stat-card--green {
-  .stat-card__icon     { background: rgba(93,158,63,0.2); color: #80c920; }
-  .stat-card__value    { color: #80c920; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(128,201,32,0.3); }
-  .stat-card__bar-fill { background: #80c920; box-shadow: 0 0 4px #80c920; }
+  .stat-card__icon     { background: rgba(93,158,63,0.2); color: var(--mc-xp,#7ED420); }
+  .stat-card__value    { color: var(--mc-xp,#7ED420); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(128,201,32,0.3); }
+  .stat-card__bar-fill { background: var(--mc-xp,#7ED420); box-shadow: 0 0 4px var(--mc-xp,#7ED420); }
   &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(128,201,32,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
@@ -370,9 +370,9 @@
 }
 
 .stat-card--yellow {
-  .stat-card__icon     { background: rgba(254,173,39,0.18); color: #fead27; }
-  .stat-card__value    { color: #fead27; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(254,173,39,0.3); }
-  .stat-card__bar-fill { background: #fead27; box-shadow: 0 0 4px #fead27; }
+  .stat-card__icon     { background: rgba(254,173,39,0.18); color: var(--mc-gold,#F0AA1C); }
+  .stat-card__value    { color: var(--mc-gold,#F0AA1C); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(254,173,39,0.3); }
+  .stat-card__bar-fill { background: var(--mc-gold,#F0AA1C); box-shadow: 0 0 4px var(--mc-gold,#F0AA1C); }
   &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(254,173,39,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
@@ -386,7 +386,7 @@
 
 // Chart card — Minecraft enchantment table / book panel style
 .chart-card {
-  background: #1e2228;
+  background: #1E1C16;
   border: 2px solid #000;
   box-shadow:
     inset -2px -2px 0 rgba(0,0,0,0.7),
@@ -398,7 +398,7 @@
   &:hover {
     box-shadow:
       inset -2px -2px 0 rgba(0,0,0,0.7),
-      inset 2px 2px 0 rgba(150,160,175,0.18),
+      inset 2px 2px 0 rgba(200,185,140,0.22),
       0 6px 0 rgba(0,0,0,0.6);
   }
 }
@@ -437,7 +437,7 @@
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 
-  mat-icon { font-size: 17px; color: #5ecfdf; }
+  mat-icon { font-size: 17px; color: var(--mc-diamond,#50CCE8); }
 }
 
 // Gold tag — like a Minecraft name tag
@@ -445,7 +445,7 @@
   font-family: 'Press Start 2P', monospace;
   font-size: 0.42rem;
   font-weight: 400;
-  color: #fead27;
+  color: var(--mc-gold,#F0AA1C);
   background: rgba(254,173,39,0.1);
   border: 1px solid rgba(254,173,39,0.3);
   padding: 4px 10px;
@@ -525,17 +525,17 @@
   }
 
   &--blue {
-    background: rgba(94,207,223,0.1); color: #5ecfdf;
+    background: rgba(94,207,223,0.1); color: var(--mc-diamond,#50CCE8);
     border-color: rgba(94,207,223,0.25);
     &:hover { background: rgba(94,207,223,0.18); }
   }
   &--orange {
-    background: rgba(224,122,16,0.1); color: #fead27;
+    background: rgba(224,122,16,0.1); color: var(--mc-gold,#F0AA1C);
     border-color: rgba(254,173,39,0.25);
     &:hover { background: rgba(254,173,39,0.18); }
   }
   &--green {
-    background: rgba(93,158,63,0.1); color: #80c920;
+    background: rgba(93,158,63,0.1); color: var(--mc-xp,#7ED420);
     border-color: rgba(128,201,32,0.25);
     &:hover { background: rgba(128,201,32,0.18); }
   }
@@ -545,7 +545,7 @@
     &:hover { background: rgba(192,132,252,0.15); }
   }
   &--yellow {
-    background: rgba(254,173,39,0.1); color: #fead27;
+    background: rgba(254,173,39,0.1); color: var(--mc-gold,#F0AA1C);
     border-color: rgba(254,173,39,0.25);
     &:hover { background: rgba(254,173,39,0.18); }
   }

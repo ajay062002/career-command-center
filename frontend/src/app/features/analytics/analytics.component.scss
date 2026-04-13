@@ -34,7 +34,7 @@
         margin: 0;
         font-family: 'Press Start 2P', monospace;
         font-size: 0.9rem;
-        color: var(--mc-gold, #fead27);
+        color: var(--mc-gold, var(--mc-gold,#F0AA1C));
         text-shadow: 3px 3px 0 rgba(0,0,0,0.9), -1px -1px 0 rgba(0,0,0,0.5);
         letter-spacing: 0;
         line-height: 1.6;
@@ -59,8 +59,8 @@
     padding: 48px;
     justify-content: center;
     color: rgba(255,255,255,0.5);
-    background: #1e2228;
-    border: 2px solid #2e3540;
+    background: #1E1C16;
+    border: 2px solid #3C3228;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18));
     font-family: 'Press Start 2P', monospace;
     font-size: 0.55rem;
@@ -73,8 +73,8 @@
 
 /* ── KPI Strip ───────────────────────────────────────── */
 .kpi-strip {
-    background: #1e2228;
-    border: 2px solid #2e3540;
+    background: #1E1C16;
+    border: 2px solid #3C3228;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
                 0 4px 0 rgba(0,0,0,0.6);
     display: flex;
@@ -109,9 +109,9 @@
         font-weight: 600;
     }
 
-    &.accent .kpi-value { color: var(--mc-gold,#fead27); text-shadow: 3px 3px 0 #7a4d00, 0 0 12px rgba(254,173,39,0.3); }
-    &.blue   .kpi-value { color: var(--mc-diamond,#5ecfdf); text-shadow: 3px 3px 0 #1a4f56, 0 0 10px rgba(94,207,223,0.3); }
-    &.offers .kpi-value { color: var(--mc-xp,#80c920); text-shadow: 3px 3px 0 #2a4a00, 0 0 10px rgba(128,201,32,0.3); }
+    &.accent .kpi-value { color: var(--mc-gold,#F0AA1C); text-shadow: 3px 3px 0 #7a4d00, 0 0 12px rgba(254,173,39,0.3); }
+    &.blue   .kpi-value { color: var(--mc-diamond,#50CCE8); text-shadow: 3px 3px 0 #1a4f56, 0 0 10px rgba(94,207,223,0.3); }
+    &.offers .kpi-value { color: var(--mc-xp,#7ED420); text-shadow: 3px 3px 0 #2a4a00, 0 0 10px rgba(128,201,32,0.3); }
     &.rejected .kpi-value { color: var(--mc-redstone,#c41e3a); text-shadow: 3px 3px 0 #500000, 0 0 10px rgba(196,30,58,0.3); }
 }
 
@@ -131,8 +131,8 @@
 }
 
 .chart-card {
-    background: #1e2228 !important;
-    border: 2px solid #2e3540 !important;
+    background: #1E1C16 !important;
+    border: 2px solid #3C3228 !important;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
                 0 4px 0 rgba(0,0,0,0.6) !important;
     border-radius: 0 !important;
@@ -142,7 +142,7 @@
     animation: mc-spawn 0.35s both;
 
     &:hover {
-        border-color: var(--mc-diamond,#5ecfdf) !important;
+        border-color: var(--mc-diamond,#50CCE8) !important;
     }
 
     &.wide { grid-column: 1 / -1; }
@@ -154,14 +154,14 @@
         padding: 14px 16px 10px;
         font-family: 'Press Start 2P', monospace;
         font-size: 0.52rem;
-        color: var(--mc-gold,#fead27);
+        color: var(--mc-gold,#F0AA1C);
         text-shadow: 2px 2px 0 rgba(0,0,0,0.9);
-        border-bottom: 2px solid #2e3540;
-        background: #181b20;
+        border-bottom: 2px solid #3C3228;
+        background: #121008;
         line-height: 1.8;
 
         mat-icon {
-            color: var(--mc-gold,#fead27);
+            color: var(--mc-gold,#F0AA1C);
             font-size: 18px;
         }
     }
@@ -193,8 +193,8 @@
 
 /* ── Vendor Table ────────────────────────────────────── */
 .table-card {
-    background: #1e2228 !important;
-    border: 2px solid #2e3540 !important;
+    background: #1E1C16 !important;
+    border: 2px solid #3C3228 !important;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
                 0 4px 0 rgba(0,0,0,0.6) !important;
     border-radius: 0 !important;
@@ -208,13 +208,13 @@
         padding: 14px 16px 10px;
         font-family: 'Press Start 2P', monospace;
         font-size: 0.52rem;
-        color: var(--mc-gold,#fead27);
+        color: var(--mc-gold,#F0AA1C);
         text-shadow: 2px 2px 0 rgba(0,0,0,0.9);
-        border-bottom: 2px solid #2e3540;
-        background: #181b20;
+        border-bottom: 2px solid #3C3228;
+        background: #121008;
         line-height: 1.8;
 
-        mat-icon { color: var(--mc-gold,#fead27); font-size: 18px; }
+        mat-icon { color: var(--mc-gold,#F0AA1C); font-size: 18px; }
     }
 }
 
@@ -225,17 +225,17 @@
     font-family: 'Press Start 2P', monospace !important;
     font-size: 0.45rem !important;
     font-weight: 400 !important;
-    color: var(--mc-diamond,#5ecfdf) !important;
+    color: var(--mc-diamond,#50CCE8) !important;
     text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
-    background: #161a1f !important;
+    background: #141210 !important;
     letter-spacing: 0 !important;
     text-transform: uppercase;
     padding: 14px 16px !important;
-    border-bottom: 2px solid #2e3540 !important;
+    border-bottom: 2px solid #3C3228 !important;
 }
 
 .mat-mdc-cell {
-    color: rgba(255,255,255,0.75) !important;
+    color: rgba(232,224,208,0.80) !important;
     padding: 14px 16px !important;
     border-bottom: 1px solid rgba(255,255,255,0.04) !important;
     font-size: 0.85rem !important;
@@ -259,7 +259,7 @@
     height: 32px;
     border-radius: 0;
     background: var(--mc-lapis,#1b4fd8);
-    border: 2px solid #2e5ac8;
+    border: 2px solid #2050C0;
     box-shadow: inset -1px -1px 0 rgba(0,0,0,0.7), inset 1px 1px 0 rgba(100,130,255,0.3);
     color: white;
     display: flex;
@@ -284,17 +284,17 @@
 
     &.rtr {
         background: rgba(254,173,39,0.12);
-        color: var(--mc-gold,#fead27);
+        color: var(--mc-gold,#F0AA1C);
         border-color: rgba(254,173,39,0.3);
     }
     &.sub {
         background: rgba(94,207,223,0.1);
-        color: var(--mc-diamond,#5ecfdf);
+        color: var(--mc-diamond,#50CCE8);
         border-color: rgba(94,207,223,0.25);
     }
     &.interview {
         background: rgba(128,201,32,0.1);
-        color: var(--mc-xp,#80c920);
+        color: var(--mc-xp,#7ED420);
         border-color: rgba(128,201,32,0.25);
     }
 }
@@ -313,8 +313,8 @@
         // XP-bar look: dark track
         --mdc-linear-progress-track-color: #0d0f12;
 
-        &.high   { --mdc-linear-progress-active-indicator-color: var(--mc-xp,#80c920); }
-        &.medium { --mdc-linear-progress-active-indicator-color: var(--mc-gold,#fead27); }
+        &.high   { --mdc-linear-progress-active-indicator-color: var(--mc-xp,#7ED420); }
+        &.medium { --mdc-linear-progress-active-indicator-color: var(--mc-gold,#F0AA1C); }
         &.low    { --mdc-linear-progress-active-indicator-color: var(--mc-redstone,#c41e3a); }
     }
 
