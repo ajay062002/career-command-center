@@ -451,10 +451,7 @@ Return ONLY a valid JSON object, no markdown, no explanation:
                 endfor_count += 1
 
         # Pass 2: fix missing {% for b in CH %}.
-        # The template has {{ b }}{% endfor %} for CH but is missing the {% for b in CH %} opener.
-        # The TD section works because {% for b in TD %} sits at the END of the paragraph
-        # immediately before the bullet paragraph. We replicate that pattern for CH:
-        # append {% for b in CH %} as a new run on the paragraph BEFORE the CH bullet paragraph.
+        # Append {% for b in CH %} as a new run on the paragraph BEFORE the CH bullet paragraph.
         endfor_seen = 0
         all_body_paras = list(tree.iter(f'{{{WNS}}}p'))
         for idx, para in enumerate(all_body_paras):
@@ -464,8 +461,6 @@ Return ONLY a valid JSON object, no markdown, no explanation:
                 continue
             endfor_seen += 1
             if endfor_seen == 2 and '{% for b in CH %}' not in combined:
-                # Found the CH bullet paragraph ({{ b }}{% endfor %}).
-                # Append {% for b in CH %} to the paragraph immediately before this one.
                 if idx > 0:
                     prev_para = all_body_paras[idx - 1]
                     new_run = etree.SubElement(prev_para, f'{{{WNS}}}r')
@@ -473,6 +468,70 @@ Return ONLY a valid JSON object, no markdown, no explanation:
                     new_t.text = '{% for b in CH %}'
                     new_t.set('{http://www.w3.org/XML/1998/namespace}space', 'preserve')
                 break
+
+        # Pass 3: Fix TD section alignment — make bullet paragraph match CH (ListParagraph, no bold, no •)
+        # Also split "Role: {{TITLE2}}Responsibilities:" onto a new line inside the same paragraph.
+        import re as _re
+        endfor_p3 = 0
+        for para in tree.iter(f'{{{WNS}}}p'):
+            t_elems = para.findall(f'.//{{{WNS}}}t')
+            combined = ''.join((t.text or '') for t in t_elems)
+
+            # 3A: Split the Role/Responsibilities line so title and label are on separate lines
+            if '{{TITLE2}}' in combined and '{% for b in TD %}' in combined and 'Responsibilities' in combined:
+                run = para.find(f'.//{{{WNS}}}r')
+                if run is not None:
+                    t_elem = run.find(f'{{{WNS}}}t')
+                    if t_elem is not None:
+                        text = t_elem.text or ''
+                        resp_idx = text.find('Responsibilities')
+                        if resp_idx > 0:
+                            part1 = text[:resp_idx].rstrip()
+                            part2 = text[resp_idx:]
+                            t_elem.text = part1
+                            t_elem.set('{http://www.w3.org/XML/1998/namespace}space', 'preserve')
+                            br_elem = etree.Element(f'{{{WNS}}}br')
+                            t_elem.addnext(br_elem)
+                            t2_elem = etree.Element(f'{{{WNS}}}t')
+                            t2_elem.text = part2
+                            t2_elem.set('{http://www.w3.org/XML/1998/namespace}space', 'preserve')
+                            br_elem.addnext(t2_elem)
+
+            # 3B: First {% endfor %} paragraph = TD bullet paragraph
+            if '{% endfor %}' in combined:
+                endfor_p3 += 1
+                if endfor_p3 == 1:
+                    # Change paragraph style to ListParagraph (same as CH bullets)
+                    pPr = para.find(f'{{{WNS}}}pPr')
+                    if pPr is None:
+                        pPr = etree.Element(f'{{{WNS}}}pPr')
+                        para.insert(0, pPr)
+                    pStyle = pPr.find(f'{{{WNS}}}pStyle')
+                    if pStyle is None:
+                        pStyle = etree.SubElement(pPr, f'{{{WNS}}}pStyle')
+                    pStyle.set(f'{{{WNS}}}val', 'ListParagraph')
+
+                    # Fix run: remove bold + strip leading bullet character
+                    run = para.find(f'.//{{{WNS}}}r')
+                    if run is not None:
+                        rPr = run.find(f'{{{WNS}}}rPr')
+                        if rPr is not None:
+                            for bold_tag in (f'{{{WNS}}}b', f'{{{WNS}}}bCs'):
+                                b_el = rPr.find(bold_tag)
+                                if b_el is not None:
+                                    rPr.remove(b_el)
+                        t = run.find(f'{{{WNS}}}t')
+                        if t is not None and t.text:
+                            # Strip leading non-letter/non-{ characters (e.g. •, ●, -, ▪)
+                            t.text = _re.sub(r'^[^\w{]+', '', t.text)
+
+        # Pass 4: Strip all underlines from every run in the document
+        for run in tree.iter(f'{{{WNS}}}r'):
+            rPr = run.find(f'{{{WNS}}}rPr')
+            if rPr is not None:
+                u_el = rPr.find(f'{{{WNS}}}u')
+                if u_el is not None:
+                    rPr.remove(u_el)
 
         fixed_xml = etree.tostring(tree, xml_declaration=True, encoding='UTF-8', standalone=True)
         all_files['word/document.xml'] = fixed_xml
