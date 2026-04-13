@@ -239,7 +239,7 @@ class AutomationViewSet(viewsets.ViewSet):
 
         section_instructions = []
         if sections.get('title'):
-            section_instructions.append("- TITLE: Rewrite the job title to best match the JD role.")
+            section_instructions.append("- TITLE / TITLE2: Copy the EXACT job title string from the JD (e.g. 'Senior Java Developer', 'Full Stack Engineer'). Do NOT invent a title — use the JD wording verbatim.")
         if sections.get('summary'):
             section_instructions.append("- SUMMARY: Select the 5-6 best bullets from the pool that match JD keywords. Lightly rewrite to mirror JD language.")
         if sections.get('td'):
@@ -247,7 +247,7 @@ class AutomationViewSet(viewsets.ViewSet):
         if sections.get('ch'):
             section_instructions.append("- CH: Select 6-8 best bullets from the CH pool that match JD context.")
         if sections.get('env'):
-            section_instructions.append("- TD_ENV: List only the tech tools from TD_ENV that appear in the JD, adding any critical JD tools not already listed.")
+            section_instructions.append("- TD_ENV / CH_ENV: Include ALL tools, frameworks, languages, and platforms mentioned in the JD that are relevant to this role. Do not limit to a subset — add every JD keyword that belongs in a tech stack line.")
 
         prompt = f"""You are a senior resume writer specializing in enterprise banking and healthcare clients (TD Bank, Cardinal Health, etc.).
 
@@ -263,6 +263,7 @@ SECTIONS TO UPDATE:
 {chr(10).join(section_instructions) if section_instructions else "All sections"}
 
 STRICT OUTPUT REQUIREMENTS:
+- TITLE / TITLE2: MUST match the JD job title EXACTLY — copy the exact words from the posting. Never invent or generalize the title.
 - SUMMARY: exactly 25 points — strong, ATS-optimized, covers full-stack, microservices, APIs, cloud
 - TD (TD Bank experience): exactly 30 points — senior-level, real production tone
   * First 4 points: generic Senior Java Full Stack / API Engineer points, reusable across any project
@@ -469,61 +470,56 @@ Return ONLY a valid JSON object, no markdown, no explanation:
                     new_t.set('{http://www.w3.org/XML/1998/namespace}space', 'preserve')
                 break
 
-        # Pass 3: Fix TD section alignment — make bullet paragraph match CH (ListParagraph, no bold, no •)
-        # Also split "Role: {{TITLE2}}Responsibilities:" onto a new line inside the same paragraph.
+        # Pass 3: Fix TD bullet paragraph to exactly match CH (ListParagraph + numPr, no bold, no •)
+        # No line-break manipulation — that was breaking the docxtpl for-loop.
         import re as _re
         endfor_p3 = 0
         for para in tree.iter(f'{{{WNS}}}p'):
             t_elems = para.findall(f'.//{{{WNS}}}t')
             combined = ''.join((t.text or '') for t in t_elems)
 
-            # 3A: Split the Role/Responsibilities line so title and label are on separate lines
-            if '{{TITLE2}}' in combined and '{% for b in TD %}' in combined and 'Responsibilities' in combined:
-                run = para.find(f'.//{{{WNS}}}r')
-                if run is not None:
-                    t_elem = run.find(f'{{{WNS}}}t')
-                    if t_elem is not None:
-                        text = t_elem.text or ''
-                        resp_idx = text.find('Responsibilities')
-                        if resp_idx > 0:
-                            part1 = text[:resp_idx].rstrip()
-                            part2 = text[resp_idx:]
-                            t_elem.text = part1
-                            t_elem.set('{http://www.w3.org/XML/1998/namespace}space', 'preserve')
-                            br_elem = etree.Element(f'{{{WNS}}}br')
-                            t_elem.addnext(br_elem)
-                            t2_elem = etree.Element(f'{{{WNS}}}t')
-                            t2_elem.text = part2
-                            t2_elem.set('{http://www.w3.org/XML/1998/namespace}space', 'preserve')
-                            br_elem.addnext(t2_elem)
+            if '{% endfor %}' not in combined:
+                continue
+            endfor_p3 += 1
+            if endfor_p3 != 1:
+                break  # only fix the first endfor = TD bullet paragraph
 
-            # 3B: First {% endfor %} paragraph = TD bullet paragraph
-            if '{% endfor %}' in combined:
-                endfor_p3 += 1
-                if endfor_p3 == 1:
-                    # Change paragraph style to ListParagraph (same as CH bullets)
-                    pPr = para.find(f'{{{WNS}}}pPr')
-                    if pPr is None:
-                        pPr = etree.Element(f'{{{WNS}}}pPr')
-                        para.insert(0, pPr)
-                    pStyle = pPr.find(f'{{{WNS}}}pStyle')
-                    if pStyle is None:
-                        pStyle = etree.SubElement(pPr, f'{{{WNS}}}pStyle')
-                    pStyle.set(f'{{{WNS}}}val', 'ListParagraph')
+            # Completely replace pPr to mirror CH bullet para 72:
+            #   <w:pStyle val="ListParagraph"/>
+            #   <w:numPr><w:ilvl val="0"/><w:numId val="29"/></w:numPr>
+            old_pPr = para.find(f'{{{WNS}}}pPr')
+            if old_pPr is not None:
+                para.remove(old_pPr)
 
-                    # Fix run: remove bold + strip leading bullet character
-                    run = para.find(f'.//{{{WNS}}}r')
-                    if run is not None:
-                        rPr = run.find(f'{{{WNS}}}rPr')
-                        if rPr is not None:
-                            for bold_tag in (f'{{{WNS}}}b', f'{{{WNS}}}bCs'):
-                                b_el = rPr.find(bold_tag)
-                                if b_el is not None:
-                                    rPr.remove(b_el)
-                        t = run.find(f'{{{WNS}}}t')
-                        if t is not None and t.text:
-                            # Strip leading non-letter/non-{ characters (e.g. •, ●, -, ▪)
-                            t.text = _re.sub(r'^[^\w{]+', '', t.text)
+            new_pPr = etree.Element(f'{{{WNS}}}pPr')
+            pStyle_el = etree.SubElement(new_pPr, f'{{{WNS}}}pStyle')
+            pStyle_el.set(f'{{{WNS}}}val', 'ListParagraph')
+            numPr_el = etree.SubElement(new_pPr, f'{{{WNS}}}numPr')
+            ilvl_el = etree.SubElement(numPr_el, f'{{{WNS}}}ilvl')
+            ilvl_el.set(f'{{{WNS}}}val', '0')
+            numId_val = etree.SubElement(numPr_el, f'{{{WNS}}}numId')
+            numId_val.set(f'{{{WNS}}}val', '29')
+            pPr_rPr = etree.SubElement(new_pPr, f'{{{WNS}}}rPr')
+            rFonts_el = etree.SubElement(pPr_rPr, f'{{{WNS}}}rFonts')
+            rFonts_el.set(f'{{{WNS}}}cstheme', 'minorHAnsi')
+            etree.SubElement(pPr_rPr, f'{{{WNS}}}bCs')
+            sz_el = etree.SubElement(pPr_rPr, f'{{{WNS}}}sz')
+            sz_el.set(f'{{{WNS}}}val', '22')
+            para.insert(0, new_pPr)
+
+            # Fix run: remove bold + strip leading bullet character (•, ●, -, ▪)
+            run = para.find(f'.//{{{WNS}}}r')
+            if run is not None:
+                rPr = run.find(f'{{{WNS}}}rPr')
+                if rPr is not None:
+                    for bold_tag in (f'{{{WNS}}}b', f'{{{WNS}}}bCs'):
+                        b_el = rPr.find(bold_tag)
+                        if b_el is not None:
+                            rPr.remove(b_el)
+                t = run.find(f'{{{WNS}}}t')
+                if t is not None and t.text:
+                    t.text = _re.sub(r'^[^\w{]+', '', t.text)
+            break
 
         # Pass 4: Strip all underlines from every run in the document
         for run in tree.iter(f'{{{WNS}}}r'):
@@ -587,9 +583,9 @@ Return ONLY a valid JSON object, no markdown, no explanation:
             final_buf = BytesIO()
             d.save(final_buf)
 
-            # Save a copy to outputs
+            # Save a copy to server outputs
+            ts = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
             try:
-                ts = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
                 out_dir = self._outputs_root() / ts
                 out_dir.mkdir(parents=True, exist_ok=True)
                 with open(out_dir / "Ajay_Thota_Tailored.docx", 'wb') as f:
@@ -598,6 +594,18 @@ Return ONLY a valid JSON object, no markdown, no explanation:
                     f.write(jd_text)
             except Exception:
                 pass  # archive failure must never block the download
+
+            # Also save to C:\Resumes\{title}\Ajay_Thota_{timestamp}.docx
+            try:
+                title_val = (raw_ctx.get('TITLE') or 'Resume').strip()
+                safe_title = re.sub(r'[<>:"/\\|?*\n\r]', '_', title_val)[:80].strip('_ ')
+                c_dir = Path('C:/Resumes') / (safe_title or 'Resume')
+                c_dir.mkdir(parents=True, exist_ok=True)
+                c_path = c_dir / f'Ajay_Thota_{ts}.docx'
+                with open(c_path, 'wb') as f:
+                    f.write(final_buf.getvalue())
+            except Exception:
+                pass  # local save failure must never block download
 
             final_buf.seek(0)
             filename = f"Ajay_Thota_{datetime.datetime.now().strftime('%Y%m%d')}.docx"
