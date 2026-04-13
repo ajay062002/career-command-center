@@ -51,11 +51,11 @@ export class ResumeBuilderComponent implements OnInit {
     history: any[] = [];
     historyColumns: string[] = ['title', 'date', 'files', 'actions'];
 
-    // ── Section toggles ──────────────────────────────────────────────────────
+    // ── Section toggles — ALL on by default, always update everything ────────
     updateTitle    = true;
     updateSummary  = true;
-    updateTD       = false;
-    updateCH       = false;
+    updateTD       = true;
+    updateCH       = true;
     updateEnv      = true;
 
     // ── UI flags ─────────────────────────────────────────────────────────────
@@ -265,11 +265,17 @@ export class ResumeBuilderComponent implements OnInit {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `Ajay_Thota_Resume_${new Date().toISOString().split('T')[0]}.docx`;
+                // Name file with job title so it self-organises in Downloads
+                const title = (this.editedContent?.TITLE || 'Resume')
+                    .replace(/[^a-zA-Z0-9 _-]/g, '')
+                    .trim()
+                    .replace(/\s+/g, '_');
+                const date = new Date().toISOString().split('T')[0];
+                a.download = `Ajay_Thota_${title}_${date}.docx`;
                 a.click();
                 URL.revokeObjectURL(url);
                 this.isGenerating = false;
-                this.snackBar.open('✅ Resume downloaded!', 'Close', { duration: 5000 });
+                this.snackBar.open('Resume downloaded: ' + (this.editedContent?.TITLE || ''), 'Close', { duration: 5000 });
                 this.loadHistory();
             },
             error: (err) => {

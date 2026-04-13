@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import re
 import os
@@ -32,7 +33,8 @@ def home(request):
     return HttpResponse("Command Center Backend is Online")
 
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
+# Auth
+# ------------------------------------------------------------------------------
 
 class AuthViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'], url_path='register')
@@ -77,7 +79,8 @@ class AuthViewSet(viewsets.ViewSet):
         return Response({'detail': 'Password changed successfully.', 'token': token.key})
 
 
-# ── Analytics ─────────────────────────────────────────────────────────────────
+# Analytics
+# ------------------------------------------------------------------------------
 
 class AnalyticsViewSet(viewsets.ViewSet):
     def _get_user(self, request):
@@ -206,11 +209,13 @@ class AnalyticsViewSet(viewsets.ViewSet):
         return Response(result)
 
 
-# ── Automation / Resume Builder ───────────────────────────────────────────────
+# Automation / Resume Builder
+# ------------------------------------------------------------------------------
 
 class AutomationViewSet(viewsets.ViewSet):
 
-    # ── Paths ──────────────────────────────────────────────────────────────────
+    # Paths
+    # --------------------------------------------------------------------------
 
     def _automation_root(self) -> Path:
         """Correct path: <project_root>/backend/automation-service/"""
@@ -227,9 +232,10 @@ class AutomationViewSet(viewsets.ViewSet):
         p.mkdir(parents=True, exist_ok=True)
         return p
 
-    # ── Claude AI Tailoring ────────────────────────────────────────────────────
+    # Claude AI Tailoring
+    # --------------------------------------------------------------------------
 
-    def _tailor_with_claude(self, jd_text: str, base_content: dict, sections: dict):
+    def _tailor_with_claude(self, jd_text: str, base_content: dict, _sections: dict):
         """Call Claude claude-sonnet-4-6 to select and rewrite resume bullets."""
         api_key = os.environ.get('ANTHROPIC_API_KEY') or getattr(settings, 'ANTHROPIC_API_KEY', None)
         if not api_key or not anthropic:
@@ -237,64 +243,93 @@ class AutomationViewSet(viewsets.ViewSet):
 
         client = anthropic.Anthropic(api_key=api_key)
 
-        section_instructions = []
-        if sections.get('title'):
-            section_instructions.append("- TITLE / TITLE2: Copy the EXACT job title string from the JD (e.g. 'Senior Java Developer', 'Full Stack Engineer'). Do NOT invent a title — use the JD wording verbatim.")
-        if sections.get('summary'):
-            section_instructions.append("- SUMMARY: Select the 5-6 best bullets from the pool that match JD keywords. Lightly rewrite to mirror JD language.")
-        if sections.get('td'):
-            section_instructions.append("- TD: Select 8-10 best bullets from the TD pool that match JD tech stack.")
-        if sections.get('ch'):
-            section_instructions.append("- CH: Select 6-8 best bullets from the CH pool that match JD context.")
-        if sections.get('env'):
-            section_instructions.append("- TD_ENV / CH_ENV: Include ALL tools, frameworks, languages, and platforms mentioned in the JD that are relevant to this role. Do not limit to a subset — add every JD keyword that belongs in a tech stack line.")
+        # Extract title hint from JD for the prompt
+        import re as _re
+        title_hint = ''
+        for pattern in [
+            r'(?:job title|position|role|title)[:\s]+([^\n.]{4,60})',
+            r'^([A-Z][A-Za-z\s/]+(?:Developer|Engineer|Architect|Lead|Manager|Analyst|Consultant|Specialist))',
+        ]:
+            m = _re.search(pattern, jd_text[:2000], _re.IGNORECASE | _re.MULTILINE)
+            if m:
+                title_hint = m.group(1).strip()
+                break
 
-        prompt = f"""You are a senior resume writer specializing in enterprise banking and healthcare clients (TD Bank, Cardinal Health, etc.).
+        prompt = f"""You are a professional resume writer creating a tailored resume for Ajay Purshotam Thota.
 
-TASK: Tailor Ajay Purshotam Thota's resume for the following Job Description.
-
-JOB DESCRIPTION:
+════════════════════════════════════════════════════════
+JOB DESCRIPTION (read every word carefully):
+════════════════════════════════════════════════════════
 {jd_text[:6000]}
 
-BASE RESUME CONTENT (your bullet pool — select and rewrite from this only):
+════════════════════════════════════════════════════════
+BASE CONTENT POOL (rewrite bullets from this only):
+════════════════════════════════════════════════════════
 {json.dumps(base_content, indent=2)[:8000]}
 
-SECTIONS TO UPDATE:
-{chr(10).join(section_instructions) if section_instructions else "All sections"}
+════════════════════════════════════════════════════════
+STEP 1 — EXTRACT THE JOB TITLE (DO THIS FIRST, BEFORE ANYTHING ELSE)
+════════════════════════════════════════════════════════
+Scan the JD above. Find the EXACT job title the employer is hiring for.
+It is usually in the first few lines, or after words like "Position:", "Role:", "We are looking for a", "Title:".
+{'Hint found: "' + title_hint + '" — verify this is the real title or find a better one from the JD.' if title_hint else 'No hint extracted — find it yourself from the JD.'}
 
-STRICT OUTPUT REQUIREMENTS:
-- TITLE / TITLE2: MUST match the JD job title EXACTLY — copy the exact words from the posting. Never invent or generalize the title.
-- SUMMARY: exactly 25 points — strong, ATS-optimized, covers full-stack, microservices, APIs, cloud
-- TD (TD Bank experience): exactly 30 points — senior-level, real production tone
-  * First 4 points: generic Senior Java Full Stack / API Engineer points, reusable across any project
-  * Remaining 26: heavy focus on REST APIs (primary) and GraphQL (secondary), banking/payment systems context
-  * Naturally weave in: Java, Spring Boot, REST, GraphQL, Microservices, API security, resilience patterns, CI/CD (Jenkins), Git, JUnit, Cucumber, Azure
-  * Write about: failure handling, latency, API contracts, schema evolution, real problems solved
-- CH (Cardinal Health experience): exactly 30 points — healthcare/capital markets context, same quality level
-- TD_ENV / CH_ENV: comma-separated tech stacks for each company matched to JD
+TITLE RULES (VIOLATION = WRONG OUTPUT):
+★ TITLE must be the EXACT string from the JD — word for word, same capitalisation
+★ TITLE2 must be the SAME title or a very close variant (e.g. drop "Senior" for second occurrence)
+★ Do NOT use "Senior Full Stack Developer" unless the JD says EXACTLY that
+★ Do NOT paraphrase, simplify, or generalize
+★ If the JD says "Java Backend Engineer" → output exactly "Java Backend Engineer"
+★ If the JD says "Sr. Software Engineer - Java/Spring" → output exactly "Sr. Software Engineer - Java/Spring"
 
-WRITING RULES (MANDATORY):
-- Each point must be 2-3 lines, detailed, not short one-liners
-- No numbering, no bullet characters, no headings in the text
-- Strong senior-level tone — avoid "worked on", "responsible for", "helped with"
-- Every point introduces a new concept — zero repetition
-- Mix: design, development, performance tuning, security, testing, deployment, troubleshooting
-- Use real engineering language: mention specific patterns, tools, decisions, outcomes
-- Banking context for TD: payment processing, transaction APIs, PCI compliance, financial data
-- Healthcare context for CH: pharmacy systems, supply chain APIs, healthcare data, HIPAA
+════════════════════════════════════════════════════════
+STEP 2 — TAILOR ALL SECTIONS
+════════════════════════════════════════════════════════
 
-KEYWORDS: Extract 8-12 technical keywords from the JD.
+SUMMARY — exactly 25 bullets:
+- ATS-optimized, covers the JD's primary tech stack
+- Mirror the JD language and keywords throughout
+- Strong senior-level tone
 
-Return ONLY a valid JSON object, no markdown, no explanation:
+TD (TD Bank experience) — exactly 30 bullets:
+- First 4: generic "Senior [JD Title]" bullets that could apply to any project
+- Remaining 26: banking/payment systems context
+- Heavy emphasis on REST APIs, Spring Boot, microservices, JUnit, Cucumber
+- Include: failure handling, latency, API contracts, security, CI/CD
+- Mention tools from JD that are relevant (Jenkins, Azure, Git, etc.)
+
+CH (Cardinal Health experience) — exactly 30 bullets:
+- Same quality as TD, healthcare/supply-chain context
+- HIPAA awareness, pharmacy systems, eligibility workflows
+- Include same JD-relevant tech stack woven in naturally
+
+TD_ENV and CH_ENV — comma-separated tech stack lines:
+- Include EVERY tool, framework, language, platform, and cloud service mentioned in the JD
+- Add any standard tools implied by the role that aren't in the JD
+- Both should be comprehensive, not minimal
+
+════════════════════════════════════════════════════════
+WRITING RULES (every bullet, no exceptions)
+════════════════════════════════════════════════════════
+- 2-3 sentences per bullet, detailed and specific — no one-liners
+- No bullet characters, numbering, or section headers in the text
+- Zero repetition — every bullet introduces a different concept
+- Senior engineer voice: concrete decisions, tools, patterns, outcomes
+- Never say "responsible for", "worked on", "assisted with", "helped"
+- Use: Designed, Architected, Implemented, Led, Optimized, Delivered, Engineered, Built, Configured
+
+════════════════════════════════════════════════════════
+OUTPUT FORMAT — return ONLY this JSON, no markdown, no extra text
+════════════════════════════════════════════════════════
 {{
-  "TITLE": "...",
-  "TITLE2": "...",
-  "SUMMARY": ["point 1", "point 2", "... 25 total"],
-  "TD": ["point 1", "... 30 total"],
-  "CH": ["point 1", "... 30 total"],
-  "TD_ENV": "Java, Spring Boot, ...",
-  "CH_ENV": "...",
-  "KEYWORDS": ["keyword1", "..."]
+  "TITLE": "<exact job title copied from JD>",
+  "TITLE2": "<same or close variant>",
+  "SUMMARY": ["bullet 1", "bullet 2", "... exactly 25 items"],
+  "TD": ["bullet 1", "... exactly 30 items"],
+  "CH": ["bullet 1", "... exactly 30 items"],
+  "TD_ENV": "all relevant tools comma separated",
+  "CH_ENV": "all relevant tools comma separated",
+  "KEYWORDS": ["keyword1", "keyword2", "... 8-12 items"]
 }}"""
 
         try:
@@ -314,7 +349,8 @@ Return ONLY a valid JSON object, no markdown, no explanation:
             print(f"[Claude Error] {e}")
             return None
 
-    # ── Keyword fallback ranking ───────────────────────────────────────────────
+    # Keyword fallback ranking
+    # --------------------------------------------------------------------------
 
     def _rank_bullets(self, pool, keywords, limit=6):
         if not pool:
@@ -323,7 +359,8 @@ Return ONLY a valid JSON object, no markdown, no explanation:
         scored.sort(key=lambda x: x[0], reverse=True)
         return [b for _, b in scored[:limit]]
 
-    # ── Endpoints ─────────────────────────────────────────────────────────────
+    # Endpoints
+    # --------------------------------------------------------------------------
 
     @action(detail=False, methods=['get'], url_path='base-content')
     def base_content(self, request):
@@ -689,7 +726,8 @@ Return ONLY a valid JSON object, no markdown, no explanation:
         return Response({'url': mailto_url, 'subject': subject})
 
 
-# ── Standard CRUD ViewSets ────────────────────────────────────────────────────
+# Standard CRUD ViewSets
+# ------------------------------------------------------------------------------
 
 class ScrapedJobViewSet(viewsets.ModelViewSet):
     serializer_class = ScrapedJobSerializer
