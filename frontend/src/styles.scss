@@ -37,41 +37,41 @@ $mc-dark-theme: mat.define-dark-theme((
 
 // ── CSS Variables ────────────────────────────────────────────────────────────
 :root {
-  // ── True Minecraft palette (matched to official artwork) ──
-  --mc-grass:     #62B418;   // vivid grass green (from block top)
-  --mc-grass-dark:#2E6408;   // darker grass underside
-  --mc-dirt:      #8A5C32;   // warm dirt brown
-  --mc-dirt-dk:   #5A3418;   // dark dirt
-  --mc-diamond:   #50CCE8;   // sky-toned cyan (from water/sky)
-  --mc-diamond-dk:#086880;
-  --mc-gold:      #F0AA1C;   // warm MC gold block
-  --mc-gold-dk:   #7A4C00;
-  --mc-redstone:  #CC1C38;   // redstone torch red
-  --mc-redstone-dk:#6A0010;
-  --mc-emerald:   #16D858;
-  --mc-lapis:     #1848A8;   // lapis lazuli blue
-  --mc-lapis-dk:  #091840;
-  --mc-purple:    #7840B8;   // enchantment purple
-  --mc-enchant:   #7840B8;
-  --mc-xp:        #7ED420;   // XP bar green (bright lime)
-  --mc-xp-dk:     #386000;
-  --mc-iron:      #C4C4C4;
-  --mc-netherite: #484040;
-  --mc-orange:    #E07818;
-  --mc-sky:       #78C8E8;   // sky blue from artwork backgrounds
-  --mc-sand:      #D4AA38;   // sand/sandstone
+  // ── BRIGHT Minecraft palette — vivid, saturated, like official artwork ──
+  --mc-grass:     #7DCF22;   // VIVID bright grass green
+  --mc-grass-dark:#3A7A08;
+  --mc-dirt:      #9A6A3A;   // warm dirt
+  --mc-dirt-dk:   #6A3C18;
+  --mc-diamond:   #44E8FF;   // BRIGHT cyan-aqua diamond
+  --mc-diamond-dk:#006A80;
+  --mc-gold:      #FFD020;   // BRIGHT gold block yellow
+  --mc-gold-dk:   #8A5A00;
+  --mc-redstone:  #FF2244;   // BRIGHT neon red
+  --mc-redstone-dk:#800010;
+  --mc-emerald:   #22FF70;   // BRIGHT emerald green
+  --mc-lapis:     #2255CC;   // BRIGHT lapis blue
+  --mc-lapis-dk:  #0A1E50;
+  --mc-purple:    #AA44FF;   // BRIGHT enchantment purple
+  --mc-enchant:   #AA44FF;
+  --mc-xp:        #A0FF28;   // BRIGHT XP lime
+  --mc-xp-dk:     #3A6800;
+  --mc-iron:      #D8D8D8;
+  --mc-netherite: #584848;
+  --mc-orange:    #FF8820;   // BRIGHT fire orange
+  --mc-sky:       #88D8FF;   // BRIGHT sky blue
+  --mc-sand:      #FFCC44;   // BRIGHT sand/gold
 
-  // ── Minecraft GUI backgrounds (warm stone — no blue tint) ──
-  --mc-void:      #0E0C0A;   // warm near-black
-  --mc-obsidian:  #1A1814;   // warm dark bg (replaces blue #1a1c1f)
-  --mc-stone:     #2C2820;   // warm dark stone (replaces blue #262a30)
-  --mc-cobble:    #363028;   // warm cobblestone (replaces blue #2d3139)
-  --mc-gui:       #403A30;   // warm raised surface (replaces blue #373c44)
+  // ── Minecraft GUI backgrounds — lighter stone, not void-dark ──
+  --mc-void:      #181510;   // dark but warm, not black
+  --mc-obsidian:  #222018;   // main bg — visible warmth
+  --mc-stone:     #302E24;   // panel bg — like polished stone
+  --mc-cobble:    #3E3A2E;   // card bg — cobblestone warm
+  --mc-gui:       #4E4838;   // raised surface — bright stone
 
-  // ── Minecraft GUI 3D border system ──
+  // ── Bright MC GUI border system ──
   --mc-border-outer: #000000;
-  --mc-border-hi:    rgba(200, 185, 140, 0.38);   // warm earthy highlight (not cold blue-grey)
-  --mc-border-sh:    rgba(0, 0, 0, 0.65);          // bottom/right shadow
+  --mc-border-hi:    rgba(255, 240, 180, 0.55);   // BRIGHT warm highlight — pops
+  --mc-border-sh:    rgba(0, 0, 0, 0.70);
 
   // ── Typography ──
   --font-pixel: 'Press Start 2P', monospace;
@@ -142,22 +142,22 @@ html, body {
   margin: 0;
   font-family: var(--font-body);
   background-color: var(--mc-void);
-  color: #E8E0D0;   // warm off-white (like MC inventory text)
+  color: #F5F0E0;   // bright warm white — MC inventory text
   overflow-x: hidden;
 }
 
-// Warm stone pixel grid — like deepslate/stone texture
+// Bright stone pixel grid texture
 body {
   background-image:
     repeating-linear-gradient(
       0deg,
       transparent 0px, transparent 7px,
-      rgba(80, 60, 20, 0.12) 7px, rgba(80, 60, 20, 0.12) 8px
+      rgba(120, 100, 40, 0.18) 7px, rgba(120, 100, 40, 0.18) 8px
     ),
     repeating-linear-gradient(
       90deg,
       transparent 0px, transparent 7px,
-      rgba(80, 60, 20, 0.08) 7px, rgba(80, 60, 20, 0.08) 8px
+      rgba(120, 100, 40, 0.12) 7px, rgba(120, 100, 40, 0.12) 8px
     );
 }
 

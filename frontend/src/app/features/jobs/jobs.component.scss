@@ -31,7 +31,7 @@
             font-family: 'Press Start 2P', monospace;
             font-size: 0.85rem;
             margin: 0 0 10px;
-            color: var(--mc-diamond,#50CCE8);
+            color: var(--mc-diamond,#44E8FF);
             text-shadow: 3px 3px 0 rgba(0,0,0,0.9), 0 0 20px rgba(94,207,223,0.25);
             line-height: 1.8;
             letter-spacing: 0;
@@ -44,9 +44,9 @@
             font-family: 'Press Start 2P', monospace;
             font-size: 0.42rem;
             color: rgba(255,255,255,0.4);
-            background: #181612;
+            background: #221E16;
             padding: 6px 14px;
-            border: 1px solid #3C3228;
+            border: 1px solid #504838;
             box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
             text-transform: uppercase;
             letter-spacing: 0.1em;
@@ -64,7 +64,7 @@
             font-family: 'Press Start 2P', monospace !important;
             font-size: 0.5rem !important;
             letter-spacing: 0 !important;
-            background: var(--mc-grass,#62B418) !important;
+            background: var(--mc-grass,#7DCF22) !important;
             color: white !important;
             box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,200,100,0.3),
                         0 4px 0 #2a5a1a !important;
@@ -96,9 +96,9 @@
 
         ::ng-deep {
             .mat-mdc-text-field-wrapper {
-                background: #181612 !important;
+                background: #221E16 !important;
                 border-radius: 0 !important;
-                border: 2px solid #3C3228 !important;
+                border: 2px solid #504838 !important;
                 box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5) !important;
             }
             .mdc-text-field--outlined .mdc-notched-outline__leading,
@@ -120,9 +120,9 @@
 
 /* ── Table Container ────────────────────────────────── */
 .table-container {
-    background: #1E1C16;
-    border: 2px solid #3C3228;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
+    background: #2A2820;
+    border: 2px solid #504838;
+    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
     overflow: hidden;
     position: relative;
@@ -137,7 +137,7 @@
         align-items: center;
         justify-content: center;
         gap: 16px;
-        color: var(--mc-diamond,#50CCE8);
+        color: var(--mc-diamond,#44E8FF);
         font-family: 'Press Start 2P', monospace;
         font-size: 0.5rem;
         line-height: 2;
@@ -150,21 +150,21 @@
     }
 
     th {
-        background: #141210 !important;
-        color: var(--mc-diamond,#50CCE8) !important;
+        background: #1E1C14 !important;
+        color: var(--mc-diamond,#44E8FF) !important;
         font-family: 'Press Start 2P', monospace !important;
         font-size: 0.42rem !important;
         font-weight: 400 !important;
         letter-spacing: 0 !important;
         text-transform: uppercase !important;
         padding: 16px 16px !important;
-        border-bottom: 2px solid #3C3228 !important;
+        border-bottom: 2px solid #504838 !important;
         text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
     }
 
     td {
         padding: 16px 16px !important;
-        color: rgba(232,224,208,0.75) !important;
+        color: rgba(245,240,224,0.82) !important;
         border-bottom: 1px solid rgba(255,255,255,0.04) !important;
         vertical-align: middle;
     }
@@ -174,7 +174,7 @@
         cursor: pointer;
 
         &:hover {
-            background: rgba(94,207,223,0.05) !important;
+            background: rgba(68,232,255,0.08) !important;
             td { color: rgba(255,255,255,0.95) !important; }
         }
 
@@ -208,17 +208,17 @@
     border: 1px solid transparent;
     line-height: 1.8;
 
-    &.applied       { color: var(--mc-diamond,#50CCE8); background:rgba(94,207,223,0.08);  border-color:rgba(94,207,223,0.2); }
+    &.applied       { color: var(--mc-diamond,#44E8FF); background:rgba(68,232,255,0.12);  border-color:rgba(94,207,223,0.2); }
     &.interviewing,
-    &.screening     { color: var(--mc-xp,#7ED420); background:rgba(128,201,32,0.08); border-color:rgba(128,201,32,0.2); }
-    &.offer         { color: var(--mc-gold,#F0AA1C); background:rgba(254,173,39,0.1); border-color:rgba(254,173,39,0.3);
+    &.screening     { color: var(--mc-xp,#A0FF28); background:rgba(160,255,40,0.12); border-color:rgba(128,201,32,0.2); }
+    &.offer         { color: var(--mc-gold,#FFD020); background:rgba(254,173,39,0.1); border-color:rgba(254,173,39,0.3);
                       box-shadow: 0 0 10px rgba(254,173,39,0.15), inset 0 0 8px rgba(254,173,39,0.05); animation: mc-blink 2s step-end infinite; }
-    &.rejected      { color: var(--mc-redstone,#c41e3a); background:rgba(196,30,58,0.08); border-color:rgba(196,30,58,0.2); }
+    &.rejected      { color: var(--mc-redstone,#FF2244); background:rgba(255,34,68,0.12); border-color:rgba(196,30,58,0.2); }
     &.onhold,
     &.rtrsent,
     &.rtrpending,
-    &.submitted     { color: #c084fc; background:rgba(192,132,252,0.08); border-color:rgba(192,132,252,0.2); }
-    &.active        { color: var(--mc-gold,#F0AA1C); background:rgba(254,173,39,0.08); border-color:rgba(254,173,39,0.2); }
+    &.submitted     { color: #DD88FF; background:rgba(192,132,252,0.08); border-color:rgba(192,132,252,0.2); }
+    &.active        { color: var(--mc-gold,#FFD020); background:rgba(255,208,32,0.12); border-color:rgba(254,173,39,0.2); }
 }
 
 /* ── Action Buttons ─────────────────────────────────── */
@@ -242,8 +242,8 @@ tr.data-row:hover .action-buttons button {
 
 /* ── Paginator ──────────────────────────────────────── */
 ::ng-deep .mat-mdc-paginator {
-    background: #141210 !important;
-    border-top: 2px solid #3C3228 !important;
+    background: #1E1C14 !important;
+    border-top: 2px solid #504838 !important;
     padding: 6px 0 !important;
 
     .mat-mdc-paginator-container {
@@ -258,8 +258,8 @@ tr.data-row:hover .action-buttons button {
         color: rgba(255,255,255,0.4) !important;
         border-radius: 0 !important;
         &:hover {
-            color: var(--mc-diamond,#50CCE8) !important;
-            background: rgba(94,207,223,0.08) !important;
+            color: var(--mc-diamond,#44E8FF) !important;
+            background: rgba(68,232,255,0.12) !important;
         }
         &:disabled { color: rgba(255,255,255,0.15) !important; }
     }

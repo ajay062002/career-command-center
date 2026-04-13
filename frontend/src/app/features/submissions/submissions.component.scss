@@ -28,7 +28,7 @@
             font-family: 'Press Start 2P', monospace;
             font-size: 0.85rem;
             margin: 0;
-            color: var(--mc-gold,#F0AA1C);
+            color: var(--mc-gold,#FFD020);
             text-shadow: 3px 3px 0 rgba(0,0,0,0.9), 0 0 18px rgba(254,173,39,0.2);
             line-height: 1.8;
             letter-spacing: 0;
@@ -41,9 +41,9 @@
             font-family: 'Press Start 2P', monospace;
             font-size: 0.42rem;
             color: rgba(255,255,255,0.4);
-            background: #181612;
+            background: #221E16;
             padding: 6px 14px;
-            border: 1px solid #3C3228;
+            border: 1px solid #504838;
             box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
             letter-spacing: 0.08em;
         }
@@ -59,9 +59,9 @@
 /* ── View Toggle ─────────────────────────────────────── */
 .view-toggle {
     display: flex;
-    background: #181612;
+    background: #221E16;
     padding: 3px;
-    border: 2px solid #3C3228;
+    border: 2px solid #504838;
     box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
     gap: 2px;
 
@@ -70,7 +70,7 @@
         color: rgba(255,255,255,0.4);
 
         &.active {
-            background: var(--mc-gold,#F0AA1C) !important;
+            background: var(--mc-gold,#FFD020) !important;
             color: #000 !important;
             box-shadow: inset -1px -1px 0 rgba(0,0,0,0.5), inset 1px 1px 0 rgba(255,220,100,0.3);
         }
@@ -79,9 +79,9 @@
 
 /* ── Form Panel ──────────────────────────────────────── */
 .form-panel {
-    background: #1E1C16;
-    border: 2px solid #3C3228;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
+    background: #2A2820;
+    border: 2px solid #504838;
+    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
     padding: 24px;
     margin-bottom: 28px;
@@ -96,7 +96,7 @@
             margin: 0;
             font-family: 'Press Start 2P', monospace;
             font-size: 0.6rem;
-            color: var(--mc-gold,#F0AA1C);
+            color: var(--mc-gold,#FFD020);
             text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
             line-height: 1.8;
             display: flex;
@@ -123,7 +123,7 @@
         gap: 14px;
         margin-top: 20px;
         padding-top: 20px;
-        border-top: 2px solid #3C3228;
+        border-top: 2px solid #504838;
     }
 }
 
@@ -145,9 +145,9 @@
 
             ::ng-deep {
                 .mat-mdc-text-field-wrapper {
-                    background: #181612 !important;
+                    background: #221E16 !important;
                     border-radius: 0 !important;
-                    border: 2px solid #3C3228 !important;
+                    border: 2px solid #504838 !important;
                     box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5) !important;
                 }
                 .mdc-text-field--outlined .mdc-notched-outline__leading,
@@ -170,9 +170,9 @@
 
 /* ── Table View ──────────────────────────────────────── */
 .table-container {
-    background: #1E1C16;
-    border: 2px solid #3C3228;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
+    background: #2A2820;
+    border: 2px solid #504838;
+    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
     overflow: hidden;
 
@@ -181,8 +181,8 @@
         background: transparent !important;
 
         th {
-            background: #141210;
-            color: var(--mc-gold,#F0AA1C) !important;
+            background: #1E1C14;
+            color: var(--mc-gold,#FFD020) !important;
             font-family: 'Press Start 2P', monospace !important;
             font-size: 0.42rem !important;
             font-weight: 400 !important;
@@ -190,12 +190,12 @@
             text-transform: uppercase;
             letter-spacing: 0 !important;
             padding: 14px 16px !important;
-            border-bottom: 2px solid #3C3228 !important;
+            border-bottom: 2px solid #504838 !important;
         }
 
         td {
             padding: 14px 16px !important;
-            color: rgba(232,224,208,0.85) !important;
+            color: rgba(245,240,224,0.92) !important;
             border-bottom: 1px solid rgba(255,255,255,0.04) !important;
         }
     }
@@ -210,9 +210,9 @@
 
 /* ── Vendor Group ────────────────────────────────────── */
 .vendor-group {
-    background: #1E1C16;
-    border: 2px solid #3C3228;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
+    background: #2A2820;
+    border: 2px solid #504838;
+    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
     overflow: hidden;
     animation: mc-spawn 0.3s both;
@@ -223,8 +223,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 22px;
-    background: #141210;
-    border-bottom: 2px solid #3C3228;
+    background: #1E1C14;
+    border-bottom: 2px solid #504838;
 
     .vendor-header-left {
         display: flex;
@@ -236,7 +236,7 @@
         width: 44px;
         height: 44px;
         border-radius: 0;
-        background: var(--mc-enchant,#7b52ab);
+        background: var(--mc-enchant,#AA44FF);
         border: 2px solid #9b6fd8;
         box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(180,130,255,0.2);
         color: white;
@@ -280,11 +280,11 @@
     border: 1px solid transparent;
     line-height: 1.8;
 
-    &.submitted { color: var(--mc-diamond,#50CCE8); background:rgba(94,207,223,0.08); border-color:rgba(94,207,223,0.2); }
-    &.screening { color: var(--mc-gold,#F0AA1C); background:rgba(254,173,39,0.08); border-color:rgba(254,173,39,0.2); }
+    &.submitted { color: var(--mc-diamond,#44E8FF); background:rgba(68,232,255,0.12); border-color:rgba(94,207,223,0.2); }
+    &.screening { color: var(--mc-gold,#FFD020); background:rgba(255,208,32,0.12); border-color:rgba(254,173,39,0.2); }
     &.interview,
-    &.interviewscheduled { color: var(--mc-xp,#7ED420); background:rgba(128,201,32,0.08); border-color:rgba(128,201,32,0.2); }
-    &.rejected  { color: var(--mc-redstone,#c41e3a); background:rgba(196,30,58,0.08); border-color:rgba(196,30,58,0.2); }
+    &.interviewscheduled { color: var(--mc-xp,#A0FF28); background:rgba(160,255,40,0.12); border-color:rgba(128,201,32,0.2); }
+    &.rejected  { color: var(--mc-redstone,#FF2244); background:rgba(255,34,68,0.12); border-color:rgba(196,30,58,0.2); }
     &.withdrawn { color: rgba(255,255,255,0.4); background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1); }
 }
 
@@ -294,14 +294,14 @@
     font-size: 0.36rem;
 }
 
-.data-row:hover { background: rgba(254,173,39,0.04) !important; }
+.data-row:hover { background: rgba(255,208,32,0.06) !important; }
 
 /* ── Empty State ─────────────────────────────────────── */
 .empty-state {
     text-align: center;
     padding: 64px 32px;
-    background: #1E1C16;
-    border: 2px dashed #3C3228;
+    background: #2A2820;
+    border: 2px dashed #504838;
 
     mat-icon {
         font-size: 56px;

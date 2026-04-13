@@ -30,16 +30,16 @@
   font-family: 'Press Start 2P', monospace;
   font-size: 0.45rem;
   letter-spacing: 1px;
-  color: var(--mc-xp,#7ED420);
+  color: var(--mc-xp,#A0FF28);
   text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
   text-transform: uppercase;
   margin-bottom: 14px;
 
   .greeting-dot {
     width: 5px; height: 5px;
-    background: var(--mc-xp,#7ED420);
+    background: var(--mc-xp,#A0FF28);
     border-radius: 0; // pixel square
-    box-shadow: 0 0 4px var(--mc-xp,#7ED420);
+    box-shadow: 0 0 4px var(--mc-xp,#A0FF28);
     animation: blink 1.8s infinite;
   }
 }
@@ -60,7 +60,7 @@
   text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 2px 2px 0 rgba(0,0,0,0.6);
   letter-spacing: 0;
 
-  .title-accent { color: var(--mc-diamond,#50CCE8); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 16px rgba(94,207,223,0.4); }
+  .title-accent { color: var(--mc-diamond,#44E8FF); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 16px rgba(94,207,223,0.4); }
 }
 
 .dashboard-subtitle {
@@ -92,7 +92,7 @@
   cursor: pointer;
   transition: all 0.12s ease;
   // Minecraft button: raised 3D look
-  background: var(--mc-grass,#62B418);
+  background: var(--mc-grass,#7DCF22);
   color: #fff;
   border: 2px solid #000;
   box-shadow:
@@ -148,7 +148,7 @@
   gap: 8px;
   margin-top: 20px;
   padding: 10px 22px;
-  background: var(--mc-grass,#62B418);
+  background: var(--mc-grass,#7DCF22);
   color: #fff;
   border: 2px solid #000;
   box-shadow:
@@ -202,7 +202,7 @@
 .loading-orbs, .orb { display: none; }
 
 ::ng-deep .custom-spinner circle {
-  stroke: var(--mc-diamond,#50CCE8) !important;
+  stroke: var(--mc-diamond,#44E8FF) !important;
 }
 
 // ── Error State ────────────────────────────────────────────────────────────────
@@ -214,7 +214,7 @@
   mat-icon {
     font-size: 52px; width: 52px; height: 52px;
     display: block; margin: 0 auto 16px;
-    color: #c41e3a;
+    color: #FF2244;
     filter: drop-shadow(0 0 8px rgba(196,30,58,0.4));
   }
   h3 {
@@ -246,7 +246,7 @@
   border: 2px solid #000;
   box-shadow:
     inset -2px -2px 0 rgba(0,0,0,0.7),
-    inset 2px 2px 0 rgba(200,185,140,0.22),
+    inset 2px 2px 0 rgba(255,240,180,0.40),
     0 4px 0 rgba(0,0,0,0.7);
   transition: all 0.12s ease;
 
@@ -321,7 +321,7 @@
 // XP bar style progress bar — a true Minecraft touch
 .stat-card__bar {
   height: 5px;
-  background: #0d0f12;
+  background: #0A0808;
   border: 1px solid #000;
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(0,0,0,0.5);
@@ -335,44 +335,44 @@
 
 // ── Color variants — Minecraft item rarity colors ─────────────────────────────
 .stat-card--blue {
-  .stat-card__icon     { background: rgba(94,207,223,0.18); color: var(--mc-diamond,#50CCE8); }
-  .stat-card__value    { color: var(--mc-diamond,#50CCE8); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(94,207,223,0.3); }
-  .stat-card__bar-fill { background: var(--mc-diamond,#50CCE8); box-shadow: 0 0 4px var(--mc-diamond,#50CCE8); }
+  .stat-card__icon     { background: rgba(94,207,223,0.18); color: var(--mc-diamond,#44E8FF); }
+  .stat-card__value    { color: var(--mc-diamond,#44E8FF); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(68,232,255,0.55); }
+  .stat-card__bar-fill { background: var(--mc-diamond,#44E8FF); box-shadow: 0 0 4px var(--mc-diamond,#44E8FF); }
   &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(94,207,223,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
 .stat-card--orange {
-  .stat-card__icon     { background: rgba(224,122,16,0.2); color: var(--mc-gold,#F0AA1C); }
-  .stat-card__value    { color: var(--mc-gold,#F0AA1C); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(254,173,39,0.3); }
-  .stat-card__bar-fill { background: var(--mc-gold,#F0AA1C); box-shadow: 0 0 4px var(--mc-gold,#F0AA1C); }
+  .stat-card__icon     { background: rgba(224,122,16,0.2); color: var(--mc-gold,#FFD020); }
+  .stat-card__value    { color: var(--mc-gold,#FFD020); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(255,208,32,0.55); }
+  .stat-card__bar-fill { background: var(--mc-gold,#FFD020); box-shadow: 0 0 4px var(--mc-gold,#FFD020); }
   &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(254,173,39,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
 .stat-card--green {
-  .stat-card__icon     { background: rgba(93,158,63,0.2); color: var(--mc-xp,#7ED420); }
-  .stat-card__value    { color: var(--mc-xp,#7ED420); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(128,201,32,0.3); }
-  .stat-card__bar-fill { background: var(--mc-xp,#7ED420); box-shadow: 0 0 4px var(--mc-xp,#7ED420); }
+  .stat-card__icon     { background: rgba(93,158,63,0.2); color: var(--mc-xp,#A0FF28); }
+  .stat-card__value    { color: var(--mc-xp,#A0FF28); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(160,255,40,0.55); }
+  .stat-card__bar-fill { background: var(--mc-xp,#A0FF28); box-shadow: 0 0 4px var(--mc-xp,#A0FF28); }
   &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(128,201,32,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
 .stat-card--red {
   .stat-card__icon     { background: rgba(196,30,58,0.2); color: #e05252; }
-  .stat-card__value    { color: #e05252; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(196,30,58,0.3); }
-  .stat-card__bar-fill { background: #c41e3a; box-shadow: 0 0 4px #c41e3a; }
+  .stat-card__value    { color: #e05252; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(255,34,68,0.55); }
+  .stat-card__bar-fill { background: #FF2244; box-shadow: 0 0 4px #FF2244; }
   &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(196,30,58,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
 .stat-card--purple {
-  .stat-card__icon     { background: rgba(123,0,200,0.2); color: #c084fc; }
-  .stat-card__value    { color: #c084fc; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(192,132,252,0.3); }
+  .stat-card__icon     { background: rgba(123,0,200,0.2); color: #DD88FF; }
+  .stat-card__value    { color: #DD88FF; text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(192,132,252,0.3); }
   .stat-card__bar-fill { background: #9b59d0; box-shadow: 0 0 4px #9b59d0; }
   &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(123,0,200,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
 .stat-card--yellow {
-  .stat-card__icon     { background: rgba(254,173,39,0.18); color: var(--mc-gold,#F0AA1C); }
-  .stat-card__value    { color: var(--mc-gold,#F0AA1C); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(254,173,39,0.3); }
-  .stat-card__bar-fill { background: var(--mc-gold,#F0AA1C); box-shadow: 0 0 4px var(--mc-gold,#F0AA1C); }
+  .stat-card__icon     { background: rgba(254,173,39,0.18); color: var(--mc-gold,#FFD020); }
+  .stat-card__value    { color: var(--mc-gold,#FFD020); text-shadow: 3px 3px 0 rgba(0,0,0,0.8), 0 0 12px rgba(255,208,32,0.55); }
+  .stat-card__bar-fill { background: var(--mc-gold,#FFD020); box-shadow: 0 0 4px var(--mc-gold,#FFD020); }
   &:hover { box-shadow: inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(254,173,39,0.15), 0 7px 0 rgba(0,0,0,0.7); }
 }
 
@@ -386,7 +386,7 @@
 
 // Chart card — Minecraft enchantment table / book panel style
 .chart-card {
-  background: #1E1C16;
+  background: #2A2820;
   border: 2px solid #000;
   box-shadow:
     inset -2px -2px 0 rgba(0,0,0,0.7),
@@ -398,7 +398,7 @@
   &:hover {
     box-shadow:
       inset -2px -2px 0 rgba(0,0,0,0.7),
-      inset 2px 2px 0 rgba(200,185,140,0.22),
+      inset 2px 2px 0 rgba(255,240,180,0.40),
       0 6px 0 rgba(0,0,0,0.6);
   }
 }
@@ -437,7 +437,7 @@
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 
-  mat-icon { font-size: 17px; color: var(--mc-diamond,#50CCE8); }
+  mat-icon { font-size: 17px; color: var(--mc-diamond,#44E8FF); }
 }
 
 // Gold tag — like a Minecraft name tag
@@ -445,9 +445,9 @@
   font-family: 'Press Start 2P', monospace;
   font-size: 0.42rem;
   font-weight: 400;
-  color: var(--mc-gold,#F0AA1C);
+  color: var(--mc-gold,#FFD020);
   background: rgba(254,173,39,0.1);
-  border: 1px solid rgba(254,173,39,0.3);
+  border: 1px solid rgba(255,208,32,0.55);
   padding: 4px 10px;
   letter-spacing: 0.5px;
   white-space: nowrap;
@@ -525,27 +525,27 @@
   }
 
   &--blue {
-    background: rgba(94,207,223,0.1); color: var(--mc-diamond,#50CCE8);
+    background: rgba(94,207,223,0.1); color: var(--mc-diamond,#44E8FF);
     border-color: rgba(94,207,223,0.25);
     &:hover { background: rgba(94,207,223,0.18); }
   }
   &--orange {
-    background: rgba(224,122,16,0.1); color: var(--mc-gold,#F0AA1C);
+    background: rgba(224,122,16,0.1); color: var(--mc-gold,#FFD020);
     border-color: rgba(254,173,39,0.25);
     &:hover { background: rgba(254,173,39,0.18); }
   }
   &--green {
-    background: rgba(93,158,63,0.1); color: var(--mc-xp,#7ED420);
+    background: rgba(93,158,63,0.1); color: var(--mc-xp,#A0FF28);
     border-color: rgba(128,201,32,0.25);
     &:hover { background: rgba(128,201,32,0.18); }
   }
   &--purple {
-    background: rgba(123,0,200,0.1); color: #c084fc;
+    background: rgba(123,0,200,0.1); color: #DD88FF;
     border-color: rgba(192,132,252,0.25);
     &:hover { background: rgba(192,132,252,0.15); }
   }
   &--yellow {
-    background: rgba(254,173,39,0.1); color: var(--mc-gold,#F0AA1C);
+    background: rgba(254,173,39,0.1); color: var(--mc-gold,#FFD020);
     border-color: rgba(254,173,39,0.25);
     &:hover { background: rgba(254,173,39,0.18); }
   }

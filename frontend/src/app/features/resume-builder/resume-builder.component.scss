@@ -7,7 +7,7 @@
 @keyframes mc-slideup { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
 @keyframes mc-spawn   { 0%{opacity:0;transform:scale(0.88)}60%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)} }
 @keyframes mc-blink   { 0%,100%{opacity:1}50%{opacity:0.3} }
-@keyframes mc-enchant { 0%{color:var(--mc-enchant,#7b52ab)}50%{color:#c084fc}100%{color:var(--mc-enchant,#7b52ab)} }
+@keyframes mc-enchant { 0%{color:var(--mc-enchant,#AA44FF)}50%{color:#DD88FF}100%{color:var(--mc-enchant,#AA44FF)} }
 @keyframes mc-slidein { from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)} }
 
 .builder-container {
@@ -26,7 +26,7 @@
         font-family: 'Press Start 2P', monospace;
         font-size: 0.82rem;
         margin: 0 0 6px;
-        color: var(--mc-enchant,#7b52ab);
+        color: var(--mc-enchant,#AA44FF);
         text-shadow: 3px 3px 0 rgba(0,0,0,0.9), 0 0 18px rgba(123,82,171,0.3);
         line-height: 1.8;
         letter-spacing: 0;
@@ -45,8 +45,8 @@
     margin-top: 8px;
 
     ::ng-deep .mat-mdc-tab-header {
-        border-bottom: 2px solid #3C3228;
-        background: #141210;
+        border-bottom: 2px solid #504838;
+        background: #1E1C14;
     }
 
     ::ng-deep .mat-mdc-tab-label-container { margin-bottom: 0; }
@@ -59,12 +59,12 @@
     }
 
     ::ng-deep .mdc-tab--active .mdc-tab__text-label {
-        color: var(--mc-enchant,#7b52ab) !important;
+        color: var(--mc-enchant,#AA44FF) !important;
         text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
     }
 
     ::ng-deep .mdc-tab-indicator__content--underline {
-        border-color: var(--mc-enchant,#7b52ab) !important;
+        border-color: var(--mc-enchant,#AA44FF) !important;
         border-width: 2px !important;
     }
 
@@ -89,10 +89,10 @@
 .history-card {
     padding: 0 !important;
     overflow: hidden;
-    background: #1E1C16 !important;
-    border: 2px solid #3C3228 !important;
+    background: #2A2820 !important;
+    border: 2px solid #504838 !important;
     border-radius: 0 !important;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
+    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6) !important;
 }
 
@@ -100,9 +100,9 @@
     background: transparent !important;
 
     mat-header-row {
-        background: #141210;
+        background: #1E1C14;
         min-height: 44px;
-        border-bottom: 2px solid #3C3228 !important;
+        border-bottom: 2px solid #504838 !important;
     }
 
     mat-row {
@@ -115,9 +115,9 @@
         font-family: 'Press Start 2P', monospace !important;
         font-size: 0.4rem !important;
         font-weight: 400 !important;
-        color: var(--mc-enchant,#7b52ab) !important;
+        color: var(--mc-enchant,#AA44FF) !important;
         text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
-        background: #141210 !important;
+        background: #1E1C14 !important;
         border-bottom: none !important;
         text-transform: uppercase;
     }
@@ -132,7 +132,7 @@
 
 .gen-title {
     font-weight: 600;
-    color: var(--mc-enchant,#7b52ab);
+    color: var(--mc-enchant,#AA44FF);
     font-size: 0.85rem;
 }
 
@@ -157,7 +157,7 @@
 
     &.docx {
         background: rgba(94,207,223,0.1);
-        color: var(--mc-diamond,#50CCE8);
+        color: var(--mc-diamond,#44E8FF);
         border-color: rgba(94,207,223,0.25);
     }
     &.jd {
@@ -192,10 +192,10 @@
 
 /* ── Glass / MC Panel cards ──────────────────────────── */
 .glass-panel {
-    background: #1E1C16 !important;
-    border: 2px solid #3C3228 !important;
+    background: #2A2820 !important;
+    border: 2px solid #504838 !important;
     border-radius: 0 !important;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
+    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6) !important;
 }
 
@@ -217,11 +217,11 @@
 }
 
 .jd-icon     { background: var(--mc-lapis,#1b4fd8);   border-color: #2a6aff; }
-.ctrl-icon   { background: var(--mc-enchant,#7b52ab); border-color: #a06eff; }
-.preview-icon{ background: var(--mc-diamond,#50CCE8); border-color: #8af0ff; }
+.ctrl-icon   { background: var(--mc-enchant,#AA44FF); border-color: #CC88FF; }
+.preview-icon{ background: var(--mc-diamond,#44E8FF); border-color: #8af0ff; }
 .docx-icon   { background: var(--mc-lapis,#1b4fd8);   border-color: #2a6aff; }
-.email-icon  { background: var(--mc-redstone,#c41e3a); border-color: #ff4060; }
-.upload-icon { background: var(--mc-grass,#62B418);   border-color: var(--mc-xp,#7ED420); }
+.email-icon  { background: var(--mc-redstone,#FF2244); border-color: #ff4060; }
+.upload-icon { background: var(--mc-grass,#7DCF22);   border-color: var(--mc-xp,#A0FF28); }
 
 /* ── Section Toggles ─────────────────────────────────── */
 .section-toggles { display: flex; flex-direction: column; gap: 3px; }
@@ -258,7 +258,7 @@
 
 /* ── Tailor / Reset Buttons ──────────────────────────── */
 .tailor-btn {
-    background: var(--mc-enchant,#7b52ab) !important;
+    background: var(--mc-enchant,#AA44FF) !important;
     color: white !important;
     border-radius: 0 !important;
     display: flex !important;
@@ -280,7 +280,7 @@
 }
 
 .reset-btn {
-    border: 2px solid #3C3228 !important;
+    border: 2px solid #504838 !important;
     color: rgba(255,255,255,0.4) !important;
     border-radius: 0 !important;
     font-family: 'Press Start 2P', monospace !important;
@@ -303,7 +303,7 @@
 
 .kw-chip {
     background: rgba(123,82,171,0.15) !important;
-    color: #c084fc !important;
+    color: #DD88FF !important;
     border: 1px solid rgba(123,82,171,0.3) !important;
     border-radius: 0 !important;
     font-size: 0.7rem !important;
@@ -320,8 +320,8 @@
     padding-right: 4px;
 
     &::-webkit-scrollbar { width: 4px; }
-    &::-webkit-scrollbar-track { background: #181612; }
-    &::-webkit-scrollbar-thumb { background: #3C3228; }
+    &::-webkit-scrollbar-track { background: #221E16; }
+    &::-webkit-scrollbar-thumb { background: #504838; }
 }
 
 .preview-section { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
@@ -338,7 +338,7 @@
 .preview-title-val  {
     font-family: 'Press Start 2P', monospace;
     font-size: 0.62rem;
-    color: var(--mc-enchant,#7b52ab);
+    color: var(--mc-enchant,#AA44FF);
     text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
     line-height: 1.8;
     animation: mc-enchant 4s step-end infinite;
@@ -378,7 +378,7 @@
     font-size: 0.72rem;
     line-height: 1.5;
     background: #0d0f12 !important;
-    color: var(--mc-xp,#7ED420) !important;
+    color: var(--mc-xp,#A0FF28) !important;
 }
 
 .json-hint {
@@ -391,10 +391,10 @@
 .action-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 
 .action-card {
-    background: #1E1C16 !important;
-    border: 2px solid #3C3228 !important;
+    background: #2A2820 !important;
+    border: 2px solid #504838 !important;
     border-radius: 0 !important;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
+    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 3px 0 rgba(0,0,0,0.5) !important;
 
     mat-card-content { padding: 0 !important; }
@@ -434,7 +434,7 @@
 }
 
 .email-btn {
-    background: var(--mc-redstone,#c41e3a) !important;
+    background: var(--mc-redstone,#FF2244) !important;
     color: white !important;
     border-radius: 0 !important;
     font-family: 'Press Start 2P', monospace !important;
@@ -477,13 +477,13 @@
 
 /* ── Before/After Diff Panel ─────────────────────────── */
 .diff-card {
-    border-left: 3px solid var(--mc-enchant,#7b52ab) !important;
-    background: #1E1C16 !important;
-    border-top: 2px solid #3C3228 !important;
-    border-right: 2px solid #3C3228 !important;
-    border-bottom: 2px solid #3C3228 !important;
+    border-left: 3px solid var(--mc-enchant,#AA44FF) !important;
+    background: #2A2820 !important;
+    border-top: 2px solid #504838 !important;
+    border-right: 2px solid #504838 !important;
+    border-bottom: 2px solid #504838 !important;
     border-radius: 0 !important;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
+    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6) !important;
     animation: mc-slidein 0.35s ease-out;
 }
@@ -493,7 +493,7 @@
     mat-card-subtitle { margin-top: 4px; color: rgba(255,255,255,0.3) !important; }
 }
 
-.diff-icon { background: var(--mc-enchant,#7b52ab); border: 2px solid #a06eff; }
+.diff-icon { background: var(--mc-enchant,#AA44FF); border: 2px solid #CC88FF; }
 
 .diff-content {
     padding: 0 16px 16px;
@@ -533,12 +533,12 @@
 
     &.before-tag {
         background: rgba(196,30,58,0.1);
-        color: var(--mc-redstone,#c41e3a);
+        color: var(--mc-redstone,#FF2244);
         border-color: rgba(196,30,58,0.25);
     }
     &.after-tag {
         background: rgba(128,201,32,0.1);
-        color: var(--mc-xp,#7ED420);
+        color: var(--mc-xp,#A0FF28);
         border-color: rgba(128,201,32,0.25);
     }
 }
@@ -552,11 +552,11 @@
     font-size: 0.78rem; line-height: 1.5; margin: 0; word-break: break-word;
 
     &.removed {
-        color: var(--mc-redstone,#c41e3a);
+        color: var(--mc-redstone,#FF2244);
         text-decoration: line-through;
         text-decoration-color: rgba(196,30,58,0.45);
     }
-    &.added { color: var(--mc-xp,#7ED420); }
+    &.added { color: var(--mc-xp,#A0FF28); }
 }
 
 .diff-bullets {
@@ -567,11 +567,11 @@
         color: rgba(255,255,255,0.5);
 
         &.removed {
-            color: var(--mc-redstone,#c41e3a);
+            color: var(--mc-redstone,#FF2244);
             text-decoration: line-through;
             text-decoration-color: rgba(196,30,58,0.4);
         }
-        &.added { color: var(--mc-xp,#7ED420); font-weight: 600; }
+        &.added { color: var(--mc-xp,#A0FF28); font-weight: 600; }
     }
 }
 
@@ -588,7 +588,7 @@
     &.ai-active {
         background: rgba(123,82,171,0.08);
         border-color: rgba(123,82,171,0.25);
-        color: #c084fc;
+        color: #DD88FF;
         mat-icon { opacity: 1; }
         animation: mc-enchant 3s step-end infinite;
     }

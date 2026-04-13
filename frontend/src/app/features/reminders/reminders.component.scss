@@ -29,7 +29,7 @@
             font-family: 'Press Start 2P', monospace;
             font-size: 0.85rem;
             margin: 0;
-            color: var(--mc-redstone,#c41e3a);
+            color: var(--mc-redstone,#FF2244);
             text-shadow: 3px 3px 0 rgba(0,0,0,0.9), 0 0 18px rgba(196,30,58,0.25);
             line-height: 1.8;
             letter-spacing: 0;
@@ -46,9 +46,9 @@
 /* ── View Toggle ─────────────────────────────────────── */
 .view-toggle {
     display: flex;
-    background: #181612;
+    background: #221E16;
     padding: 3px;
-    border: 2px solid #3C3228;
+    border: 2px solid #504838;
     box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
     gap: 2px;
     margin-right: 14px;
@@ -58,7 +58,7 @@
         color: rgba(255,255,255,0.4);
 
         &.active {
-            background: var(--mc-redstone,#c41e3a) !important;
+            background: var(--mc-redstone,#FF2244) !important;
             color: white !important;
             box-shadow: inset -1px -1px 0 rgba(0,0,0,0.5), inset 1px 1px 0 rgba(255,100,100,0.25);
         }
@@ -67,9 +67,9 @@
 
 /* ── Table Container ─────────────────────────────────── */
 .table-container {
-    background: #1E1C16;
-    border: 2px solid #3C3228;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
+    background: #2A2820;
+    border: 2px solid #504838;
+    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
     overflow: hidden;
     position: relative;
@@ -79,8 +79,8 @@
         background: transparent !important;
 
         th {
-            background: #141210;
-            color: var(--mc-redstone,#c41e3a) !important;
+            background: #1E1C14;
+            color: var(--mc-redstone,#FF2244) !important;
             font-family: 'Press Start 2P', monospace !important;
             font-size: 0.42rem !important;
             font-weight: 400 !important;
@@ -88,16 +88,16 @@
             padding: 14px 16px !important;
             text-transform: uppercase;
             letter-spacing: 0 !important;
-            border-bottom: 2px solid #3C3228 !important;
+            border-bottom: 2px solid #504838 !important;
         }
 
         td {
             padding: 14px 16px !important;
-            color: rgba(232,224,208,0.85) !important;
+            color: rgba(245,240,224,0.92) !important;
             border-bottom: 1px solid rgba(255,255,255,0.04) !important;
         }
 
-        tr.data-row:hover { background: rgba(196,30,58,0.04) !important; }
+        tr.data-row:hover { background: rgba(255,34,68,0.06) !important; }
     }
 }
 
@@ -139,9 +139,9 @@
     border: 1px solid transparent;
     line-height: 1.8;
 
-    &.followup  { color: var(--mc-diamond,#50CCE8); background:rgba(94,207,223,0.08); border-color:rgba(94,207,223,0.2); }
-    &.interview { color: var(--mc-xp,#7ED420); background:rgba(128,201,32,0.08); border-color:rgba(128,201,32,0.2); }
-    &.study     { color: #c084fc; background:rgba(192,132,252,0.08); border-color:rgba(192,132,252,0.2); }
+    &.followup  { color: var(--mc-diamond,#44E8FF); background:rgba(68,232,255,0.12); border-color:rgba(94,207,223,0.2); }
+    &.interview { color: var(--mc-xp,#A0FF28); background:rgba(160,255,40,0.12); border-color:rgba(128,201,32,0.2); }
+    &.study     { color: #DD88FF; background:rgba(192,132,252,0.08); border-color:rgba(192,132,252,0.2); }
     &.task      { color: rgba(255,255,255,0.5); background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1); }
 }
 
@@ -159,14 +159,14 @@
 
     &.overdue {
         background: rgba(196,30,58,0.1);
-        color: var(--mc-redstone,#c41e3a);
+        color: var(--mc-redstone,#FF2244);
         border-color: rgba(196,30,58,0.3);
         animation: mc-urgent 1.5s step-end infinite;
     }
 
     &.today {
         background: rgba(254,173,39,0.1);
-        color: var(--mc-gold,#F0AA1C);
+        color: var(--mc-gold,#FFD020);
         border-color: rgba(254,173,39,0.3);
         animation: mc-blink 2s step-end infinite;
     }
@@ -192,7 +192,7 @@
     transition: color 0s, transform 0s !important;
 
     &:hover {
-        color: var(--mc-xp,#7ED420);
+        color: var(--mc-xp,#A0FF28);
         transform: scale(1.15);
     }
 }
@@ -208,15 +208,15 @@
     display: flex;
     flex-direction: column;
     padding: 20px;
-    background: #1E1C16;
-    border: 2px solid #3C3228;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.18)),
+    background: #2A2820;
+    border: 2px solid #504838;
+    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
     animation: mc-spawn 0.3s both;
     transition: border-color 0s;
 
     &:hover {
-        border-color: var(--mc-redstone,#c41e3a);
+        border-color: var(--mc-redstone,#FF2244);
     }
 
     .card-header {
@@ -261,12 +261,12 @@
     .card-footer {
         margin-top: 20px;
         padding-top: 16px;
-        border-top: 2px solid #3C3228;
+        border-top: 2px solid #504838;
         display: flex;
         justify-content: flex-end;
 
         .action-done {
-            color: var(--mc-xp,#7ED420);
+            color: var(--mc-xp,#A0FF28);
             font-family: 'Press Start 2P', monospace;
             font-size: 0.42rem;
             letter-spacing: 0;
@@ -281,8 +281,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #1E1C16;
-    border: 2px dashed #3C3228;
+    background: #2A2820;
+    border: 2px dashed #504838;
 
     mat-icon {
         font-size: 56px;
@@ -312,7 +312,7 @@
     align-items: center;
     justify-content: center;
     gap: 16px;
-    color: var(--mc-redstone,#c41e3a);
+    color: var(--mc-redstone,#FF2244);
     font-family: 'Press Start 2P', monospace;
     font-size: 0.5rem;
     line-height: 2;

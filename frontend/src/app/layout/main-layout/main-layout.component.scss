@@ -2,7 +2,7 @@
 // Looks like a Minecraft inventory title bar
 .main-toolbar {
   height: 56px;
-  background: #1E1C16 !important;
+  background: #2A2820 !important;
   border-bottom: 2px solid #000 !important;
   // Classic MC 3D bottom edge
   box-shadow:
@@ -20,7 +20,7 @@
 .menu-trigger {
   color: rgba(255,255,255,0.45) !important;
   transition: color 0.12s ease !important;
-  &:hover { color: var(--mc-diamond,#50CCE8) !important; }
+  &:hover { color: var(--mc-diamond,#44E8FF) !important; }
 }
 
 // ── Brand ─────────────────────────────────────────────────────────────────────
@@ -41,7 +41,7 @@
     inset -2px -2px 0 rgba(0,0,0,0.5),
     inset 2px 2px 0 rgba(150,160,175,0.3);
   // Grass block: top half green, bottom half dirt brown
-  background: linear-gradient(180deg, var(--mc-grass,#62B418) 0%, var(--mc-grass,#62B418) 45%, #7a5330 45%, #7a5330 100%);
+  background: linear-gradient(180deg, var(--mc-grass,#7DCF22) 0%, var(--mc-grass,#7DCF22) 45%, #7a5330 45%, #7a5330 100%);
   display: flex; align-items: center; justify-content: center;
 
   mat-icon {
@@ -61,7 +61,7 @@
   text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
   letter-spacing: 0;
 
-  .highlight { color: var(--mc-diamond,#50CCE8); }
+  .highlight { color: var(--mc-diamond,#44E8FF); }
 }
 
 .spacer { flex: 1 1 auto; }
@@ -86,17 +86,17 @@
   font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 1.5px;
-  color: var(--mc-grass,#62B418);
+  color: var(--mc-grass,#7DCF22);
   text-transform: uppercase;
   font-family: 'Press Start 2P', monospace;
   text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
 
   .live-dot {
     width: 5px; height: 5px;
-    background: var(--mc-xp,#7ED420);
+    background: var(--mc-xp,#A0FF28);
     border-radius: 0; // square pixel
     animation: blink 1.5s infinite ease-in-out;
-    box-shadow: 0 0 4px var(--mc-xp,#7ED420);
+    box-shadow: 0 0 4px var(--mc-xp,#A0FF28);
   }
 }
 
@@ -162,8 +162,8 @@
 }
 
 .logout-menu-item {
-  color: #c41e3a !important;
-  mat-icon { color: #c41e3a !important; }
+  color: #FF2244 !important;
+  mat-icon { color: #FF2244 !important; }
 }
 
 // ── Sidenav Container ─────────────────────────────────────────────────────────
@@ -180,7 +180,7 @@
 // Styled as the Minecraft inventory side panel
 .sidenav {
   width: 252px;
-  background: #1E1C16 !important;
+  background: #2A2820 !important;
   border-right: 2px solid #000 !important;
   // 3D panel effect — right side shadow, left side highlight
   box-shadow:
@@ -248,7 +248,7 @@
   // Selected hotbar slot look — bright border + highlight bg
   &.active {
     background: rgba(94,207,223,0.1);
-    color: var(--mc-diamond,#50CCE8);
+    color: var(--mc-diamond,#44E8FF);
     // Minecraft selected slot: lighter outer border with inner glow
     border: 1px solid rgba(94,207,223,0.4);
     box-shadow:
@@ -261,7 +261,7 @@
       position: absolute;
       left: 0; top: 0; height: 100%;
       width: 3px;
-      background: var(--mc-diamond,#50CCE8);
+      background: var(--mc-diamond,#44E8FF);
       box-shadow: 0 0 6px rgba(94,207,223,0.6);
     }
   }
@@ -281,11 +281,11 @@
 
   mat-icon { font-size: 15px; width: 15px; height: 15px; }
 
-  &.icon-blue   { background: rgba(94,207,223,0.18);   color: var(--mc-diamond,#50CCE8); }
-  &.icon-orange { background: rgba(224,122,16,0.2);    color: var(--mc-gold,#F0AA1C); }
-  &.icon-green  { background: rgba(93,158,63,0.22);    color: var(--mc-xp,#7ED420); }
-  &.icon-purple { background: rgba(123,0,200,0.2);     color: #c084fc; }
-  &.icon-yellow { background: rgba(254,173,39,0.2);    color: var(--mc-gold,#F0AA1C); }
+  &.icon-blue   { background: rgba(94,207,223,0.18);   color: var(--mc-diamond,#44E8FF); }
+  &.icon-orange { background: rgba(224,122,16,0.2);    color: var(--mc-gold,#FFD020); }
+  &.icon-green  { background: rgba(93,158,63,0.22);    color: var(--mc-xp,#A0FF28); }
+  &.icon-purple { background: rgba(123,0,200,0.2);     color: #DD88FF; }
+  &.icon-yellow { background: rgba(254,173,39,0.2);    color: var(--mc-gold,#FFD020); }
   &.icon-red    { background: rgba(196,30,58,0.2);     color: #e05252; }
   &.icon-teal   { background: rgba(20,184,166,0.18);   color: #2dd4bf; }
 }
@@ -313,8 +313,8 @@
   .logout-item {
     color: rgba(196,30,58,0.7) !important;
     &:hover {
-      background: rgba(196,30,58,0.08) !important;
-      color: #c41e3a !important;
+      background: rgba(255,34,68,0.12) !important;
+      color: #FF2244 !important;
       border-color: rgba(196,30,58,0.25) !important;
     }
   }
