@@ -243,94 +243,104 @@ class AutomationViewSet(viewsets.ViewSet):
 
         client = anthropic.Anthropic(api_key=api_key)
 
-        # Extract title hint from JD for the prompt
+        # Pre-extract title hint from JD to inject as a concrete signal
         import re as _re
         title_hint = ''
         for pattern in [
             r'(?:job title|position|role|title)[:\s]+([^\n.]{4,60})',
-            r'^([A-Z][A-Za-z\s/]+(?:Developer|Engineer|Architect|Lead|Manager|Analyst|Consultant|Specialist))',
+            r'^([A-Z][A-Za-z /\-]+(?:Developer|Engineer|Architect|Lead|Manager|Analyst|Consultant|Specialist))',
         ]:
             m = _re.search(pattern, jd_text[:2000], _re.IGNORECASE | _re.MULTILINE)
             if m:
                 title_hint = m.group(1).strip()
                 break
 
-        prompt = f"""You are a professional resume writer creating a tailored resume for Ajay Purshotam Thota.
+        # Detect AI/ML/NLP in JD for the 12-reference cap instruction
+        has_ai = bool(_re.search(r'\b(AI|ML|machine learning|NLP|LLM|deep learning|neural|GPT)\b',
+                                  jd_text[:6000], _re.IGNORECASE))
 
-════════════════════════════════════════════════════════
-JOB DESCRIPTION (read every word carefully):
-════════════════════════════════════════════════════════
+        prompt = f"""Act as a senior resume writer and ATS optimization expert.
+
+Generate a highly tailored resume in JSON format based on the given Job Description (JD).
+
+STRICT RULES:
+
+1. ONLY update the following sections:
+   - TD Bank (key: "TD")
+   - Cardinal Health (key: "CH")
+   - TITLE, TITLE2, SUMMARY, TD_ENV, CH_ENV
+
+2. Each experience section (TD and CH) must contain EXACTLY 36 points.
+   - Each point must be 2-3 lines long (2-3 full sentences)
+   - Write in paragraph style (NO bullets, NO numbering, NO hyphens at start)
+   - Use strong action verbs and achievement-based phrasing
+   - Do NOT repeat any concept across the 36 points
+
+3. KEYWORD OPTIMIZATION (VERY IMPORTANT):
+   - Identify the most important keywords from the JD (Java, Spring Boot, Microservices, AWS, Kubernetes, APIs, Kafka, REST, CI/CD, etc.)
+   - EACH important JD keyword must appear at least 10 times within each 36-point section
+   - Distribute keywords naturally across different points — do NOT cluster them
+   - Flow must read naturally — never mechanical keyword stuffing
+
+4. SUMMARY SECTION:
+   - First 4 points = strong reusable base (generic senior-level, 10+ years profile)
+   - Remaining points = tightly tailored to this specific JD
+   - Every point 2-3 sentences, senior tone, ATS-rich with JD keywords
+
+5. ROLE ALIGNMENT — TITLE EXTRACTION (DO THIS FIRST):
+   Scan the JD. Find the EXACT job title the employer posted.
+   {'Pre-extracted hint: "' + title_hint + '" — verify this matches the JD or find the exact string.' if title_hint else 'No hint available — scan the JD yourself for the exact posted title.'}
+   - TITLE = EXACT job title from JD, word for word, same capitalisation
+   - TITLE2 = same title or minor variant (e.g. drop "Senior" if it appears twice)
+   - NEVER paraphrase. If JD says "Java Backend Engineer" output "Java Backend Engineer"
+   - NEVER default to "Senior Full Stack Developer" unless the JD says EXACTLY that
+
+6. TECH FOCUS — emphasize these when present in JD:
+   - Backend development (Java, Spring Boot)
+   - Microservices architecture
+   - REST API design and GraphQL
+   - Cloud (AWS preferred, Azure/GCP if in JD)
+   - Distributed systems and event-driven architecture
+   - CI/CD pipelines, Docker, Kubernetes
+   - Apache Kafka (if present in JD)
+   - Spring Security, OAuth2, JWT
+
+7. AI/ML/NLP:
+   {'- JD MENTIONS AI/ML/NLP — include up to 12 references naturally across TD and CH combined. Do not exceed 12.' if has_ai else '- JD does not mention AI/ML — do not add AI/ML content.'}
+
+8. ENVIRONMENT BLOCKS:
+   - TD_ENV: comma-separated tech stack for TD Bank role — include every tool from the JD plus standard Java enterprise stack
+   - CH_ENV: same format for Cardinal Health role — healthcare-specific tools plus JD stack
+   - Both must be comprehensive, not minimal
+
+9. OUTPUT FORMAT — STRICT JSON, no markdown, no explanation, no extra text:
+   Return ONLY this structure:
+   {{
+     "TITLE": "<exact job title from JD>",
+     "TITLE2": "<same or minor variant>",
+     "SUMMARY": ["point 1", "point 2", "..."],
+     "TD": ["point 1", "point 2", "... exactly 36 items"],
+     "CH": ["point 1", "point 2", "... exactly 36 items"],
+     "TD_ENV": "Java, Spring Boot, ...",
+     "CH_ENV": "Java, Spring Boot, ...",
+     "KEYWORDS": ["keyword1", "keyword2", "... 8-12 items"]
+   }}
+
+10. DO NOT:
+    - Add explanations or commentary outside the JSON
+    - Add extra sections beyond what is listed above
+    - Break the JSON format
+    - Reduce TD or CH below 36 points
+    - Use bullet characters (•, -, *) inside point text
+
+BASE CONTENT POOL (use as inspiration and starting material — expand and rewrite to reach 36 points each):
+{json.dumps(base_content, indent=2)[:9000]}
+
+JOB DESCRIPTION:
 {jd_text[:6000]}
 
-════════════════════════════════════════════════════════
-BASE CONTENT POOL (rewrite bullets from this only):
-════════════════════════════════════════════════════════
-{json.dumps(base_content, indent=2)[:8000]}
-
-════════════════════════════════════════════════════════
-STEP 1 — EXTRACT THE JOB TITLE (DO THIS FIRST, BEFORE ANYTHING ELSE)
-════════════════════════════════════════════════════════
-Scan the JD above. Find the EXACT job title the employer is hiring for.
-It is usually in the first few lines, or after words like "Position:", "Role:", "We are looking for a", "Title:".
-{'Hint found: "' + title_hint + '" — verify this is the real title or find a better one from the JD.' if title_hint else 'No hint extracted — find it yourself from the JD.'}
-
-TITLE RULES (VIOLATION = WRONG OUTPUT):
-★ TITLE must be the EXACT string from the JD — word for word, same capitalisation
-★ TITLE2 must be the SAME title or a very close variant (e.g. drop "Senior" for second occurrence)
-★ Do NOT use "Senior Full Stack Developer" unless the JD says EXACTLY that
-★ Do NOT paraphrase, simplify, or generalize
-★ If the JD says "Java Backend Engineer" → output exactly "Java Backend Engineer"
-★ If the JD says "Sr. Software Engineer - Java/Spring" → output exactly "Sr. Software Engineer - Java/Spring"
-
-════════════════════════════════════════════════════════
-STEP 2 — TAILOR ALL SECTIONS
-════════════════════════════════════════════════════════
-
-SUMMARY — exactly 25 bullets:
-- ATS-optimized, covers the JD's primary tech stack
-- Mirror the JD language and keywords throughout
-- Strong senior-level tone
-
-TD (TD Bank experience) — exactly 30 bullets:
-- First 4: generic "Senior [JD Title]" bullets that could apply to any project
-- Remaining 26: banking/payment systems context
-- Heavy emphasis on REST APIs, Spring Boot, microservices, JUnit, Cucumber
-- Include: failure handling, latency, API contracts, security, CI/CD
-- Mention tools from JD that are relevant (Jenkins, Azure, Git, etc.)
-
-CH (Cardinal Health experience) — exactly 30 bullets:
-- Same quality as TD, healthcare/supply-chain context
-- HIPAA awareness, pharmacy systems, eligibility workflows
-- Include same JD-relevant tech stack woven in naturally
-
-TD_ENV and CH_ENV — comma-separated tech stack lines:
-- Include EVERY tool, framework, language, platform, and cloud service mentioned in the JD
-- Add any standard tools implied by the role that aren't in the JD
-- Both should be comprehensive, not minimal
-
-════════════════════════════════════════════════════════
-WRITING RULES (every bullet, no exceptions)
-════════════════════════════════════════════════════════
-- 2-3 sentences per bullet, detailed and specific — no one-liners
-- No bullet characters, numbering, or section headers in the text
-- Zero repetition — every bullet introduces a different concept
-- Senior engineer voice: concrete decisions, tools, patterns, outcomes
-- Never say "responsible for", "worked on", "assisted with", "helped"
-- Use: Designed, Architected, Implemented, Led, Optimized, Delivered, Engineered, Built, Configured
-
-════════════════════════════════════════════════════════
-OUTPUT FORMAT — return ONLY this JSON, no markdown, no extra text
-════════════════════════════════════════════════════════
-{{
-  "TITLE": "<exact job title copied from JD>",
-  "TITLE2": "<same or close variant>",
-  "SUMMARY": ["bullet 1", "bullet 2", "... exactly 25 items"],
-  "TD": ["bullet 1", "... exactly 30 items"],
-  "CH": ["bullet 1", "... exactly 30 items"],
-  "TD_ENV": "all relevant tools comma separated",
-  "CH_ENV": "all relevant tools comma separated",
-  "KEYWORDS": ["keyword1", "keyword2", "... 8-12 items"]
-}}"""
+OUTPUT:
+Valid JSON only."""
 
         try:
             message = client.messages.create(
@@ -416,9 +426,9 @@ OUTPUT FORMAT — return ONLY this JSON, no markdown, no extra text
         if sections.get('summary'):
             updated['SUMMARY'] = self._rank_bullets(base_content.get('SUMMARY', []), found_keywords, 25)
         if sections.get('td'):
-            updated['TD'] = self._rank_bullets(base_content.get('TD', []), found_keywords, 30)
+            updated['TD'] = self._rank_bullets(base_content.get('TD', []), found_keywords, 36)
         if sections.get('ch'):
-            updated['CH'] = self._rank_bullets(base_content.get('CH', []), found_keywords, 30)
+            updated['CH'] = self._rank_bullets(base_content.get('CH', []), found_keywords, 36)
         if sections.get('env'):
             updated['TD_ENV'] = ', '.join(found_keywords) if found_keywords else base_content.get('TD_ENV', '')
 
