@@ -3,7 +3,7 @@ services:
     name: career-command-center-api
     runtime: python
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py seed
-    startCommand: gunicorn django_backend.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --threads 2 --timeout 120
+    startCommand: gunicorn django_backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 --preload --max-requests 1000 --max-requests-jitter 100 --keepalive 5
     envVars:
       - key: SECRET_KEY
         generateValue: true
@@ -12,7 +12,7 @@ services:
       - key: ALLOWED_HOSTS
         value: api.ajaylive.com,career-command-center-api.onrender.com
       - key: CORS_ALLOWED_ORIGINS
-        value: https://ajaylive.com,https://www.ajaylive.com
+        value: https://ajaylive.com,https://www.ajaylive.com,http://localhost:4200,http://127.0.0.1:4200
       - key: ANTHROPIC_API_KEY
         sync: false
       - key: ADMIN_PASSWORD
@@ -22,6 +22,19 @@ services:
           name: career-command-center-db
           property: connectionString
     healthCheckPath: /api/health/
+
+  - type: web
+    name: career-command-center-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist/career-command-center-frontend/browser
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
 
 databases:
   - name: career-command-center-db
