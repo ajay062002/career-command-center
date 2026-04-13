@@ -6,7 +6,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RouterModule } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { forkJoin } from 'rxjs';
+import { forkJoin, timer } from 'rxjs';
+import { retry, switchMap } from 'rxjs/operators';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { AuthService } from '../../core/services/auth.service';
 import { DashboardSummary, JobStatusCount, StudyTrend } from '../../core/models/dashboard.models';
@@ -34,6 +35,8 @@ export class DashboardComponent implements OnInit {
   summary?: DashboardSummary;
   loading = true;
   error = false;
+  retrying = false;
+  retryCount = 0;
   today = new Date();
 
   statCards = [
@@ -106,18 +109,19 @@ export class DashboardComponent implements OnInit {
     labels: [],
     datasets: [{
       data: [],
+      // Minecraft item rarity colors
       backgroundColor: [
-        'rgba(0,89,179,0.85)',
-        'rgba(255,107,0,0.85)',
-        'rgba(34,197,94,0.85)',
-        'rgba(168,85,247,0.85)',
-        'rgba(239,68,68,0.85)',
-        'rgba(245,158,11,0.85)',
-        'rgba(20,184,166,0.85)',
+        'rgba(94,207,223,0.85)',   // diamond blue
+        'rgba(254,173,39,0.85)',   // gold
+        'rgba(128,201,32,0.85)',   // xp green
+        'rgba(192,132,252,0.85)',  // enchant purple
+        'rgba(196,30,58,0.85)',    // redstone
+        'rgba(45,212,191,0.85)',   // emerald
+        'rgba(224,122,16,0.85)',   // orange
       ],
       borderWidth: 2,
-      borderColor: 'rgba(5,10,20,0.8)',
-      hoverOffset: 12,
+      borderColor: '#111317',
+      hoverOffset: 8,
     }]
   };
   pieChartType: ChartType = 'doughnut';
@@ -161,34 +165,48 @@ export class DashboardComponent implements OnInit {
       backgroundColor: (ctx: any) => {
         const chart = ctx.chart;
         const { ctx: c, chartArea } = chart;
-        if (!chartArea) return 'rgba(0,89,179,0.6)';
+        if (!chartArea) return 'rgba(94,207,223,0.7)';
         const gradient = c.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-        gradient.addColorStop(0, 'rgba(0,89,179,0.3)');
-        gradient.addColorStop(1, 'rgba(0,89,179,0.9)');
+        gradient.addColorStop(0, 'rgba(94,207,223,0.3)');
+        gradient.addColorStop(1, 'rgba(94,207,223,0.9)');
         return gradient;
       },
-      borderColor: 'rgba(0,89,179,0)',
+      borderColor: 'rgba(94,207,223,0)',
       borderWidth: 0,
-      borderRadius: 10,
+      borderRadius: 0, // pixel-art: no radius
       borderSkipped: false,
-      hoverBackgroundColor: 'rgba(255,107,0,0.85)',
+      hoverBackgroundColor: 'rgba(254,173,39,0.9)',
       barThickness: 28,
     }]
   };
   barChartType: ChartType = 'bar';
 
-  ngOnInit(): void {
+  loadData(): void {
+    this.loading = true;
+    this.error = false;
+    this.retrying = false;
+
     forkJoin({
-      summary:   this.dashboardService.getDashboardSummary(),
+      summary:    this.dashboardService.getDashboardSummary(),
       jobsStatus: this.dashboardService.getJobsStatus(),
       studyTrend: this.dashboardService.getStudyTrend(),
       reminders:  this.reminderService.getOverdueReminders()
-    }).subscribe({
+    }).pipe(
+      retry({
+        count: 3,
+        delay: (err, attempt) => {
+          this.retrying = true;
+          this.retryCount = attempt;
+          return timer(attempt * 3000); // 3s, 6s, 9s
+        }
+      })
+    ).subscribe({
       next: ({ summary, jobsStatus, studyTrend, reminders }) => {
         this.summary = summary;
         this.updatePieChart(jobsStatus);
         this.updateBarChart(studyTrend);
         this.loading = false;
+        this.retrying = false;
 
         const today = new Date().toDateString();
         const dueToday = reminders.filter(r => new Date(r.dueDate).toDateString() === today);
@@ -204,8 +222,13 @@ export class DashboardComponent implements OnInit {
         console.error('Dashboard error', err);
         this.error = true;
         this.loading = false;
+        this.retrying = false;
       }
     });
+  }
+
+  ngOnInit(): void {
+    this.loadData();
   }
 
   private updatePieChart(statusCounts: JobStatusCount[]): void {

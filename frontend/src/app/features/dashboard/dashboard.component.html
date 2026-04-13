@@ -22,29 +22,26 @@
     </div>
   </div>
 
-  <!-- Loading State -->
-  <ng-template #loadingState>
-    <div class="loading-screen">
-      <div class="loading-orbs">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-      </div>
-      <mat-spinner diameter="44" class="custom-spinner"></mat-spinner>
-      <h3>Syncing Command Center...</h3>
-      <p>Loading your career data</p>
-    </div>
-  </ng-template>
-
-  <!-- Error State -->
-  <div class="error-state" *ngIf="error">
-    <mat-icon>cloud_off</mat-icon>
-    <h3>Backend Offline</h3>
-    <p>Could not reach the backend. Check your connection and refresh.</p>
+  <!-- Loading State (ONLY when loading, NOT combined with error) -->
+  <div class="loading-screen" *ngIf="loading">
+    <mat-spinner diameter="44" class="custom-spinner"></mat-spinner>
+    <h3>{{ retrying ? 'Retrying... (' + retryCount + '/3)' : 'Syncing Command Center...' }}</h3>
+    <p>{{ retrying ? 'Backend waking up, please wait' : 'Loading your career data' }}</p>
   </div>
 
-  <!-- Main Content -->
-  <div *ngIf="!loading && !error; else loadingState">
+  <!-- Error State (ONLY when NOT loading) -->
+  <div class="error-state" *ngIf="!loading && error">
+    <mat-icon>cloud_off</mat-icon>
+    <h3>Backend Offline</h3>
+    <p>Could not reach the server after 3 attempts.</p>
+    <button class="retry-btn" (click)="loadData()">
+      <mat-icon>refresh</mat-icon>
+      <span>Try Again</span>
+    </button>
+  </div>
+
+  <!-- Main Content (ONLY when loaded AND no error) -->
+  <div *ngIf="!loading && !error">
 
     <!-- Stat Cards Grid -->
     <div class="stats-grid">
@@ -56,12 +53,11 @@
           [style.animation-delay]="(i * 70) + 'ms'"
           [routerLink]="card.link"
         >
-          <div class="stat-card__glow"></div>
           <div class="stat-card__top">
             <div class="stat-card__icon">
               <mat-icon>{{ card.icon }}</mat-icon>
             </div>
-            </div>
+          </div>
           <div class="stat-card__value">{{ getDisplayValue(card.key) }}</div>
           <div class="stat-card__label">{{ card.label }}</div>
           <div class="stat-card__bar">
@@ -114,9 +110,9 @@
 
     </div>
 
-    <!-- Quick Actions -->
+    <!-- Quick Actions — Hotbar -->
     <div class="quick-actions fade-in-up stagger-3">
-      <div class="quick-actions__title">Quick Actions</div>
+      <div class="quick-actions__title">&#9658; Quick Actions</div>
       <div class="quick-actions__grid">
         <a class="qa-btn qa-btn--blue"   routerLink="/jobs/add">
           <mat-icon>work</mat-icon><span>Log Job</span>
