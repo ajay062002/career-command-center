@@ -740,7 +740,14 @@ Valid JSON only."""
                 pass  # local save failure must never block download
 
             final_buf.seek(0)
-            filename = f"Ajay_Thota_{datetime.datetime.now().strftime('%Y%m%d')}.docx"
+            # Name the download after the JD title — e.g. Ajay_Thota_Full_Stack_Developer.docx
+            _title_for_file = (raw_ctx.get('TITLE') or '').strip()
+            if _title_for_file:
+                _safe = re.sub(r'[^A-Za-z0-9 ]', '', _title_for_file).strip()
+                _safe = re.sub(r'\s+', '_', _safe)[:60]
+                filename = f"Ajay_Thota_{_safe}.docx"
+            else:
+                filename = f"Ajay_Thota_{datetime.datetime.now().strftime('%Y%m%d')}.docx"
             return FileResponse(
                 final_buf,
                 as_attachment=True,
