@@ -1,0 +1,120 @@
+ava Tech Lead -Pittsburgh, PA - Day 1 Onsite at Pittsburgh, Pennsylvania, USA
+Email: raj.b@centraprise.com
+http://bit.ly/4ey8w48
+https://jobs.nvoids.com/job_details.jsp?id=3291800&uid=c93ebd38899c4f57b2eaddbeea9a887b
+
+From:
+
+Raj Methre,
+
+Centraprise Global
+
+raj.b@centraprise.com
+
+Reply to: raj.b@centraprise.com
+
+Hi Team,
+
+Greetings from Centraprise,
+
+Job Title:
+
+Java Tech Lead
+
+Location:
+
+- Pittsburgh, PA - Day 1 Onsite
+
+Core Java & Backend Development:-
+
+11+ years of hands-on Java development experience
+
+Strong proficiency in Java (Java 8+)
+
+Solid understanding of:-
+
+Object Oriented Programming (OOP)
+
+Design patterns (Factory, Singleton, DAO, etc.)
+
+Exception handling, multithreading, and collections:-
+
+Experience building scalable, maintainable backend services API Development
+
+Strong experience designing and developing RESTful APIs
+
+Hands on with Spring Boot / Spring MVC
+
+API design best practices:-
+
+HTTP methods, status codes, Request/response validation, Versioning strategies
+
+Experience with JSON, request serialization/deserialization
+
+Familiarity with API documentation tools (Swagger / OpenAPI)
+
+API testing using tools such as Postman, REST Assured, or similar Frameworks & Libraries
+
+Spring Framework (Core, Boot, MVC)
+
+Dependency Injection and Aspect Oriented Programming (AOP)
+
+Data Power
+
+ORM frameworks such as:-
+
+Hibernate / JPA
+
+Experience with Microservices architecture is strongly preferred Database & SQL
+
+Strong hands on experience with SQL
+
+Ability to write and optimize:-
+
+Complex joins o Subqueries ,Stored procedures (nice to have)
+
+Experience with relational databases such as: Oracle o Teradata DevOps, Build & Deployment
+
+Experience with Maven / Gradle
+
+Version control using Git/bitbucket
+
+CI/CD exposure (Jenkins, GitHub Actions, Azure DevOps, udeploy etc.)
+
+Experience deploying applications on:-
+
+Application servers (Tomcat, WebLogic, etc.)
+
+Containers (Docker preferred)
+
+Basic knowledge of Linux/Unix environments
+
+Note
+:- Please Add My Email ID To Your
+Distribution
+and Share Your Updated Hotlist
+
+Thanks & Regards
+
+Raj Methre
+
+Sr Acquisition Specialist
+
+Centraprise corp,
+
+33 Wood Avenue South, Suite 600, Iselin NJ 08830
+
+raj.b@centraprise.com
+
+Desk: +1 732-476-5515 *
+(1025)
+
+linkedin.com/in/raj-b-methre-720b55223
+
+Keywords: continuous integration continuous deployment Idaho New Jersey Pennsylvania
+Java Tech Lead -Pittsburgh, PA - Day 1 Onsite
+raj.b@centraprise.com
+http://bit.ly/4ey8w48
+https://jobs.nvoids.com/job_details.jsp?id=3291800&uid=c93ebd38899c4f57b2eaddbeea9a887b
+raj.b@centraprise.com
+View All

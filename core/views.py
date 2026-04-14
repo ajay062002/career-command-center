@@ -644,13 +644,60 @@ Valid JSON only."""
             doc.save(buf)
             buf.seek(0)
 
-            # Post-process: tighten spacing
+            # Post-process the rendered DOCX
+            from docx.oxml.ns import qn
+            from lxml import etree as _etree
+            import copy
+
             d = Document(buf)
+            title_val = ctx.get('TITLE', '').strip()
+
             for p in d.paragraphs:
                 pf = p.paragraph_format
                 pf.space_before = Pt(0)
                 pf.space_after = Pt(0)
                 pf.line_spacing = 1.0
+
+                text = p.text
+
+                # ── Fix 1: Replace hardcoded role names with the JD title ──────
+                # Covers both TD Bank and CH sections in the template
+                if title_val and text.strip().startswith('Role:'):
+                    # Pattern: "Role: <anything>" — replace <anything> with TITLE
+                    role_prefix = 'Role: '
+                    # Rebuild the paragraph text using runs
+                    full_text = ''.join(r.text for r in p.runs)
+                    if full_text.strip().startswith('Role:'):
+                        # Clear all runs then set first run to correct value
+                        for run in p.runs:
+                            run.text = ''
+                        if p.runs:
+                            p.runs[0].text = f'Role: {title_val}'
+
+                # ── Fix 2: Split "Role: TitleResponsibilities:" into two paras ─
+                # This happens when template has {{TITLE}}Responsibilities: on one line
+                if 'Responsibilities:' in text and text.strip().startswith('Role:'):
+                    idx = text.find('Responsibilities:')
+                    role_part = text[:idx].strip()
+                    resp_part = text[idx:].strip()
+                    # Set current paragraph to just the role line
+                    for run in p.runs:
+                        run.text = ''
+                    if p.runs:
+                        p.runs[0].text = role_part if role_part else f'Role: {title_val}'
+                    # Insert a new paragraph after with "Responsibilities:"
+                    new_p = copy.deepcopy(p._element)
+                    # Clear all run text in the copy
+                    for r in new_p.findall('.//' + qn('w:t')):
+                        r.text = ''
+                    # Find first run in copy and set text
+                    first_r = new_p.find('.//' + qn('w:r'))
+                    if first_r is not None:
+                        t_el = first_r.find(qn('w:t'))
+                        if t_el is None:
+                            t_el = _etree.SubElement(first_r, qn('w:t'))
+                        t_el.text = resp_part
+                    p._element.addnext(new_p)
 
             final_buf = BytesIO()
             d.save(final_buf)

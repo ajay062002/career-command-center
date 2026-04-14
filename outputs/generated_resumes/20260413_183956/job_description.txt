@@ -1,0 +1,51 @@
+REQUIRED SKILLS:
+
+1. Java (Spring Boot, Java 17).
+
+2. Microsoft Azure services including App Service, Azure Functions, Azure DevOps, Azure Storage, Azure SQL Database, Service Bus,
+PostgreSQL, and Cosmos DB.
+
+3. Angular (17+), TypeScript, HTML5, and CSS3
+
+Additionally, the use of approved AI tools for higher efficiency.
+
+Bachelors degree in computer science, Engineering, or a related field (or equivalent practical experience).
+
+5+ years of hands-on experience with Java (Spring Boot, Java 17).
+
+5+ years of frontend development experience with Angular (17+), TypeScript, HTML5, and CSS3
+.
+
+Strong experience with
+
+NgRx Store for state management in Angular applications.
+
+Hands-on experience building and consuming
+
+REST APIs and GraphQL services.
+
+Proven experience with
+Microsoft Azure services (App Services, Azure Functions, Azure DevOps, Azure Storage, Azure SQL).
+
+Proficiency in setting up and managing
+
+GitHub Workflows for CI/CD automation.
+
+Solid understanding of microservices architecture and asynchronous processing.
+
+Experience with
+
+SQL databases (MySQL, PostgreSQL);
+NoSQL experience is a plus.
+
+Familiarity with
+Agile/Scrum methodologies and Git-based version control.
+
+Hands-on experience with test automation frameworks
+(JUnit, Jasmine, Karma).
+
+Experience with
+Infrastructure as Code (IaC) using tools such as Terraform.
+
+Experience with containerization technologies
+(Docker) and orchestration tools (Kubernetes).

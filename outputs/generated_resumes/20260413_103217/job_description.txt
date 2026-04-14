@@ -1,0 +1,62 @@
+Strong hands
+on experience with Java (8 or
+above), Spring Boot, Spring MVC, and Spring Security.
+
+Expertise in developing and consuming REST APIs
+and working with microservices architecture.
+
+Solid experience in Angular (latest versions)
+and React (functional components, hooks).
+
+Proficiency in HTML5, CSS3, JavaScript, and
+TypeScript.
+
+Good understanding of state management concepts
+(Redux, Context API, NgRx).
+
+Strong database skills with Oracle, PostgreSQL,
+or MySQL, including complex queries and performance optimization.
+
+Experience with Git, Maven/Gradle, and standard
+SDLC practices.
+
+Familiarity with unit testing and integration
+testing frameworks (JUnit, Mockito, Jest, Karma/Jasmine).
+
+Exposure to CI/CD pipelines and DevOps
+practices.
+
+Experience with Docker, Kubernetes, or cloud
+platforms such as AWS or Azure.
+
+Knowledge of application security concepts such
+as OAuth2, JWT, and secure API design.
+
+Roles & Responsibilities
+
+Design, develop, and deliver full
+stack
+web applications using Java (Spring Boot) along with Angular and React.
+
+Build scalable, secure, and high
+performance
+RESTful services and integrate them seamlessly with modern UI components.
+
+Develop responsive and reusable user interface
+components aligned with UX standards and best practices.
+
+Translate business requirements into technical
+solutions with minimal supervision.
+
+Work closely with product owners, business
+analysts, QA, and DevOps teams to ensure accurate delivery.
+
+Ensure code quality through peer reviews, unit
+testing, and adherence to coding standards.
+
+Troubleshoot and resolve application defects,
+performance issues, and production incidents.
+
+Participate actively in Agile ceremonies
+including sprint planning, daily stand
+ups, reviews, and retrospectives.

@@ -61,12 +61,12 @@ $mc-dark-theme: mat.define-dark-theme((
   --mc-sky:       #88D8FF;   // BRIGHT sky blue
   --mc-sand:      #FFCC44;   // BRIGHT sand/gold
 
-  // ── Minecraft GUI backgrounds — lighter stone, not void-dark ──
-  --mc-void:      #181510;   // dark but warm, not black
-  --mc-obsidian:  #222018;   // main bg — visible warmth
-  --mc-stone:     #302E24;   // panel bg — like polished stone
-  --mc-cobble:    #3E3A2E;   // card bg — cobblestone warm
-  --mc-gui:       #4E4838;   // raised surface — bright stone
+  // ── Minecraft GUI backgrounds — warm stone, visibly bright ──
+  --mc-void:      #2E2A1E;   // warm dark background
+  --mc-obsidian:  #38332A;   // main bg — warm brown stone
+  --mc-stone:     #4A4436;   // panel bg — polished stone
+  --mc-cobble:    #5C5446;   // card bg — cobblestone BRIGHT
+  --mc-gui:       #706050;   // raised surface — bright warm stone
 
   // ── Bright MC GUI border system ──
   --mc-border-outer: #000000;
@@ -142,9 +142,12 @@ html, body {
   margin: 0;
   font-family: var(--font-body);
   background-color: var(--mc-void);
-  color: #F5F0E0;   // bright warm white — MC inventory text
+  color: #F5F0E0;
   overflow-x: hidden;
 }
+
+/* Force visible background — warm stone, never pure black */
+body { background-color: #2E2A1E !important; }
 
 // Bright stone pixel grid texture
 body {

@@ -42,9 +42,9 @@
             font-family: 'Press Start 2P', monospace;
             font-size: 0.42rem;
             color: rgba(255,255,255,0.4);
-            background: #221E16;
+            background: #38332A;
             padding: 6px 14px;
-            border: 1px solid #504838;
+            border: 1px solid #7A6855;
             box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
             letter-spacing: 0.08em;
         }
@@ -60,9 +60,9 @@
 /* ── View Toggle ─────────────────────────────────────── */
 .view-toggle {
     display: flex;
-    background: #221E16;
+    background: #38332A;
     padding: 3px;
-    border: 2px solid #504838;
+    border: 2px solid #7A6855;
     box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
     gap: 2px;
 
@@ -82,8 +82,8 @@
 
 /* ── Form Panel ──────────────────────────────────────── */
 .form-panel {
-    background: #2A2820;
-    border: 2px solid #504838;
+    background: #4A4438;
+    border: 2px solid #7A6855;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
     padding: 24px;
@@ -123,7 +123,7 @@
         gap: 14px;
         margin-top: 20px;
         padding-top: 20px;
-        border-top: 2px solid #504838;
+        border-top: 2px solid #7A6855;
     }
 }
 
@@ -149,9 +149,9 @@
 
         ::ng-deep {
             .mat-mdc-text-field-wrapper {
-                background: #221E16 !important;
+                background: #38332A !important;
                 border-radius: 0 !important;
-                border: 2px solid #504838 !important;
+                border: 2px solid #7A6855 !important;
                 box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5) !important;
             }
             .mdc-text-field--outlined .mdc-notched-outline__leading,
@@ -167,8 +167,8 @@
 
 /* ── Table View ──────────────────────────────────────── */
 .table-container {
-    background: #2A2820;
-    border: 2px solid #504838;
+    background: #4A4438;
+    border: 2px solid #7A6855;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
     overflow-x: auto;
@@ -179,14 +179,14 @@
         background: transparent !important;
 
         th {
-            background: #1E1C14;
+            background: #2E2A1E;
             color: var(--mc-xp,#A0FF28) !important;
             font-family: 'Press Start 2P', monospace !important;
             font-size: 0.42rem !important;
             font-weight: 400 !important;
             text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
             padding: 14px 16px !important;
-            border-bottom: 2px solid #504838 !important;
+            border-bottom: 2px solid #7A6855 !important;
             text-transform: uppercase;
         }
 
@@ -202,8 +202,8 @@
 
 /* ── Vendor Groups ───────────────────────────────────── */
 .vendor-group {
-    background: #2A2820;
-    border: 2px solid #504838;
+    background: #4A4438;
+    border: 2px solid #7A6855;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
     margin-bottom: 16px;
@@ -212,11 +212,11 @@
 
     .vendor-header {
         padding: 18px 24px;
-        background: #1E1C14;
+        background: #2E2A1E;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 2px solid #504838;
+        border-bottom: 2px solid #7A6855;
 
         .vendor-header-left {
             display: flex;

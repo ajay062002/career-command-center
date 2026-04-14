@@ -44,9 +44,9 @@
             font-family: 'Press Start 2P', monospace;
             font-size: 0.42rem;
             color: rgba(255,255,255,0.4);
-            background: #221E16;
+            background: #38332A;
             padding: 6px 14px;
-            border: 1px solid #504838;
+            border: 1px solid #7A6855;
             box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
             text-transform: uppercase;
             letter-spacing: 0.1em;
@@ -96,9 +96,9 @@
 
         ::ng-deep {
             .mat-mdc-text-field-wrapper {
-                background: #221E16 !important;
+                background: #38332A !important;
                 border-radius: 0 !important;
-                border: 2px solid #504838 !important;
+                border: 2px solid #7A6855 !important;
                 box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5) !important;
             }
             .mdc-text-field--outlined .mdc-notched-outline__leading,
@@ -120,8 +120,8 @@
 
 /* ── Table Container ────────────────────────────────── */
 .table-container {
-    background: #2A2820;
-    border: 2px solid #504838;
+    background: #4A4438;
+    border: 2px solid #7A6855;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
     overflow: hidden;
@@ -150,7 +150,7 @@
     }
 
     th {
-        background: #1E1C14 !important;
+        background: #2E2A1E !important;
         color: var(--mc-diamond,#44E8FF) !important;
         font-family: 'Press Start 2P', monospace !important;
         font-size: 0.42rem !important;
@@ -158,7 +158,7 @@
         letter-spacing: 0 !important;
         text-transform: uppercase !important;
         padding: 16px 16px !important;
-        border-bottom: 2px solid #504838 !important;
+        border-bottom: 2px solid #7A6855 !important;
         text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
     }
 
@@ -242,8 +242,8 @@ tr.data-row:hover .action-buttons button {
 
 /* ── Paginator ──────────────────────────────────────── */
 ::ng-deep .mat-mdc-paginator {
-    background: #1E1C14 !important;
-    border-top: 2px solid #504838 !important;
+    background: #2E2A1E !important;
+    border-top: 2px solid #7A6855 !important;
     padding: 6px 0 !important;
 
     .mat-mdc-paginator-container {

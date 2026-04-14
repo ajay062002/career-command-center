@@ -59,8 +59,8 @@
     padding: 48px;
     justify-content: center;
     color: rgba(255,255,255,0.5);
-    background: #2A2820;
-    border: 2px solid #504838;
+    background: #4A4438;
+    border: 2px solid #7A6855;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40));
     font-family: 'Press Start 2P', monospace;
     font-size: 0.55rem;
@@ -73,8 +73,8 @@
 
 /* ── KPI Strip ───────────────────────────────────────── */
 .kpi-strip {
-    background: #2A2820;
-    border: 2px solid #504838;
+    background: #4A4438;
+    border: 2px solid #7A6855;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
     display: flex;
@@ -131,8 +131,8 @@
 }
 
 .chart-card {
-    background: #2A2820 !important;
-    border: 2px solid #504838 !important;
+    background: #4A4438 !important;
+    border: 2px solid #7A6855 !important;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6) !important;
     border-radius: 0 !important;
@@ -156,8 +156,8 @@
         font-size: 0.52rem;
         color: var(--mc-gold,#FFD020);
         text-shadow: 2px 2px 0 rgba(0,0,0,0.9);
-        border-bottom: 2px solid #504838;
-        background: #161208;
+        border-bottom: 2px solid #7A6855;
+        background: #1E1A10;
         line-height: 1.8;
 
         mat-icon {
@@ -193,8 +193,8 @@
 
 /* ── Vendor Table ────────────────────────────────────── */
 .table-card {
-    background: #2A2820 !important;
-    border: 2px solid #504838 !important;
+    background: #4A4438 !important;
+    border: 2px solid #7A6855 !important;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6) !important;
     border-radius: 0 !important;
@@ -210,8 +210,8 @@
         font-size: 0.52rem;
         color: var(--mc-gold,#FFD020);
         text-shadow: 2px 2px 0 rgba(0,0,0,0.9);
-        border-bottom: 2px solid #504838;
-        background: #161208;
+        border-bottom: 2px solid #7A6855;
+        background: #1E1A10;
         line-height: 1.8;
 
         mat-icon { color: var(--mc-gold,#FFD020); font-size: 18px; }
@@ -227,11 +227,11 @@
     font-weight: 400 !important;
     color: var(--mc-diamond,#44E8FF) !important;
     text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
-    background: #1E1C14 !important;
+    background: #2E2A1E !important;
     letter-spacing: 0 !important;
     text-transform: uppercase;
     padding: 14px 16px !important;
-    border-bottom: 2px solid #504838 !important;
+    border-bottom: 2px solid #7A6855 !important;
 }
 
 .mat-mdc-cell {
