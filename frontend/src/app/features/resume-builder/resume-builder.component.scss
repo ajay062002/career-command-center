@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   RESUME BUILDER — MINECRAFT THEME
+   RESUME BUILDER — MINECRAFT ENCHANTING THEME
    ═══════════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -7,9 +7,12 @@
 @keyframes mc-slideup { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
 @keyframes mc-spawn   { 0%{opacity:0;transform:scale(0.88)}60%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)} }
 @keyframes mc-blink   { 0%,100%{opacity:1}50%{opacity:0.3} }
-@keyframes mc-enchant { 0%{color:var(--mc-enchant,#AA44FF)}50%{color:#DD88FF}100%{color:var(--mc-enchant,#AA44FF)} }
+@keyframes mc-enchant { 0%{color:#AA44FF}33%{color:#DD88FF}66%{color:#CC66FF}100%{color:#AA44FF} }
+@keyframes mc-glow    { 0%,100%{box-shadow:0 0 8px rgba(170,68,255,0.3)}50%{box-shadow:0 0 20px rgba(170,68,255,0.7)} }
 @keyframes mc-slidein { from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)} }
+@keyframes mc-shimmer { 0%{background-position:-200% center}100%{background-position:200% center} }
 
+/* ── Container ───────────────────────────────────────── */
 .builder-container {
     padding: 24px 28px;
     max-width: 1400px;
@@ -26,16 +29,16 @@
         font-family: 'Press Start 2P', monospace;
         font-size: 0.82rem;
         margin: 0 0 6px;
-        color: var(--mc-enchant,#AA44FF);
-        text-shadow: 3px 3px 0 rgba(0,0,0,0.9), 0 0 18px rgba(123,82,171,0.3);
+        color: #AA44FF;
+        text-shadow: 3px 3px 0 rgba(0,0,0,0.9), 0 0 20px rgba(170,68,255,0.5);
         line-height: 1.8;
         letter-spacing: 0;
-        animation: mc-enchant 4s step-end infinite;
+        animation: mc-enchant 3s step-end infinite;
     }
 
     .subtitle {
         font-size: 0.72rem;
-        color: rgba(255,255,255,0.35);
+        color: rgba(255,255,255,0.4);
         letter-spacing: 0.5px;
     }
 }
@@ -45,27 +48,28 @@
     margin-top: 8px;
 
     ::ng-deep .mat-mdc-tab-header {
-        border-bottom: 2px solid #7A6855;
-        background: #2E2A1E;
+        border-bottom: 3px solid #000;
+        background: #38332A;
+        box-shadow: 0 3px 0 rgba(0,0,0,0.5);
     }
 
     ::ng-deep .mat-mdc-tab-label-container { margin-bottom: 0; }
 
     ::ng-deep .mdc-tab__text-label {
         font-family: 'Press Start 2P', monospace !important;
-        font-size: 0.45rem !important;
+        font-size: 0.42rem !important;
         letter-spacing: 0 !important;
         color: rgba(255,255,255,0.4) !important;
     }
 
     ::ng-deep .mdc-tab--active .mdc-tab__text-label {
-        color: var(--mc-enchant,#AA44FF) !important;
-        text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
+        color: #CC88FF !important;
+        text-shadow: 1px 1px 0 rgba(0,0,0,0.8), 0 0 10px rgba(170,68,255,0.4) !important;
     }
 
     ::ng-deep .mdc-tab-indicator__content--underline {
-        border-color: var(--mc-enchant,#AA44FF) !important;
-        border-width: 2px !important;
+        border-color: #AA44FF !important;
+        border-width: 3px !important;
     }
 
     .tab-icon { margin-right: 6px; font-size: 18px; width: 18px; height: 18px; vertical-align: middle; }
@@ -89,42 +93,44 @@
 .history-card {
     padding: 0 !important;
     overflow: hidden;
-    background: #4A4438 !important;
-    border: 2px solid #7A6855 !important;
+    background: #5C5446 !important;
+    border: 3px solid #000 !important;
     border-radius: 0 !important;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
-                0 4px 0 rgba(0,0,0,0.6) !important;
+    box-shadow:
+        inset -3px -3px 0 rgba(0,0,0,0.65),
+        inset 3px 3px 0 rgba(255,240,180,0.45),
+        0 5px 0 rgba(0,0,0,0.7) !important;
 }
 
 .history-table {
     background: transparent !important;
 
     mat-header-row {
-        background: #2E2A1E;
+        background: #38332A;
         min-height: 44px;
-        border-bottom: 2px solid #7A6855 !important;
+        border-bottom: 2px solid #000 !important;
     }
 
     mat-row {
         min-height: 64px;
-        border-bottom-color: rgba(255,255,255,0.04) !important;
-        &:hover { background: rgba(123,82,171,0.05) !important; }
+        border-bottom-color: rgba(0,0,0,0.3) !important;
+        &:hover { background: rgba(170,68,255,0.08) !important; }
     }
 
     ::ng-deep .mat-mdc-header-cell {
         font-family: 'Press Start 2P', monospace !important;
         font-size: 0.4rem !important;
         font-weight: 400 !important;
-        color: var(--mc-enchant,#AA44FF) !important;
-        text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
-        background: #2E2A1E !important;
+        color: #CC88FF !important;
+        text-shadow: 1px 1px 0 rgba(0,0,0,0.8), 0 0 8px rgba(170,68,255,0.3) !important;
+        background: #38332A !important;
         border-bottom: none !important;
         text-transform: uppercase;
     }
 
     ::ng-deep .mat-mdc-cell {
-        color: rgba(255,255,255,0.7) !important;
-        border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+        color: rgba(255,255,255,0.82) !important;
+        border-bottom: 1px solid rgba(0,0,0,0.2) !important;
     }
 }
 
@@ -132,7 +138,7 @@
 
 .gen-title {
     font-weight: 600;
-    color: var(--mc-enchant,#AA44FF);
+    color: #CC88FF;
     font-size: 0.85rem;
 }
 
@@ -156,14 +162,14 @@
     text-transform: uppercase;
 
     &.docx {
-        background: rgba(94,207,223,0.1);
-        color: var(--mc-diamond,#44E8FF);
-        border-color: rgba(94,207,223,0.25);
+        background: rgba(68,232,255,0.12);
+        color: #44E8FF;
+        border-color: rgba(68,232,255,0.3);
     }
     &.jd {
         background: rgba(255,255,255,0.06);
         color: rgba(255,255,255,0.5);
-        border-color: rgba(255,255,255,0.12);
+        border-color: rgba(255,255,255,0.15);
     }
 }
 
@@ -174,12 +180,12 @@
     padding: 64px 20px;
     text-align: center;
 
-    mat-icon { font-size: 44px; width: 44px; height: 44px; color: rgba(255,255,255,0.1); margin-bottom: 14px; }
+    mat-icon { font-size: 44px; width: 44px; height: 44px; color: rgba(255,255,255,0.12); margin-bottom: 14px; }
 
     p {
         font-family: 'Press Start 2P', monospace;
         font-size: 0.42rem;
-        color: rgba(255,255,255,0.25);
+        color: rgba(255,255,255,0.28);
         line-height: 2;
     }
 }
@@ -190,13 +196,15 @@
 .mat-column-files   { flex: 0 0 15%; }
 .mat-column-actions { flex: 0 0 15%; justify-content: flex-end; padding-right: 16px !important; }
 
-/* ── Glass / MC Panel cards ──────────────────────────── */
+/* ── MC Panel card (BRIGHT) ──────────────────────────── */
 .glass-panel {
-    background: #4A4438 !important;
-    border: 2px solid #7A6855 !important;
+    background: #5C5446 !important;
+    border: 3px solid #000 !important;
     border-radius: 0 !important;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
-                0 4px 0 rgba(0,0,0,0.6) !important;
+    box-shadow:
+        inset -3px -3px 0 rgba(0,0,0,0.65),
+        inset 3px 3px 0 rgba(255,240,180,0.45),
+        0 5px 0 rgba(0,0,0,0.7) !important;
 }
 
 .section-card {
@@ -205,26 +213,37 @@
     mat-card-actions { padding: 0 16px 16px; gap: 8px; display: flex; flex-wrap: wrap; }
 }
 
+/* mat-card-title color */
+::ng-deep .glass-panel mat-card-title {
+    color: rgba(255,255,255,0.92) !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+}
+::ng-deep .glass-panel mat-card-subtitle {
+    color: rgba(255,255,255,0.45) !important;
+    font-size: 0.78rem !important;
+}
+
 /* ── Card Icons ──────────────────────────────────────── */
 .card-icon {
     width: 40px; height: 40px;
     border-radius: 0;
-    border: 2px solid;
+    border: 2px solid #000;
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    box-shadow: inset -2px -2px 0 rgba(0,0,0,0.6), inset 2px 2px 0 rgba(255,255,255,0.1);
+    box-shadow: inset -2px -2px 0 rgba(0,0,0,0.6), inset 2px 2px 0 rgba(255,255,255,0.15);
 
     mat-icon { color: white; font-size: 20px; width: 20px; height: 20px; }
 }
 
-.jd-icon     { background: var(--mc-lapis,#1b4fd8);   border-color: #2a6aff; }
-.ctrl-icon   { background: var(--mc-enchant,#AA44FF); border-color: #CC88FF; }
-.preview-icon{ background: var(--mc-diamond,#44E8FF); border-color: #8af0ff; }
-.docx-icon   { background: var(--mc-lapis,#1b4fd8);   border-color: #2a6aff; }
-.email-icon  { background: var(--mc-redstone,#FF2244); border-color: #ff4060; }
-.upload-icon { background: var(--mc-grass,#7DCF22);   border-color: var(--mc-xp,#A0FF28); }
+.jd-icon     { background: #1b4fd8; }
+.ctrl-icon   { background: #AA44FF; box-shadow: inset -2px -2px 0 rgba(0,0,0,0.6), inset 2px 2px 0 rgba(200,150,255,0.2); animation: mc-glow 3s infinite; }
+.preview-icon{ background: #00B8C9; }
+.docx-icon   { background: #1b4fd8; }
+.email-icon  { background: #FF2244; }
+.upload-icon { background: #7DCF22; }
 
 /* ── Section Toggles ─────────────────────────────────── */
-.section-toggles { display: flex; flex-direction: column; gap: 3px; }
+.section-toggles { display: flex; flex-direction: column; gap: 2px; }
 
 .toggle-row {
     display: flex; align-items: center; gap: 10px;
@@ -232,10 +251,11 @@
     cursor: pointer;
     border: 1px solid transparent;
     transition: background 0s, border-color 0s;
+    background: rgba(0,0,0,0.15);
 
     &:hover {
-        background: rgba(123,82,171,0.08);
-        border-color: rgba(123,82,171,0.2);
+        background: rgba(170,68,255,0.12);
+        border-color: rgba(170,68,255,0.3);
     }
 }
 
@@ -243,49 +263,61 @@
 
 .toggle-name {
     display: flex; align-items: center; gap: 5px;
-    font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.82);
+    font-size: 0.85rem; font-weight: 700; color: rgba(255,255,255,0.9);
 
     .toggle-icon { font-size: 15px; width: 15px; height: 15px; opacity: 0.6; }
 }
 
 .toggle-val {
-    font-size: 0.7rem; color: rgba(255,255,255,0.3);
+    font-size: 0.7rem; color: rgba(255,255,255,0.35);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     max-width: 280px;
 }
 
 .preview-text { font-style: italic; }
 
-/* ── Tailor / Reset Buttons ──────────────────────────── */
+/* ── Tailor Button ───────────────────────────────────── */
 .tailor-btn {
-    background: var(--mc-enchant,#AA44FF) !important;
+    background: #AA44FF !important;
     color: white !important;
     border-radius: 0 !important;
+    border: 2px solid #000 !important;
     display: flex !important;
     align-items: center;
     gap: 6px;
     flex: 1;
     font-family: 'Press Start 2P', monospace !important;
     font-size: 0.45rem !important;
-    box-shadow: inset -2px -2px 0 rgba(0,0,0,0.6), inset 2px 2px 0 rgba(200,150,255,0.2),
-                0 4px 0 #3a1a6a !important;
+    box-shadow:
+        inset -2px -2px 0 rgba(0,0,0,0.6),
+        inset 2px 2px 0 rgba(200,150,255,0.25),
+        0 4px 0 #3a1a6a !important;
     text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
     transition: transform 0s, box-shadow 0s !important;
 
-    &:hover {
+    &:hover:not(:disabled) {
         transform: translateY(2px) !important;
-        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.5), inset 2px 2px 0 rgba(200,150,255,0.3),
-                    0 2px 0 #3a1a6a !important;
+        box-shadow:
+            inset -2px -2px 0 rgba(0,0,0,0.5),
+            inset 2px 2px 0 rgba(200,150,255,0.35),
+            0 2px 0 #3a1a6a !important;
+    }
+
+    &:disabled {
+        background: #4A4438 !important;
+        color: rgba(255,255,255,0.3) !important;
+        box-shadow: none !important;
     }
 }
 
+/* ── Reset Button ────────────────────────────────────── */
 .reset-btn {
     border: 2px solid #7A6855 !important;
-    color: rgba(255,255,255,0.4) !important;
+    color: rgba(255,255,255,0.5) !important;
     border-radius: 0 !important;
     font-family: 'Press Start 2P', monospace !important;
     font-size: 0.42rem !important;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(150,160,175,0.1)) !important;
+    box-shadow: inset -2px -2px 0 rgba(0,0,0,0.5), inset 2px 2px 0 rgba(255,240,180,0.1) !important;
 }
 
 /* ── Keyword Chips ───────────────────────────────────── */
@@ -294,7 +326,7 @@
 .chips-label {
     font-family: 'Press Start 2P', monospace;
     font-size: 0.38rem;
-    color: rgba(255,255,255,0.35);
+    color: rgba(255,255,255,0.38);
     display: block;
     margin-bottom: 6px;
     letter-spacing: 0.08em;
@@ -302,9 +334,9 @@
 }
 
 .kw-chip {
-    background: rgba(123,82,171,0.15) !important;
+    background: rgba(170,68,255,0.18) !important;
     color: #DD88FF !important;
-    border: 1px solid rgba(123,82,171,0.3) !important;
+    border: 1px solid rgba(170,68,255,0.4) !important;
     border-radius: 0 !important;
     font-size: 0.7rem !important;
     font-family: 'Outfit', sans-serif !important;
@@ -319,34 +351,37 @@
     overflow-y: auto;
     padding-right: 4px;
 
-    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar { width: 6px; }
     &::-webkit-scrollbar-track { background: #38332A; }
-    &::-webkit-scrollbar-thumb { background: #7A6855; }
+    &::-webkit-scrollbar-thumb { background: #7A6855; border: 1px solid #000; }
 }
 
-.preview-section { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.preview-section {
+    padding: 12px 0;
+    border-bottom: 2px solid rgba(0,0,0,0.3);
+}
 
 .preview-section-label {
     display: flex; align-items: center; gap: 5px;
     font-family: 'Press Start 2P', monospace;
     font-size: 0.38rem; font-weight: 400;
     letter-spacing: 0.1em; text-transform: uppercase;
-    color: rgba(255,255,255,0.25); margin-bottom: 8px;
+    color: rgba(255,255,255,0.3); margin-bottom: 8px;
     mat-icon { font-size: 12px; width: 12px; height: 12px; }
 }
 
-.preview-title-val  {
+.preview-title-val {
     font-family: 'Press Start 2P', monospace;
     font-size: 0.62rem;
-    color: var(--mc-enchant,#AA44FF);
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+    color: #AA44FF;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.8), 0 0 12px rgba(170,68,255,0.4);
     line-height: 1.8;
-    animation: mc-enchant 4s step-end infinite;
+    animation: mc-enchant 3s step-end infinite;
 }
 
 .preview-title-val2 {
     font-size: 0.82rem;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.45);
     margin-top: 4px;
 }
 
@@ -354,22 +389,22 @@
     margin: 0; padding-left: 16px;
     li {
         font-size: 0.78rem;
-        color: rgba(255,255,255,0.6);
+        color: rgba(255,255,255,0.7);
         margin-bottom: 5px;
         line-height: 1.5;
     }
-    .more-indicator { color: rgba(255,255,255,0.25); font-style: italic; list-style: none; }
+    .more-indicator { color: rgba(255,255,255,0.28); font-style: italic; list-style: none; }
 }
 
 .env-tags { display: flex; flex-wrap: wrap; gap: 5px; }
 
 .env-tag {
-    background: rgba(94,207,223,0.06);
-    border: 1px solid rgba(94,207,223,0.15);
+    background: rgba(68,232,255,0.1);
+    border: 1px solid rgba(68,232,255,0.2);
     border-radius: 0;
     padding: 2px 8px;
     font-size: 0.68rem;
-    color: rgba(255,255,255,0.55);
+    color: rgba(255,255,255,0.65);
 }
 
 /* ── JSON Editor ─────────────────────────────────────── */
@@ -378,12 +413,13 @@
     font-size: 0.72rem;
     line-height: 1.5;
     background: #0d0f12 !important;
-    color: var(--mc-xp,#A0FF28) !important;
+    color: #A0FF28 !important;
+    border: 2px solid #000 !important;
 }
 
 .json-hint {
     display: flex; align-items: center; gap: 5px;
-    font-size: 0.7rem; color: rgba(255,255,255,0.25);
+    font-size: 0.7rem; color: rgba(255,255,255,0.28);
     mat-icon { font-size: 12px; width: 12px; height: 12px; }
 }
 
@@ -391,11 +427,13 @@
 .action-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 
 .action-card {
-    background: #4A4438 !important;
-    border: 2px solid #7A6855 !important;
+    background: #5C5446 !important;
+    border: 3px solid #000 !important;
     border-radius: 0 !important;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
-                0 3px 0 rgba(0,0,0,0.5) !important;
+    box-shadow:
+        inset -3px -3px 0 rgba(0,0,0,0.65),
+        inset 3px 3px 0 rgba(255,240,180,0.4),
+        0 4px 0 rgba(0,0,0,0.65) !important;
 
     mat-card-content { padding: 0 !important; }
 }
@@ -408,46 +446,56 @@
 .action-text {
     display: flex; flex-direction: column; flex: 1; min-width: 0;
 
-    strong { font-family: 'Press Start 2P', monospace; font-size: 0.42rem; color: rgba(255,255,255,0.85); text-shadow: 1px 1px 0 rgba(0,0,0,0.8); line-height: 1.8; }
-    span   { font-size: 0.68rem; color: rgba(255,255,255,0.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    strong { font-family: 'Press Start 2P', monospace; font-size: 0.42rem; color: rgba(255,255,255,0.9); text-shadow: 1px 1px 0 rgba(0,0,0,0.8); line-height: 1.8; }
+    span   { font-size: 0.68rem; color: rgba(255,255,255,0.38); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
 
 .gen-btn {
-    background: var(--mc-lapis,#1b4fd8) !important;
+    background: #1b4fd8 !important;
     color: white !important;
     border-radius: 0 !important;
+    border: 2px solid #000 !important;
     display: flex !important;
     align-items: center;
     gap: 5px;
     font-family: 'Press Start 2P', monospace !important;
     font-size: 0.42rem !important;
-    box-shadow: inset -2px -2px 0 rgba(0,0,0,0.6), inset 2px 2px 0 rgba(100,150,255,0.2),
-                0 3px 0 #0a2a80 !important;
+    box-shadow:
+        inset -2px -2px 0 rgba(0,0,0,0.6),
+        inset 2px 2px 0 rgba(100,150,255,0.2),
+        0 3px 0 #0a2a80 !important;
     text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
     transition: transform 0s, box-shadow 0s !important;
 
     &:hover {
         transform: translateY(2px) !important;
-        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.5), inset 2px 2px 0 rgba(100,150,255,0.3),
-                    0 1px 0 #0a2a80 !important;
+        box-shadow:
+            inset -2px -2px 0 rgba(0,0,0,0.5),
+            inset 2px 2px 0 rgba(100,150,255,0.3),
+            0 1px 0 #0a2a80 !important;
     }
 }
 
 .email-btn {
-    background: var(--mc-redstone,#FF2244) !important;
+    background: #FF2244 !important;
     color: white !important;
     border-radius: 0 !important;
+    border: 2px solid #000 !important;
     font-family: 'Press Start 2P', monospace !important;
     font-size: 0.42rem !important;
-    box-shadow: inset -2px -2px 0 rgba(0,0,0,0.6), inset 2px 2px 0 rgba(255,100,100,0.2),
-                0 3px 0 #6a0010 !important;
+    box-shadow:
+        inset -2px -2px 0 rgba(0,0,0,0.6),
+        inset 2px 2px 0 rgba(255,100,100,0.2),
+        0 3px 0 #6a0010 !important;
     text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
     transition: transform 0s, box-shadow 0s !important;
 
     &:hover {
         transform: translateY(2px) !important;
-        box-shadow: inset -2px -2px 0 rgba(0,0,0,0.5), inset 2px 2px 0 rgba(255,100,100,0.3),
-                    0 1px 0 #6a0010 !important;
+        box-shadow:
+            inset -2px -2px 0 rgba(0,0,0,0.5),
+            inset 2px 2px 0 rgba(255,100,100,0.3),
+            0 1px 0 #6a0010 !important;
     }
 }
 
@@ -469,7 +517,7 @@
     p {
         font-family: 'Press Start 2P', monospace;
         font-size: 0.45rem;
-        color: rgba(255,255,255,0.3);
+        color: rgba(255,255,255,0.35);
         line-height: 2;
         animation: mc-blink 1.2s step-end infinite;
     }
@@ -477,34 +525,33 @@
 
 /* ── Before/After Diff Panel ─────────────────────────── */
 .diff-card {
-    border-left: 3px solid var(--mc-enchant,#AA44FF) !important;
-    background: #4A4438 !important;
-    border-top: 2px solid #7A6855 !important;
-    border-right: 2px solid #7A6855 !important;
-    border-bottom: 2px solid #7A6855 !important;
+    border-left: 4px solid #AA44FF !important;
+    background: #5C5446 !important;
+    border-top: 3px solid #000 !important;
+    border-right: 3px solid #000 !important;
+    border-bottom: 3px solid #000 !important;
     border-radius: 0 !important;
-    box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
-                0 4px 0 rgba(0,0,0,0.6) !important;
+    box-shadow:
+        inset -3px -3px 0 rgba(0,0,0,0.65),
+        inset 3px 3px 0 rgba(255,240,180,0.4),
+        0 5px 0 rgba(0,0,0,0.7) !important;
     animation: mc-slidein 0.35s ease-out;
 }
 
 .diff-header-text {
     flex: 1;
-    mat-card-subtitle { margin-top: 4px; color: rgba(255,255,255,0.3) !important; }
+    mat-card-subtitle { margin-top: 4px; color: rgba(255,255,255,0.38) !important; }
 }
 
-.diff-icon { background: var(--mc-enchant,#AA44FF); border: 2px solid #CC88FF; }
+.diff-icon { background: #AA44FF; border: 2px solid #000; animation: mc-glow 3s infinite; }
 
-.diff-content {
-    padding: 0 16px 16px;
-    display: flex; flex-direction: column; gap: 16px;
-}
+.diff-content { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 16px; }
 
 .diff-section {
     border-radius: 0;
-    background: rgba(255,255,255,0.015);
+    background: rgba(0,0,0,0.2);
     padding: 12px;
-    border: 1px solid rgba(255,255,255,0.04);
+    border: 1px solid rgba(0,0,0,0.3);
 }
 
 .diff-label {
@@ -512,7 +559,7 @@
     font-family: 'Press Start 2P', monospace;
     font-size: 0.38rem; font-weight: 400;
     letter-spacing: 0.1em; text-transform: uppercase;
-    color: rgba(255,255,255,0.25); margin-bottom: 10px;
+    color: rgba(255,255,255,0.3); margin-bottom: 10px;
     mat-icon { font-size: 12px; width: 12px; height: 12px; }
 }
 
@@ -532,31 +579,27 @@
     border: 1px solid;
 
     &.before-tag {
-        background: rgba(196,30,58,0.1);
-        color: var(--mc-redstone,#FF2244);
-        border-color: rgba(196,30,58,0.25);
+        background: rgba(196,30,58,0.15);
+        color: #FF2244;
+        border-color: rgba(196,30,58,0.35);
     }
     &.after-tag {
-        background: rgba(128,201,32,0.1);
-        color: var(--mc-xp,#A0FF28);
-        border-color: rgba(128,201,32,0.25);
+        background: rgba(160,255,40,0.12);
+        color: #A0FF28;
+        border-color: rgba(128,201,32,0.3);
     }
 }
 
 .diff-arrow {
-    color: rgba(255,255,255,0.15); margin-top: 24px;
+    color: rgba(255,255,255,0.2); margin-top: 24px;
     font-size: 18px; width: 18px; height: 18px; flex-shrink: 0;
 }
 
 .diff-text {
     font-size: 0.78rem; line-height: 1.5; margin: 0; word-break: break-word;
 
-    &.removed {
-        color: var(--mc-redstone,#FF2244);
-        text-decoration: line-through;
-        text-decoration-color: rgba(196,30,58,0.45);
-    }
-    &.added { color: var(--mc-xp,#A0FF28); }
+    &.removed { color: #FF2244; text-decoration: line-through; text-decoration-color: rgba(196,30,58,0.5); }
+    &.added { color: #A0FF28; }
 }
 
 .diff-bullets {
@@ -564,14 +607,10 @@
 
     li {
         font-size: 0.74rem; line-height: 1.5; margin-bottom: 5px;
-        color: rgba(255,255,255,0.5);
+        color: rgba(255,255,255,0.6);
 
-        &.removed {
-            color: var(--mc-redstone,#FF2244);
-            text-decoration: line-through;
-            text-decoration-color: rgba(196,30,58,0.4);
-        }
-        &.added { color: var(--mc-xp,#A0FF28); font-weight: 600; }
+        &.removed { color: #FF2244; text-decoration: line-through; text-decoration-color: rgba(196,30,58,0.4); }
+        &.added { color: #A0FF28; font-weight: 600; }
     }
 }
 
@@ -579,17 +618,17 @@
 .ai-status-bar {
     display: flex; align-items: center; gap: 8px;
     padding: 10px 12px; border-radius: 0; margin-bottom: 12px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
-    font-size: 0.78rem; color: rgba(255,255,255,0.35);
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(0,0,0,0.3);
+    font-size: 0.78rem; color: rgba(255,255,255,0.38);
 
     mat-icon { font-size: 16px; width: 16px; height: 16px; opacity: 0.5; }
 
     &.ai-active {
-        background: rgba(123,82,171,0.08);
-        border-color: rgba(123,82,171,0.25);
+        background: rgba(170,68,255,0.12);
+        border-color: rgba(170,68,255,0.35);
         color: #DD88FF;
-        mat-icon { opacity: 1; }
-        animation: mc-enchant 3s step-end infinite;
+        mat-icon { opacity: 1; color: #AA44FF; }
+        animation: mc-glow 3s infinite;
     }
 }
