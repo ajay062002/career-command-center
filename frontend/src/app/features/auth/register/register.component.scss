@@ -1,0 +1,386 @@
+/* ═══════════════════════════════════════════════════════
+   LOGIN — MINECRAFT THEME
+   ═══════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+@keyframes mc-spawn  { 0%{opacity:0;transform:scale(0.88) translateY(16px)}60%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)} }
+@keyframes mc-float  { 0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-14px) rotate(6deg)} }
+@keyframes mc-pulse  { 0%,100%{box-shadow:0 0 0 0 rgba(160,255,40,0.5),inset -3px -3px 0 rgba(0,0,0,0.5),inset 3px 3px 0 rgba(200,255,80,0.3),0 4px 0 #3A7800}50%{box-shadow:0 0 0 10px rgba(160,255,40,0),inset -3px -3px 0 rgba(0,0,0,0.5),inset 3px 3px 0 rgba(200,255,80,0.3),0 4px 0 #3A7800} }
+@keyframes mc-blink  { 0%,100%{opacity:1}49%{opacity:1}50%{opacity:0}99%{opacity:0} }
+@keyframes mc-stars  { 0%{background-position:0 0}100%{background-position:200px 200px} }
+@keyframes mc-xpbar  { 0%{transform:translateX(-100%)}100%{transform:translateX(100%)} }
+@keyframes mc-cloud  { 0%{transform:translateX(-120px)}100%{transform:translateX(calc(100vw + 120px))} }
+
+/* ── Full page ────────────────────────────────────────── */
+.login-page {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: 'Press Start 2P', monospace;
+
+    /* Minecraft sky → grass → stone gradient */
+    background:
+        linear-gradient(180deg,
+            #5BA4CF 0%,
+            #7EC8E3 38%,
+            #88CC44 38%,
+            #6AAA2A 44%,
+            #5C3A1E 44%,
+            #2E2A1E 100%
+        );
+}
+
+/* ── Pixel clouds ────────────────────────────────────── */
+.login-decorations {
+    position: absolute;
+    width: 100%; height: 100%;
+    pointer-events: none;
+
+    .glow-blue, .glow-orange, .glow-white {
+        position: absolute;
+        border-radius: 0;
+        animation: mc-float 7s infinite ease-in-out;
+    }
+
+    /* Grass block */
+    .glow-blue {
+        width: 40px; height: 40px;
+        background: #7DCF22;
+        border: 3px solid #000;
+        box-shadow: inset -4px -4px 0 rgba(0,0,0,0.6), inset 4px 4px 0 rgba(200,255,80,0.2);
+        top: 12%; left: 6%;
+        animation-delay: 0s;
+    }
+
+    /* Sand block */
+    .glow-orange {
+        width: 52px; height: 52px;
+        background: #F0C060;
+        border: 3px solid #000;
+        box-shadow: inset -4px -4px 0 rgba(0,0,0,0.5), inset 4px 4px 0 rgba(255,240,180,0.3);
+        bottom: 18%; right: 7%;
+        animation-delay: -3s;
+        animation-duration: 9s;
+    }
+
+    /* Diamond block */
+    .glow-white {
+        width: 28px; height: 28px;
+        background: #44E8FF;
+        border: 3px solid #000;
+        box-shadow: inset -3px -3px 0 rgba(0,0,0,0.5), inset 3px 3px 0 rgba(200,250,255,0.3), 0 0 12px rgba(68,232,255,0.4);
+        top: 22%; right: 10%;
+        animation-delay: -5s;
+        animation-duration: 5.5s;
+    }
+}
+
+/* ── Layout ──────────────────────────────────────────── */
+.split-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 36px;
+    width: 100%;
+    max-width: 1100px;
+    z-index: 10;
+    padding: 20px;
+
+    @media (min-width: 900px) {
+        flex-direction: row;
+        justify-content: center;
+        gap: 60px;
+        align-items: center;
+    }
+}
+
+/* ── Brand ───────────────────────────────────────────── */
+.brand-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 480px;
+
+    .brand-logo-wrap {
+        margin-bottom: 24px;
+
+        .large-logo {
+            width: 100%;
+            max-width: 380px;
+            height: auto;
+            border-radius: 0 !important;
+            border: 4px solid #000;
+            box-shadow:
+                inset -4px -4px 0 rgba(0,0,0,0.7),
+                inset 4px 4px 0 rgba(255,240,180,0.15),
+                0 8px 0 rgba(0,0,0,0.9);
+            cursor: pointer;
+            transition: transform 0s;
+
+            &:hover { transform: scale(1.02); }
+        }
+    }
+
+    .brand-text {
+        h2 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.7rem, 2vw, 1.1rem);
+            color: #FFD020;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.9), 0 0 20px rgba(255,208,32,0.35);
+            margin: 0 0 14px;
+            line-height: 1.8;
+        }
+
+        p {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.4rem;
+            color: rgba(255,255,255,0.55);
+            line-height: 2.2;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+        }
+    }
+}
+
+/* ── Card ────────────────────────────────────────────── */
+.login-card-container {
+    width: 100%;
+    max-width: 420px;
+    flex-shrink: 0;
+}
+
+.login-card {
+    background: #3A3628 !important;
+    border: 4px solid #000 !important;
+    border-radius: 0 !important;
+    padding: 32px 28px !important;
+    backdrop-filter: none !important;
+    box-shadow:
+        inset -4px -4px 0 rgba(0,0,0,0.7),
+        inset 4px 4px 0 rgba(255,240,180,0.35),
+        0 8px 0 rgba(0,0,0,0.95) !important;
+    animation: mc-spawn 0.5s both;
+
+    &:hover { transform: none !important; box-shadow: inset -4px -4px 0 rgba(0,0,0,0.7), inset 4px 4px 0 rgba(255,240,180,0.35), 0 8px 0 rgba(0,0,0,0.95) !important; }
+}
+
+/* ── Header ──────────────────────────────────────────── */
+.login-header {
+    text-align: center;
+    margin-bottom: 28px;
+
+    .logo-circle {
+        width: 68px; height: 68px;
+        background: #A0FF28;
+        border: 4px solid #000;
+        border-radius: 0 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 18px;
+        box-shadow:
+            inset -3px -3px 0 rgba(0,0,0,0.5),
+            inset 3px 3px 0 rgba(200,255,80,0.3),
+            0 4px 0 #3A7800;
+        animation: mc-pulse 2.5s infinite;
+        transition: transform 0s;
+
+        mat-icon {
+            font-size: 34px; width: 34px; height: 34px;
+            color: #000 !important;
+        }
+    }
+
+    h1 {
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.85rem;
+        color: #A0FF28;
+        text-shadow: 3px 3px 0 rgba(0,0,0,0.9);
+        margin: 0 0 8px;
+        line-height: 1.8;
+    }
+
+    p {
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.35rem;
+        color: rgba(255,255,255,0.38);
+        line-height: 2.2;
+        text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    }
+}
+
+/* ── Form ────────────────────────────────────────────── */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    ::ng-deep .mat-mdc-form-field {
+        width: 100%;
+
+        .mat-mdc-text-field-wrapper {
+            background: #282420 !important;
+            border-radius: 0 !important;
+            border: 2px solid #7A6855 !important;
+            box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5) !important;
+        }
+
+        .mdc-text-field--outlined .mdc-notched-outline__leading,
+        .mdc-text-field--outlined .mdc-notched-outline__notch,
+        .mdc-text-field--outlined .mdc-notched-outline__trailing {
+            border: none !important;
+        }
+
+        .mdc-floating-label {
+            font-family: 'Press Start 2P', monospace !important;
+            font-size: 0.38rem !important;
+            color: rgba(255,255,255,0.38) !important;
+        }
+
+        input {
+            color: rgba(245,240,224,0.92) !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 1rem !important;
+        }
+
+        mat-icon { color: rgba(255,255,255,0.28) !important; }
+
+        &.mat-focused .mat-mdc-text-field-wrapper {
+            border-color: #A0FF28 !important;
+            box-shadow: inset 2px 2px 0 rgba(0,0,0,0.4), 0 0 0 1px rgba(160,255,40,0.15) !important;
+        }
+    }
+}
+
+/* ── Sign In Button ──────────────────────────────────── */
+.login-btn {
+    height: 52px;
+    border-radius: 0 !important;
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 0.5rem !important;
+    background: #A0FF28 !important;
+    color: #000 !important;
+    border: 2px solid #000 !important;
+    box-shadow:
+        inset -2px -2px 0 rgba(0,0,0,0.5),
+        inset 2px 2px 0 rgba(200,255,80,0.3),
+        0 4px 0 #3A7800 !important;
+    text-shadow: none !important;
+    letter-spacing: 0 !important;
+    margin-top: 8px;
+    transition: transform 0s, box-shadow 0s !important;
+
+    &:hover:not(:disabled) {
+        transform: translateY(2px) !important;
+        box-shadow:
+            inset -2px -2px 0 rgba(0,0,0,0.4),
+            inset 2px 2px 0 rgba(200,255,80,0.4),
+            0 2px 0 #3A7800 !important;
+    }
+
+    &:disabled {
+        background: #4A4438 !important;
+        color: rgba(255,255,255,0.25) !important;
+        box-shadow: none !important;
+        border-color: #7A6855 !important;
+    }
+}
+
+/* ── Register link ───────────────────────────────────── */
+.register-link {
+    text-align: center;
+    margin-top: 22px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.33rem;
+    color: rgba(255,255,255,0.32);
+    line-height: 2.5;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+
+    a {
+        color: #44E8FF;
+        text-decoration: none;
+        &:hover { color: #88F8FF; text-decoration: underline; }
+    }
+}
+
+/* ── Footer ──────────────────────────────────────────── */
+.login-footer {
+    text-align: center;
+    margin-top: 18px;
+
+    p {
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.3rem;
+        color: rgba(255,255,255,0.14);
+        line-height: 2;
+        letter-spacing: 0;
+    }
+}
+
+.fade-in { animation: mc-spawn 0.5s both; }
+
+/* ── Success state ───────────────────────────────────── */
+.success-content {
+    text-align: center;
+    padding: 16px 0;
+
+    .success-icon-wrap mat-icon {
+        font-size: 60px; width: 60px; height: 60px;
+        color: #A0FF28;
+        filter: drop-shadow(0 0 14px rgba(160,255,40,0.5));
+    }
+
+    h2 {
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.65rem;
+        color: #A0FF28;
+        text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+        line-height: 1.8;
+        margin: 16px 0 12px;
+    }
+
+    p {
+        font-family: 'Press Start 2P', monospace;
+        font-size: 0.35rem;
+        color: rgba(255,255,255,0.5);
+        line-height: 2.2;
+    }
+
+    .sub-text { color: rgba(255,255,255,0.28) !important; }
+
+    .loading-bar {
+        width: 100%; height: 10px;
+        background: #282420;
+        border: 2px solid #7A6855;
+        margin-top: 24px;
+        overflow: hidden;
+        box-shadow: inset 2px 2px 0 rgba(0,0,0,0.4);
+
+        .loading-progress {
+            width: 60%; height: 100%;
+            background: #A0FF28;
+            box-shadow: 0 0 10px rgba(160,255,40,0.6);
+            animation: mc-xpbar 1.5s infinite linear;
+        }
+    }
+}
+
+/* ── Mobile ──────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .login-page {
+        background: linear-gradient(180deg, #4A8CC4 0%, #6AAA2A 50%, #2E2A1E 100%);
+        align-items: flex-end;
+        padding-bottom: 20px;
+    }
+    .brand-section { display: none; }
+    .split-container { padding: 16px; }
+    .login-card { padding: 24px 18px !important; }
+    .login-header h1 { font-size: 0.68rem !important; }
+    .login-btn { font-size: 0.42rem !important; }
+}

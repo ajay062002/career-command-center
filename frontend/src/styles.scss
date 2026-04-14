@@ -149,18 +149,18 @@ html, body {
 /* Force visible background — warm stone, never pure black */
 body { background-color: #2E2A1E !important; }
 
-// Bright stone pixel grid texture
+// Subtle Minecraft stone pixel grid — very faint warm squares
 body {
   background-image:
     repeating-linear-gradient(
       0deg,
-      transparent 0px, transparent 7px,
-      rgba(120, 100, 40, 0.18) 7px, rgba(120, 100, 40, 0.18) 8px
+      transparent 0px, transparent 15px,
+      rgba(160, 130, 60, 0.07) 15px, rgba(160, 130, 60, 0.07) 16px
     ),
     repeating-linear-gradient(
       90deg,
-      transparent 0px, transparent 7px,
-      rgba(120, 100, 40, 0.12) 7px, rgba(120, 100, 40, 0.12) 8px
+      transparent 0px, transparent 15px,
+      rgba(160, 130, 60, 0.05) 15px, rgba(160, 130, 60, 0.05) 16px
     );
 }
 
@@ -267,9 +267,9 @@ a { text-decoration: none; }
 
 // ── Material Card ─────────────────────────────────────────────────────────────
 .mat-mdc-card {
-  background: var(--mc-cobble) !important;
+  background: #5C5446 !important;
   border: 2px solid #000 !important;
-  box-shadow: var(--panel-shadow) !important;
+  box-shadow: inset -2px -2px 0 rgba(0,0,0,0.65), inset 2px 2px 0 rgba(255,240,180,0.45) !important;
   border-radius: 0 !important;
 }
 

@@ -245,29 +245,35 @@ class AutomationViewSet(viewsets.ViewSet):
 
         import re as _re
 
-        # Aggressively extract job title from JD — 6 patterns, first wins
+        # Aggressively extract job title from JD — 8 patterns, first wins
         title_hint = ''
+        _ROLE_WORDS = r'(?:Developer|Engineer|Architect|Lead|Manager|Analyst|Specialist|Consultant|Designer|Scientist|Administrator|Director|Programmer|Technician)'
         _title_patterns = [
-            # Explicit label: "Job Title: Senior Java Developer"
-            r'(?:job title|position title|role|position)[:\s]+([^\n|,]{4,70})',
-            # "We are looking for a <Title>"
-            r'(?:looking for(?: an?)?|hiring(?: an?)?|seeking(?: an?)?)\s+([A-Z][A-Za-z /\-\(\)]{4,60})',
-            # "Title: ..." at start of line
-            r'^(?:title|role)[:\s]+([^\n]{4,60})',
-            # Standalone title line — capitalised multi-word ending in known suffix
-            r'^([A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+){1,5})\s*\n',
-            # "as a/an <Title>" pattern
-            r'as an?\s+([A-Z][A-Za-z /\-]{4,60})',
-            # Fallback — any line that ends with Developer/Engineer/Architect/Lead/etc.
-            r'([A-Za-z /\-]{4,60}(?:Developer|Engineer|Architect|Lead|Manager|Analyst|Specialist|Consultant))',
+            # Explicit label: "Job Title: / Opening: / Opportunity:"
+            r'(?:job title|position title|opening|opportunity)[:\s]+([^\n|,]{4,70})',
+            # "Role: ..." or "Position: ..." at line start
+            r'^(?:role|position|title)[:\s]+([^\n]{4,60})',
+            # "looking for / hiring / seeking / need a <Title>"
+            r'(?:looking for(?: an?)?|hiring(?: an?)?|seeking(?: an?)?|need(?:ing)?(?: an?)?)\s+([A-Za-z][A-Za-z /\-\(\)]{4,60})',
+            # "as a/an <Title>"
+            r'\bas an?\s+([A-Za-z][A-Za-z /\-]{4,60})',
+            # Standalone short line that IS a role title
+            r'^((?:[A-Za-z]+ ){0,4}' + _ROLE_WORDS + r'(?:[A-Za-z /\-]*)?)\s*$',
+            # "for the <Title> position/role"
+            r'for(?: the)?\s+([A-Za-z][A-Za-z /\-]{4,55})\s+(?:position|role|opening)',
+            # Any phrase containing a role word — within first 2500 chars
+            r'([A-Za-z][A-Za-z /\-]{2,50}\s+' + _ROLE_WORDS + r')',
+            # Last resort: first non-empty line under 80 chars containing a role word
+            r'^(.{5,79}' + _ROLE_WORDS + r'.{0,30})$',
         ]
         for _pat in _title_patterns:
             _m = _re.search(_pat, jd_text[:3000], _re.IGNORECASE | _re.MULTILINE)
             if _m:
-                _raw = _m.group(1).strip().strip('.,;:')
-                # Remove noise like "with 5+ years" or "to join our team"
-                _raw = _re.split(r'\s+(?:with|to |who|that|and |for |at |in )', _raw, flags=_re.IGNORECASE)[0].strip()
-                if 4 < len(_raw) < 70:
+                _raw = _m.group(1).strip().strip('.,;:()')
+                # Strip trailing noise: "with 5+ years", "to join", etc.
+                _raw = _re.split(r'\s+(?:with\b|to join|who\b|that\b|to\b)', _raw, flags=_re.IGNORECASE)[0].strip()
+                _raw = _raw.strip('.,;:()')
+                if 4 < len(_raw) < 75:
                     title_hint = _raw
                     break
 
@@ -714,15 +720,22 @@ Valid JSON only."""
             except Exception:
                 pass  # archive failure must never block the download
 
-            # Also save to C:\Resumes\{title}\Ajay_Thota_{timestamp}.docx
+            # Save to C:\Resumes\ with auto-incrementing numbered subfolders
+            # (same pattern as Mail-Resume_Automation project)
             try:
                 title_val = (raw_ctx.get('TITLE') or 'Resume').strip()
                 safe_title = re.sub(r'[<>:"/\\|?*\n\r]', '_', title_val)[:80].strip('_ ')
-                c_dir = Path('C:/Resumes') / (safe_title or 'Resume')
+                c_base = Path('C:/Resumes') / (safe_title or 'Resume')
+                c_base.mkdir(parents=True, exist_ok=True)
+                # Find next numeric subfolder: 1, 2, 3 ...
+                existing = [int(p.name) for p in c_base.iterdir() if p.is_dir() and p.name.isdigit()]
+                next_num = max(existing, default=0) + 1
+                c_dir = c_base / str(next_num)
                 c_dir.mkdir(parents=True, exist_ok=True)
-                c_path = c_dir / f'Ajay_Thota_{ts}.docx'
-                with open(c_path, 'wb') as f:
+                with open(c_dir / 'Ajay_Thota.docx', 'wb') as f:
                     f.write(final_buf.getvalue())
+                with open(c_dir / 'job_description.txt', 'w', encoding='utf-8') as f:
+                    f.write(jd_text)
             except Exception:
                 pass  # local save failure must never block download
 
