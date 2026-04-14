@@ -1,0 +1,270 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 520" shape-rendering="crispEdges">
+
+  <!-- ── Sky ─────────────────────────────────────────── -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5BA4CF"/>
+      <stop offset="100%" stop-color="#88CCF0"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="520" fill="url(#sky)"/>
+
+  <!-- ── Sun ──────────────────────────────────────────── -->
+  <rect x="380" y="24" width="16" height="16" fill="#FFD020"/>
+  <rect x="396" y="24" width="16" height="16" fill="#FFD020"/>
+  <rect x="364" y="40" width="16" height="16" fill="#FFD020"/>
+  <rect x="380" y="40" width="16" height="16" fill="#FFF060"/>
+  <rect x="396" y="40" width="16" height="16" fill="#FFD020"/>
+  <rect x="412" y="40" width="16" height="16" fill="#FFD020"/>
+  <rect x="380" y="56" width="16" height="16" fill="#FFD020"/>
+  <rect x="396" y="56" width="16" height="16" fill="#FFD020"/>
+
+  <!-- ── Cloud 1 ───────────────────────────────────────── -->
+  <rect x="32"  y="40" width="16" height="16" fill="white" opacity="0.9"/>
+  <rect x="48"  y="40" width="16" height="16" fill="white" opacity="0.9"/>
+  <rect x="64"  y="40" width="16" height="16" fill="white" opacity="0.9"/>
+  <rect x="16"  y="56" width="16" height="16" fill="white" opacity="0.9"/>
+  <rect x="32"  y="56" width="16" height="16" fill="white" opacity="0.9"/>
+  <rect x="48"  y="56" width="16" height="16" fill="white" opacity="0.9"/>
+  <rect x="64"  y="56" width="16" height="16" fill="white" opacity="0.9"/>
+  <rect x="80"  y="56" width="16" height="16" fill="white" opacity="0.9"/>
+
+  <!-- ── Cloud 2 ───────────────────────────────────────── -->
+  <rect x="200" y="28" width="16" height="16" fill="white" opacity="0.85"/>
+  <rect x="216" y="28" width="16" height="16" fill="white" opacity="0.85"/>
+  <rect x="232" y="28" width="16" height="16" fill="white" opacity="0.85"/>
+  <rect x="200" y="44" width="16" height="16" fill="white" opacity="0.85"/>
+  <rect x="216" y="44" width="16" height="16" fill="white" opacity="0.85"/>
+  <rect x="232" y="44" width="16" height="16" fill="white" opacity="0.85"/>
+  <rect x="248" y="44" width="16" height="16" fill="white" opacity="0.85"/>
+
+  <!-- ── Title Banner ──────────────────────────────────── -->
+  <!-- Dark plank banner behind text -->
+  <rect x="20" y="110" width="440" height="72" fill="#2A2010" opacity="0.85"/>
+  <rect x="20" y="110" width="440" height="4"  fill="#FFD020" opacity="0.7"/>
+  <rect x="20" y="178" width="440" height="4"  fill="#8A5A00" opacity="0.7"/>
+
+  <!-- CAREER in pixel blocks (simplified rects for each letter outline) -->
+  <text x="240" y="148" font-family="'Press Start 2P', monospace" font-size="13"
+        fill="#FFD020" text-anchor="middle"
+        style="text-shadow: 2px 2px 0 #000">CAREER COMMAND CENTER</text>
+  <text x="240" y="168" font-family="'Press Start 2P', monospace" font-size="8"
+        fill="rgba(255,240,180,0.55)" text-anchor="middle">STEM SHEETZ</text>
+
+  <!-- ── Trees ─────────────────────────────────────────── -->
+  <!-- Left tree leaves -->
+  <rect x="40"  y="250" width="16" height="16" fill="#228B22"/>
+  <rect x="56"  y="250" width="16" height="16" fill="#32A832"/>
+  <rect x="72"  y="250" width="16" height="16" fill="#228B22"/>
+  <rect x="24"  y="266" width="16" height="16" fill="#228B22"/>
+  <rect x="40"  y="266" width="16" height="16" fill="#32A832"/>
+  <rect x="56"  y="266" width="16" height="16" fill="#3ABE3A"/>
+  <rect x="72"  y="266" width="16" height="16" fill="#32A832"/>
+  <rect x="88"  y="266" width="16" height="16" fill="#228B22"/>
+  <rect x="40"  y="282" width="16" height="16" fill="#32A832"/>
+  <rect x="56"  y="282" width="16" height="16" fill="#228B22"/>
+  <rect x="72"  y="282" width="16" height="16" fill="#32A832"/>
+  <!-- Left trunk -->
+  <rect x="56"  y="298" width="16" height="16" fill="#6B3A1F"/>
+  <rect x="56"  y="314" width="16" height="16" fill="#6B3A1F"/>
+
+  <!-- Right tree leaves -->
+  <rect x="360" y="234" width="16" height="16" fill="#228B22"/>
+  <rect x="376" y="234" width="16" height="16" fill="#32A832"/>
+  <rect x="392" y="234" width="16" height="16" fill="#228B22"/>
+  <rect x="344" y="250" width="16" height="16" fill="#228B22"/>
+  <rect x="360" y="250" width="16" height="16" fill="#3ABE3A"/>
+  <rect x="376" y="250" width="16" height="16" fill="#32A832"/>
+  <rect x="392" y="250" width="16" height="16" fill="#3ABE3A"/>
+  <rect x="408" y="250" width="16" height="16" fill="#228B22"/>
+  <rect x="360" y="266" width="16" height="16" fill="#32A832"/>
+  <rect x="376" y="266" width="16" height="16" fill="#228B22"/>
+  <rect x="392" y="266" width="16" height="16" fill="#32A832"/>
+  <!-- Right trunk -->
+  <rect x="376" y="282" width="16" height="16" fill="#6B3A1F"/>
+  <rect x="376" y="298" width="16" height="16" fill="#6B3A1F"/>
+
+  <!-- ── STEVE character ───────────────────────────────── -->
+  <!-- Head (32x32 at center) -->
+  <!-- Hair row 1 -->
+  <rect x="200" y="200" width="8" height="8" fill="#7A5C2E"/>
+  <rect x="208" y="200" width="8" height="8" fill="#7A5C2E"/>
+  <rect x="216" y="200" width="8" height="8" fill="#7A5C2E"/>
+  <rect x="224" y="200" width="8" height="8" fill="#7A5C2E"/>
+  <rect x="232" y="200" width="8" height="8" fill="#7A5C2E"/>
+  <rect x="240" y="200" width="8" height="8" fill="#7A5C2E"/>
+  <rect x="248" y="200" width="8" height="8" fill="#7A5C2E"/>
+  <rect x="256" y="200" width="8" height="8" fill="#7A5C2E"/>
+  <!-- Hair row 2 -->
+  <rect x="200" y="208" width="8" height="8" fill="#7A5C2E"/>
+  <rect x="208" y="208" width="8" height="8" fill="#C68642"/>
+  <rect x="216" y="208" width="8" height="8" fill="#7A5C2E"/>
+  <rect x="224" y="208" width="8" height="8" fill="#7A5C2E"/>
+  <rect x="232" y="208" width="8" height="8" fill="#7A5C2E"/>
+  <rect x="240" y="208" width="8" height="8" fill="#7A5C2E"/>
+  <rect x="248" y="208" width="8" height="8" fill="#C68642"/>
+  <rect x="256" y="208" width="8" height="8" fill="#7A5C2E"/>
+  <!-- Skin rows -->
+  <rect x="200" y="216" width="8" height="8" fill="#C68642"/>
+  <rect x="208" y="216" width="8" height="8" fill="#C68642"/>
+  <rect x="216" y="216" width="8" height="8" fill="#C68642"/>
+  <rect x="224" y="216" width="8" height="8" fill="#C68642"/>
+  <rect x="232" y="216" width="8" height="8" fill="#C68642"/>
+  <rect x="240" y="216" width="8" height="8" fill="#C68642"/>
+  <rect x="248" y="216" width="8" height="8" fill="#C68642"/>
+  <rect x="256" y="216" width="8" height="8" fill="#C68642"/>
+  <!-- Eyes row -->
+  <rect x="200" y="224" width="8" height="8" fill="#C68642"/>
+  <rect x="208" y="224" width="8" height="8" fill="#6B8CFF"/>
+  <rect x="216" y="224" width="8" height="8" fill="#6B8CFF"/>
+  <rect x="224" y="224" width="8" height="8" fill="#C68642"/>
+  <rect x="232" y="224" width="8" height="8" fill="#C68642"/>
+  <rect x="240" y="224" width="8" height="8" fill="#6B8CFF"/>
+  <rect x="248" y="224" width="8" height="8" fill="#6B8CFF"/>
+  <rect x="256" y="224" width="8" height="8" fill="#C68642"/>
+  <!-- Nose row -->
+  <rect x="200" y="232" width="8" height="8" fill="#C68642"/>
+  <rect x="208" y="232" width="8" height="8" fill="#C68642"/>
+  <rect x="216" y="232" width="8" height="8" fill="#B5783C"/>
+  <rect x="224" y="232" width="8" height="8" fill="#B5783C"/>
+  <rect x="232" y="232" width="8" height="8" fill="#B5783C"/>
+  <rect x="240" y="232" width="8" height="8" fill="#C68642"/>
+  <rect x="248" y="232" width="8" height="8" fill="#C68642"/>
+  <rect x="256" y="232" width="8" height="8" fill="#C68642"/>
+
+  <!-- ── Body (blue shirt) ─────────────────────────────── -->
+  <!-- Shirt -->
+  <rect x="192" y="240" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="200" y="240" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="208" y="240" width="8" height="8" fill="#3A7BD0"/>
+  <rect x="216" y="240" width="8" height="8" fill="#3A7BD0"/>
+  <rect x="224" y="240" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="232" y="240" width="8" height="8" fill="#3A7BD0"/>
+  <rect x="240" y="240" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="248" y="240" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="256" y="240" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="264" y="240" width="8" height="8" fill="#4A8BE0"/>
+
+  <rect x="192" y="248" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="200" y="248" width="8" height="8" fill="#3A7BD0"/>
+  <rect x="208" y="248" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="216" y="248" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="224" y="248" width="8" height="8" fill="#3A7BD0"/>
+  <rect x="232" y="248" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="240" y="248" width="8" height="8" fill="#3A7BD0"/>
+  <rect x="248" y="248" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="256" y="248" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="264" y="248" width="8" height="8" fill="#4A8BE0"/>
+
+  <rect x="200" y="256" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="208" y="256" width="8" height="8" fill="#3A7BD0"/>
+  <rect x="216" y="256" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="224" y="256" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="232" y="256" width="8" height="8" fill="#3A7BD0"/>
+  <rect x="240" y="256" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="248" y="256" width="8" height="8" fill="#4A8BE0"/>
+  <rect x="256" y="256" width="8" height="8" fill="#4A8BE0"/>
+
+  <!-- ── Pants ──────────────────────────────────────────── -->
+  <rect x="200" y="264" width="8" height="8" fill="#3A5CA8"/>
+  <rect x="208" y="264" width="8" height="8" fill="#2E4A90"/>
+  <rect x="216" y="264" width="8" height="8" fill="#3A5CA8"/>
+  <rect x="224" y="264" width="8" height="8" fill="#2E4A90"/>
+  <rect x="232" y="264" width="8" height="8" fill="#3A5CA8"/>
+  <rect x="240" y="264" width="8" height="8" fill="#2E4A90"/>
+  <rect x="248" y="264" width="8" height="8" fill="#3A5CA8"/>
+  <rect x="256" y="264" width="8" height="8" fill="#3A5CA8"/>
+
+  <rect x="200" y="272" width="8" height="8" fill="#3A5CA8"/>
+  <rect x="208" y="272" width="8" height="8" fill="#3A5CA8"/>
+  <rect x="216" y="272" width="8" height="8" fill="#2E4A90"/>
+  <rect x="240" y="272" width="8" height="8" fill="#2E4A90"/>
+  <rect x="248" y="272" width="8" height="8" fill="#3A5CA8"/>
+  <rect x="256" y="272" width="8" height="8" fill="#3A5CA8"/>
+
+  <!-- ── Shoes ─────────────────────────────────────────── -->
+  <rect x="200" y="280" width="8" height="8" fill="#704214"/>
+  <rect x="208" y="280" width="8" height="8" fill="#704214"/>
+  <rect x="216" y="280" width="8" height="8" fill="#704214"/>
+  <rect x="248" y="280" width="8" height="8" fill="#704214"/>
+  <rect x="256" y="280" width="8" height="8" fill="#704214"/>
+
+  <!-- ── Briefcase (held by Steve) ────────────────────── -->
+  <rect x="268" y="248" width="32" height="24" fill="#AA44FF" rx="0"/>
+  <rect x="268" y="248" width="32" height="4"  fill="#CC88FF"/>
+  <rect x="268" y="248" width="4"  height="24" fill="#8822CC"/>
+  <rect x="296" y="248" width="4"  height="24" fill="#8822CC"/>
+  <rect x="268" y="268" width="32" height="4"  fill="#8822CC"/>
+  <!-- briefcase handle -->
+  <rect x="276" y="244" width="16" height="4" fill="#8822CC"/>
+  <rect x="276" y="248" width="4"  height="4" fill="#8822CC"/>
+  <rect x="288" y="248" width="4"  height="4" fill="#8822CC"/>
+  <!-- briefcase clasp -->
+  <rect x="280" y="256" width="8" height="8" fill="#FFD020"/>
+
+  <!-- ── Ground — Grass blocks ─────────────────────────── -->
+  <!-- Grass top -->
+  <rect x="0"   y="332" width="480" height="8" fill="#7DCF22"/>
+  <!-- Dirt layers -->
+  <rect x="0"   y="340" width="480" height="16" fill="#9A6A3A"/>
+  <rect x="0"   y="356" width="480" height="16" fill="#8A5A2A"/>
+  <rect x="0"   y="372" width="480" height="16" fill="#7A4A1A"/>
+  <rect x="0"   y="388" width="480" height="132" fill="#6A3A10"/>
+
+  <!-- Grass block grid lines -->
+  <rect x="0"   y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="16"  y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="32"  y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="48"  y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="64"  y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="80"  y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="96"  y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="112" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="128" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="144" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="160" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="176" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="192" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="208" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="224" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="240" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="256" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="272" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="288" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="304" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="320" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="336" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="352" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="368" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="384" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="400" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="416" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="432" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="448" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+  <rect x="464" y="340" width="2"   height="16" fill="rgba(0,0,0,0.3)"/>
+
+  <!-- ── Floating item blocks ──────────────────────────── -->
+  <!-- Diamond block floating left -->
+  <rect x="80"  y="180" width="32" height="32" fill="#44E8FF"/>
+  <rect x="80"  y="180" width="32" height="4"  fill="#88F8FF"/>
+  <rect x="80"  y="180" width="4"  height="32" fill="#88F8FF"/>
+  <rect x="108" y="180" width="4"  height="32" fill="#00A8CC"/>
+  <rect x="80"  y="208" width="32" height="4"  fill="#00A8CC"/>
+  <!-- Diamond symbol -->
+  <rect x="92"  y="192" width="8"  height="8"  fill="#00D8F8"/>
+
+  <!-- Gold block floating right -->
+  <rect x="360" y="164" width="32" height="32" fill="#FFD020"/>
+  <rect x="360" y="164" width="32" height="4"  fill="#FFE870"/>
+  <rect x="360" y="164" width="4"  height="32" fill="#FFE870"/>
+  <rect x="388" y="164" width="4"  height="32" fill="#B89000"/>
+  <rect x="360" y="192" width="32" height="4"  fill="#B89000"/>
+  <!-- Gold symbol -->
+  <rect x="372" y="176" width="8"  height="8"  fill="#FFF0A0"/>
+
+  <!-- ── Bottom label ───────────────────────────────────── -->
+  <rect x="0" y="480" width="480" height="40" fill="rgba(0,0,0,0.6)"/>
+  <text x="240" y="506" font-family="'Press Start 2P', monospace" font-size="9"
+        fill="#A0FF28" text-anchor="middle">YOUR CAREER ADVENTURE AWAITS</text>
+
+</svg>
