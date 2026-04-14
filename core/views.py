@@ -243,17 +243,33 @@ class AutomationViewSet(viewsets.ViewSet):
 
         client = anthropic.Anthropic(api_key=api_key)
 
-        # Pre-extract title hint from JD to inject as a concrete signal
         import re as _re
+
+        # Aggressively extract job title from JD — 6 patterns, first wins
         title_hint = ''
-        for pattern in [
-            r'(?:job title|position|role|title)[:\s]+([^\n.]{4,60})',
-            r'^([A-Z][A-Za-z /\-]+(?:Developer|Engineer|Architect|Lead|Manager|Analyst|Consultant|Specialist))',
-        ]:
-            m = _re.search(pattern, jd_text[:2000], _re.IGNORECASE | _re.MULTILINE)
-            if m:
-                title_hint = m.group(1).strip()
-                break
+        _title_patterns = [
+            # Explicit label: "Job Title: Senior Java Developer"
+            r'(?:job title|position title|role|position)[:\s]+([^\n|,]{4,70})',
+            # "We are looking for a <Title>"
+            r'(?:looking for(?: an?)?|hiring(?: an?)?|seeking(?: an?)?)\s+([A-Z][A-Za-z /\-\(\)]{4,60})',
+            # "Title: ..." at start of line
+            r'^(?:title|role)[:\s]+([^\n]{4,60})',
+            # Standalone title line — capitalised multi-word ending in known suffix
+            r'^([A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+){1,5})\s*\n',
+            # "as a/an <Title>" pattern
+            r'as an?\s+([A-Z][A-Za-z /\-]{4,60})',
+            # Fallback — any line that ends with Developer/Engineer/Architect/Lead/etc.
+            r'([A-Za-z /\-]{4,60}(?:Developer|Engineer|Architect|Lead|Manager|Analyst|Specialist|Consultant))',
+        ]
+        for _pat in _title_patterns:
+            _m = _re.search(_pat, jd_text[:3000], _re.IGNORECASE | _re.MULTILINE)
+            if _m:
+                _raw = _m.group(1).strip().strip('.,;:')
+                # Remove noise like "with 5+ years" or "to join our team"
+                _raw = _re.split(r'\s+(?:with|to |who|that|and |for |at |in )', _raw, flags=_re.IGNORECASE)[0].strip()
+                if 4 < len(_raw) < 70:
+                    title_hint = _raw
+                    break
 
         # Detect AI/ML/NLP in JD for the 12-reference cap instruction
         has_ai = bool(_re.search(r'\b(AI|ML|machine learning|NLP|LLM|deep learning|neural|GPT)\b',
@@ -287,13 +303,15 @@ STRICT RULES:
    - Remaining points = tightly tailored to this specific JD
    - Every point 2-3 sentences, senior tone, ATS-rich with JD keywords
 
-5. ROLE ALIGNMENT — TITLE EXTRACTION (DO THIS FIRST):
-   Scan the JD. Find the EXACT job title the employer posted.
-   {'Pre-extracted hint: "' + title_hint + '" — verify this matches the JD or find the exact string.' if title_hint else 'No hint available — scan the JD yourself for the exact posted title.'}
-   - TITLE = EXACT job title from JD, word for word, same capitalisation
-   - TITLE2 = same title or minor variant (e.g. drop "Senior" if it appears twice)
-   - NEVER paraphrase. If JD says "Java Backend Engineer" output "Java Backend Engineer"
+5. ★★★ TITLE — MANDATORY RULE (VIOLATION = REJECT OUTPUT) ★★★
+   {'★ EXTRACTED TITLE = "' + title_hint + '" ★ — Copy this EXACTLY into the TITLE field. Do NOT rephrase, do NOT add words, do NOT change capitalisation. This is the title the employer posted.' if title_hint else '— No pre-extraction match. Scan the JD yourself: find the exact job title string the employer posted (e.g. "Full Stack Developer", "Java Backend Engineer", "Senior Software Engineer"). Copy it word-for-word.'}
+   - TITLE must be the EXACT string from the JD — nothing more, nothing less
+   - TITLE2 = same title, optionally drop "Senior" prefix if it reads cleaner
+   - Examples: JD says "Full Stack Developer" → TITLE = "Full Stack Developer"
+               JD says "Java Backend Engineer" → TITLE = "Java Backend Engineer"
+               JD says "Senior Software Engineer" → TITLE = "Senior Software Engineer"
    - NEVER default to "Senior Full Stack Developer" unless the JD says EXACTLY that
+   - NEVER invent or paraphrase — only copy
 
 6. TECH FOCUS — emphasize these when present in JD:
    - Backend development (Java, Spring Boot)
