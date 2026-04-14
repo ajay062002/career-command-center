@@ -372,7 +372,14 @@ Valid JSON only."""
                 raw = raw.split("```json")[-1].split("```")[0].strip()
             elif "```" in raw:
                 raw = raw.split("```")[1].split("```")[0].strip()
-            return json.loads(raw)
+            result = json.loads(raw)
+            # Hard override: if we extracted a title from the JD, always use it
+            # regardless of what Claude returned — this is the authoritative title
+            if title_hint:
+                result['TITLE'] = title_hint
+                # TITLE2: drop "Senior " prefix if present, otherwise same
+                result['TITLE2'] = _re.sub(r'^Senior\s+', '', title_hint, flags=_re.IGNORECASE).strip() or title_hint
+            return result
         except Exception as e:
             print(f"[Claude Error] {e}")
             return None
