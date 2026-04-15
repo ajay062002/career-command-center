@@ -172,26 +172,8 @@
   background: #2E2A1E;
 }
 
-// ── Alive Minecraft Background ────────────────────────────────────────────────
-.mc-alive-bg {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-// ── Shared layer base ─────────────────────────────────────────────────────────
-.mc-bg-layer {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
 // ────────────────────────────────────────────────────────────────────────────
-// LAYER 1 — XP ORBS  (tiny lime-green squares, rise upward slowly)
-// Uses the box-shadow particle trick: one 3px block → many shadows at offsets
+// ANIMATIONS
 // ────────────────────────────────────────────────────────────────────────────
 @keyframes mc-orbs-rise {
   0%   { transform: translateY(0)   translateX(0);   opacity: 0; }
@@ -206,68 +188,11 @@
   100% { transform: translateY(-110vh) translateX(-20px); opacity: 0; }
 }
 
-.mc-bg-layer--orbs {
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -6px;
-    width: 4px;
-    height: 4px;
-    background: transparent;
-    border-radius: 0;
-  }
-
-  // First wave — XP green orbs
-  &::before {
-    box-shadow:
-      8vw   0px   0 0 rgba(160,255,40,0.55),
-      18vw  15vh  0 0 rgba(160,255,40,0.4),
-      29vw  5vh   0 0 rgba(160,255,40,0.65),
-      42vw  20vh  0 0 rgba(160,255,40,0.45),
-      55vw  8vh   0 0 rgba(160,255,40,0.55),
-      67vw  25vh  0 0 rgba(160,255,40,0.35),
-      78vw  3vh   0 0 rgba(160,255,40,0.6),
-      88vw  18vh  0 0 rgba(160,255,40,0.45),
-      95vw  10vh  0 0 rgba(160,255,40,0.5),
-      12vw  40vh  0 0 rgba(160,255,40,0.3),
-      35vw  55vh  0 0 rgba(160,255,40,0.4),
-      60vw  70vh  0 0 rgba(160,255,40,0.35),
-      82vw  60vh  0 0 rgba(160,255,40,0.3);
-    animation: mc-orbs-rise 18s linear infinite;
-  }
-
-  // Second wave — cyan diamond orbs (offset timing)
-  &::after {
-    box-shadow:
-      5vw   30vh  0 0 rgba(68,232,255,0.45),
-      22vw  50vh  0 0 rgba(68,232,255,0.35),
-      38vw  10vh  0 0 rgba(68,232,255,0.5),
-      50vw  65vh  0 0 rgba(68,232,255,0.4),
-      63vw  35vh  0 0 rgba(68,232,255,0.45),
-      75vw  45vh  0 0 rgba(68,232,255,0.3),
-      90vw  20vh  0 0 rgba(68,232,255,0.5),
-      15vw  75vh  0 0 rgba(68,232,255,0.35),
-      48vw  80vh  0 0 rgba(68,232,255,0.3),
-      72vw  85vh  0 0 rgba(68,232,255,0.4);
-    animation: mc-orbs-rise2 24s linear infinite 9s;
-  }
-}
-
-// ────────────────────────────────────────────────────────────────────────────
-// LAYER 2 — FLOATING PIXEL BLOCKS  (drift diagonally across the screen)
-// ────────────────────────────────────────────────────────────────────────────
 @keyframes mc-block-drift-1 {
   0%   { transform: translate(-80px, 80vh) rotate(0deg); opacity: 0; }
   5%   { opacity: 0.18; }
   95%  { opacity: 0.12; }
   100% { transform: translate(110vw, -10vh) rotate(0deg); opacity: 0; }
-}
-@keyframes mc-block-drift-2 {
-  0%   { transform: translate(-60px, 40vh) rotate(0deg); opacity: 0; }
-  5%   { opacity: 0.14; }
-  95%  { opacity: 0.1; }
-  100% { transform: translate(110vw, 60vh) rotate(0deg); opacity: 0; }
 }
 @keyframes mc-block-drift-3 {
   0%   { transform: translate(110vw, 20vh) rotate(0deg); opacity: 0; }
@@ -276,61 +201,6 @@
   100% { transform: translate(-80px, 70vh) rotate(0deg); opacity: 0; }
 }
 
-.mc-bg-layer--blocks {
-  // Grass block drifting left-to-right
-  &::before {
-    content: '';
-    position: absolute;
-    width: 28px;
-    height: 28px;
-    background: linear-gradient(180deg, #7DCF22 0%, #7DCF22 45%, #9A6A3A 45%, #6A3C18 100%);
-    border: 2px solid rgba(0,0,0,0.4);
-    box-shadow:
-      inset -2px -2px 0 rgba(0,0,0,0.35),
-      inset 2px 2px 0 rgba(200,255,80,0.2),
-      0 0 8px rgba(125,207,34,0.15);
-    top: 0; left: 0;
-    animation: mc-block-drift-1 35s linear infinite;
-  }
-
-  // Diamond block drifting right-to-left
-  &::after {
-    content: '';
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    background: #44E8FF;
-    border: 2px solid rgba(0,0,0,0.4);
-    box-shadow:
-      inset -2px -2px 0 rgba(0,0,0,0.4),
-      inset 2px 2px 0 rgba(200,250,255,0.3),
-      0 0 12px rgba(68,232,255,0.25);
-    top: 0; right: 0;
-    animation: mc-block-drift-3 42s linear infinite 8s;
-  }
-}
-
-// Gold block — third drifting block using a sibling approach with nth-child
-// We inject it via a span in the HTML, or use the stars layer ::before
-.mc-extra-block {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background: #FFD020;
-  border: 2px solid rgba(0,0,0,0.4);
-  box-shadow:
-    inset -2px -2px 0 rgba(0,0,0,0.4),
-    inset 2px 2px 0 rgba(255,240,160,0.35),
-    0 0 10px rgba(255,208,32,0.2);
-  top: 0; left: 0;
-  pointer-events: none;
-  z-index: 0;
-  animation: mc-block-drift-2 50s linear infinite 20s;
-}
-
-// ────────────────────────────────────────────────────────────────────────────
-// LAYER 3 — PIXEL STARFIELD  (tiny static twinkles in the background)
-// ────────────────────────────────────────────────────────────────────────────
 @keyframes mc-twinkle {
   0%,100% { opacity: 0.08; }
   50%     { opacity: 0.35; }
@@ -340,57 +210,6 @@
   50%     { opacity: 0.5; }
 }
 
-.mc-bg-layer--stars {
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    width: 2px; height: 2px;
-    background: transparent;
-    box-shadow:
-      // Gold sparkles
-      7vw  12vh  0 1px rgba(255,208,32,0.6),
-      23vw 28vh  0 1px rgba(255,208,32,0.5),
-      44vw 8vh   0 1px rgba(255,208,32,0.7),
-      61vw 42vh  0 1px rgba(255,208,32,0.5),
-      80vw 18vh  0 1px rgba(255,208,32,0.6),
-      93vw 55vh  0 1px rgba(255,208,32,0.5),
-      // White sparkles
-      15vw 65vh  0 1px rgba(255,255,255,0.3),
-      33vw 50vh  0 1px rgba(255,255,255,0.25),
-      52vw 78vh  0 1px rgba(255,255,255,0.3),
-      70vw 62vh  0 1px rgba(255,255,255,0.2),
-      87vw 30vh  0 1px rgba(255,255,255,0.3),
-      // Diamond sparkles
-      3vw  82vh  0 1px rgba(68,232,255,0.5),
-      27vw 90vh  0 1px rgba(68,232,255,0.4),
-      49vw 35vh  0 1px rgba(68,232,255,0.5),
-      73vw 75vh  0 1px rgba(68,232,255,0.4),
-      96vw 47vh  0 1px rgba(68,232,255,0.5);
-    animation: mc-twinkle 3s ease-in-out infinite;
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    width: 2px; height: 2px;
-    background: transparent;
-    box-shadow:
-      // XP green sparkles
-      11vw 20vh  0 1px rgba(160,255,40,0.5),
-      36vw 15vh  0 1px rgba(160,255,40,0.4),
-      57vw 55vh  0 1px rgba(160,255,40,0.5),
-      79vw 85vh  0 1px rgba(160,255,40,0.4),
-      98vw 38vh  0 1px rgba(160,255,40,0.5),
-      // Enchant purple sparkles
-      19vw 72vh  0 1px rgba(170,68,255,0.45),
-      41vw 45vh  0 1px rgba(170,68,255,0.4),
-      65vw 22vh  0 1px rgba(170,68,255,0.45),
-      84vw 68vh  0 1px rgba(170,68,255,0.4);
-    animation: mc-twinkle2 4.5s ease-in-out infinite 1.5s;
-  }
-}
 
 // ── Sidenav Panel ─────────────────────────────────────────────────────────────
 // Styled as the Minecraft inventory side panel
@@ -551,11 +370,66 @@
       #2E2A1E 52%,
       #2E2A1E 100%
     );
-  background-attachment: fixed;
+  background-attachment: scroll;
   min-height: 100%;
   overflow-y: auto;
   position: relative;
   overflow-x: hidden;
+
+  // ── Particle Pseudo-elements ───────────────────────────────────────────────
+  // Using pseudo-elements to avoid layout push bugs from extra DOM layers
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  // WAVE 1: XP ORBS (Rising)
+  &::before {
+    width: 4px; height: 4px;
+    background: transparent;
+    box-shadow:
+      8vw   0px   0 0 rgba(160,255,40,0.55),
+      18vw  15vh  0 0 rgba(160,255,40,0.4),
+      29vw  5vh   0 0 rgba(160,255,40,0.65),
+      42vw  20vh  0 0 rgba(160,255,40,0.45),
+      55vw  8vh   0 0 rgba(160,255,40,0.55),
+      67vw  25vh  0 0 rgba(160,255,40,0.35),
+      78vw  3vh   0 0 rgba(160,255,40,0.6),
+      88vw  18vh  0 0 rgba(160,255,40,0.45),
+      95vw  10vh  0 0 rgba(160,255,40,0.5),
+      12vw  40vh  0 0 rgba(160,255,40,0.3),
+      35vw  55vh  0 0 rgba(160,255,40,0.4),
+      60vw  70vh  0 0 rgba(160,255,40,0.35),
+      82vw  60vh  0 0 rgba(160,255,40,0.3);
+    animation: mc-orbs-rise 18s linear infinite;
+    bottom: -6px;
+    top: auto;
+  }
+
+  // WAVE 2: TWINKLING STARS + DRIFTING BLOCK
+  &::after {
+    width: 2px; height: 2px;
+    background: transparent;
+    box-shadow:
+      // Twinkling stars (various colours)
+      7vw  12vh  0 1px rgba(255,208,32,0.6),
+      44vw 8vh   0 1px rgba(255,208,32,0.7),
+      80vw 18vh  0 1px rgba(255,208,32,0.6),
+      15vw 65vh  0 1px rgba(255,255,255,0.3),
+      52vw 78vh  0 1px rgba(255,255,255,0.3),
+      87vw 30vh  0 1px rgba(255,255,255,0.3),
+      49vw 35vh  0 1px rgba(68,232,255,0.5),
+      96vw 47vh  0 1px rgba(68,232,255,0.5),
+      11vw 20vh  0 1px rgba(160,255,40,0.5),
+      57vw 55vh  0 1px rgba(160,255,40,0.5),
+      65vw 22vh  0 1px rgba(170,68,255,0.45);
+    animation: mc-twinkle 3s ease-in-out infinite;
+  }
 }
 
 // ── Mobile ────────────────────────────────────────────────────────────────────
