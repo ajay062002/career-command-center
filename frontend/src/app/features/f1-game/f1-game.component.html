@@ -1,0 +1,82 @@
+<div class="f1-stadium">
+  <div class="top-nav">
+    <div class="branding">
+      <mat-icon class="pulse">sensors</mat-icon>
+      <span>MINECRAFT <span>GP</span></span>
+    </div>
+    
+    <div class="telemetry-top">
+      <div class="t-item">
+        <span class="t-label">CURRENT LAP</span>
+        <span class="t-value">{{ (player?.lap || 0) + 1 }}<span>/{{ totalLaps }}</span></span>
+      </div>
+      <div class="t-divider"></div>
+      <div class="t-item">
+        <span class="t-label">VELOCITY</span>
+        <span class="t-value">{{ math.round(player?.speed || 0) }}<span>KM/H</span></span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <select (change)="onTrackChange($event)" class="circuit-picker">
+        <option *ngFor="let t of tracks; let i = index" [value]="i">{{ t.name }}</option>
+      </select>
+      <button mat-fab extended (click)="resetGame()" class="reboot-btn">
+        <mat-icon>restart_alt</mat-icon> REBOOT ENGINE
+      </button>
+    </div>
+  </div>
+
+  <div class="arena">
+    <canvas #gameCanvas width="1400" height="750"></canvas>
+    
+    <div class="overlay countdown" *ngIf="gamePhase === 'start'">
+      <div class="lights">
+        <div class="light" [class.red]="countdown > 2"></div>
+        <div class="light" [class.red]="countdown > 1"></div>
+        <div class="light" [class.green]="countdown <= 0"></div>
+      </div>
+      <span class="msg">{{ countdown > 0 ? math.ceil(countdown) : 'GO!' }}</span>
+    </div>
+
+    <div class="overlay finish" *ngIf="gamePhase === 'finished'">
+      <div class="glass-card">
+        <mat-icon class="gold">emoji_events</mat-icon>
+        <h2>P1 FINISH</h2>
+        <p>EMERALDS EARNED: +25</p>
+        <button mat-raised-button class="reboot-btn" (click)="resetGame()">NEXT CIRCUIT</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="telemetry-footer">
+    <div class="monitor">
+      <div class="header">
+        <mat-icon>query_stats</mat-icon>
+        <span>STRUCTURAL INTEGRITY</span>
+      </div>
+      <div class="gauge-box">
+        <div class="gauge-bar"><div class="fill health" [style.width.%]="player?.health || 0"></div></div>
+        <div class="labels"><span>HEALTH</span><span>{{ player?.health || 0 }}%</span></div>
+      </div>
+    </div>
+
+    <div class="monitor">
+      <div class="header">
+        <mat-icon>speed</mat-icon>
+        <span>TYRE WEAR</span>
+      </div>
+      <div class="gauge-box">
+        <div class="gauge-bar"><div class="fill tires" [style.width.%]="(player?.tireWear || 0) * 100"></div></div>
+        <div class="labels"><span>SURFACE WEAR</span><span>{{ math.round((player?.tireWear || 0) * 100) }}%</span></div>
+      </div>
+    </div>
+
+    <div class="strategy-comms">
+       <div class="comms-box">
+          <div class="tag">RADIO</div>
+          <div class="text">RACE FOR THE EMERALDS</div>
+       </div>
+    </div>
+  </div>
+</div>
