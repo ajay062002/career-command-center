@@ -62,11 +62,11 @@ $mc-dark-theme: mat.define-dark-theme((
   --mc-sand:      #FFCC44;   // BRIGHT sand/gold
 
   // ── Minecraft GUI backgrounds — warm stone, visibly bright ──
-  --mc-void:      #2E2A1E;   // warm dark background
-  --mc-obsidian:  #38332A;   // main bg — warm brown stone
-  --mc-stone:     #4A4436;   // panel bg — polished stone
-  --mc-cobble:    #5C5446;   // card bg — cobblestone BRIGHT
-  --mc-gui:       #706050;   // raised surface — bright warm stone
+  --mc-void:      #2E2A1E;   // warm dark background (body)
+  --mc-obsidian:  #3E3828;   // main bg — warm brown stone
+  --mc-stone:     #5C5446;   // panel bg — polished stone
+  --mc-cobble:    #786856;   // card bg — cobblestone BRIGHT
+  --mc-gui:       #9A8A70;   // raised surface — bright warm stone
 
   // ── Bright MC GUI border system ──
   --mc-border-outer: #000000;
@@ -188,8 +188,8 @@ a { text-decoration: none; }
 // ── Block Card (used by feature components) ───────────────────────────────────
 .block-card, .glass-card {
   background: var(--mc-cobble);
-  border: 2px solid #000;
-  box-shadow: var(--panel-shadow), 0 4px 0 rgba(0,0,0,0.5);
+  border: 3px solid #000;
+  box-shadow: inset -3px -3px 0 rgba(0,0,0,0.6), inset 3px 3px 0 rgba(255,240,180,0.5), 0 4px 0 rgba(0,0,0,0.6);
   border-radius: 0;
   transition: var(--t-normal);
 
@@ -240,12 +240,53 @@ a { text-decoration: none; }
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+// ── Minecraft Block Spawn — panels drop into place ───────────────────────────
+@keyframes mc-block-drop {
+  0%   { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  60%  { transform: translateY(4px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+// ── Minecraft XP counter pop ─────────────────────────────────────────────────
+@keyframes mc-num-pop {
+  0%   { opacity: 0; transform: scale(0.6); }
+  70%  { transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+// ── Enchant glow pulse ────────────────────────────────────────────────────────
+@keyframes mc-enchant-pulse {
+  0%,100% { text-shadow: 0 0 6px var(--mc-purple), 2px 2px 0 rgba(0,0,0,0.9); }
+  50%     { text-shadow: 0 0 18px var(--mc-purple), 0 0 30px rgba(170,68,255,0.5), 2px 2px 0 rgba(0,0,0,0.9); }
+}
+// ── Diamond shimmer on stat numbers ──────────────────────────────────────────
+@keyframes mc-diamond-shimmer {
+  0%,100% { color: var(--mc-diamond); }
+  50%     { color: #88F8FF; text-shadow: 0 0 12px rgba(68,232,255,0.7); }
+}
+// ── Gold pulse on key stats ───────────────────────────────────────────────────
+@keyframes mc-gold-pulse {
+  0%,100% { color: var(--mc-gold); }
+  50%     { color: #FFE860; text-shadow: 0 0 10px rgba(255,208,32,0.6); }
+}
+// ── Slide in from right ───────────────────────────────────────────────────────
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+// ── Pixel scan — scanline wipe reveals content ────────────────────────────────
+@keyframes mc-scan-reveal {
+  0%   { clip-path: inset(0 100% 0 0); }
+  100% { clip-path: inset(0 0% 0 0); }
+}
 
-.fade-in-up    { animation: fadeInUp    0.4s ease both; }
-.fade-in       { animation: fadeIn      0.3s ease both; }
-.slide-in-left { animation: slideInLeft 0.35s ease both; }
+.fade-in-up      { animation: fadeInUp      0.4s ease both; }
+.fade-in         { animation: fadeIn        0.3s ease both; }
+.slide-in-left   { animation: slideInLeft   0.35s ease both; }
+.slide-in-right  { animation: slideInRight  0.35s ease both; }
+.mc-block-drop   { animation: mc-block-drop 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+.mc-num-pop      { animation: mc-num-pop    0.5s cubic-bezier(0.22,1,0.36,1) both; }
+.mc-scan         { animation: mc-scan-reveal 0.5s ease both; }
 
-@for $i from 1 through 12 {
+@for $i from 1 through 16 {
   .stagger-#{$i} { animation-delay: #{$i * 60}ms; }
 }
 
@@ -267,9 +308,9 @@ a { text-decoration: none; }
 
 // ── Material Card ─────────────────────────────────────────────────────────────
 .mat-mdc-card {
-  background: #5C5446 !important;
+  background: #786856 !important;
   border: 2px solid #000 !important;
-  box-shadow: inset -2px -2px 0 rgba(0,0,0,0.65), inset 2px 2px 0 rgba(255,240,180,0.45) !important;
+  box-shadow: inset -3px -3px 0 rgba(0,0,0,0.6), inset 3px 3px 0 rgba(255,240,180,0.5) !important;
   border-radius: 0 !important;
 }
 

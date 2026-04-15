@@ -245,37 +245,57 @@ class AutomationViewSet(viewsets.ViewSet):
 
         import re as _re
 
-        # Aggressively extract job title from JD — 8 patterns, first wins
+        # Aggressively extract job title from JD — multi-strategy, first-wins
         title_hint = ''
-        _ROLE_WORDS = r'(?:Developer|Engineer|Architect|Lead|Manager|Analyst|Specialist|Consultant|Designer|Scientist|Administrator|Director|Programmer|Technician)'
-        _title_patterns = [
-            # Explicit label: "Job Title: / Opening: / Opportunity:"
-            r'(?:job title|position title|opening|opportunity)[:\s]+([^\n|,]{4,70})',
-            # "Role: ..." or "Position: ..." at line start
-            r'^(?:role|position|title)[:\s]+([^\n]{4,60})',
-            # "looking for / hiring / seeking / need a <Title>"
-            r'(?:looking for(?: an?)?|hiring(?: an?)?|seeking(?: an?)?|need(?:ing)?(?: an?)?)\s+([A-Za-z][A-Za-z /\-\(\)]{4,60})',
-            # "as a/an <Title>"
-            r'\bas an?\s+([A-Za-z][A-Za-z /\-]{4,60})',
-            # Standalone short line that IS a role title
-            r'^((?:[A-Za-z]+ ){0,4}' + _ROLE_WORDS + r'(?:[A-Za-z /\-]*)?)\s*$',
-            # "for the <Title> position/role"
-            r'for(?: the)?\s+([A-Za-z][A-Za-z /\-]{4,55})\s+(?:position|role|opening)',
-            # Any phrase containing a role word — within first 2500 chars
-            r'([A-Za-z][A-Za-z /\-]{2,50}\s+' + _ROLE_WORDS + r')',
-            # Last resort: first non-empty line under 80 chars containing a role word
-            r'^(.{5,79}' + _ROLE_WORDS + r'.{0,30})$',
-        ]
-        for _pat in _title_patterns:
-            _m = _re.search(_pat, jd_text[:3000], _re.IGNORECASE | _re.MULTILINE)
-            if _m:
-                _raw = _m.group(1).strip().strip('.,;:()')
-                # Strip trailing noise: "with 5+ years", "to join", etc.
-                _raw = _re.split(r'\s+(?:with\b|to join|who\b|that\b|to\b)', _raw, flags=_re.IGNORECASE)[0].strip()
-                _raw = _raw.strip('.,;:()')
-                if 4 < len(_raw) < 75:
-                    title_hint = _raw
+        _ROLE_WORDS = r'(?:Developer|Engineer|Architect|Lead|Manager|Analyst|Specialist|Consultant|Designer|Scientist|Administrator|Director|Programmer|Technician|Coordinator|Intern|Associate)'
+
+        def _clean_title(raw):
+            """Strip noise from a candidate title string."""
+            raw = raw.strip().strip('.,;:()|–—-')
+            # Remove trailing qualifiers: "with 5+ years", "to join our team", etc.
+            raw = _re.split(r'\s+(?:with\b|to join|who\b|that\b|\bto\b|\band\b)', raw, flags=_re.IGNORECASE)[0].strip()
+            raw = raw.strip('.,;:()|–—-')
+            return raw
+
+        # ── STRATEGY 1: scan the first 20 lines for a clean standalone title ──
+        _first_lines = [l.strip() for l in jd_text.splitlines()[:20] if l.strip()]
+        for _line in _first_lines:
+            # Skip obviously non-title lines
+            if len(_line) > 100 or len(_line) < 3:
+                continue
+            if _re.search(r'(?:company|about us|location|salary|benefits|responsibilities|requirements|qualifications|apply|experience|years|bachelor|degree|\$|http)', _line, _re.IGNORECASE):
+                continue
+            # Accept lines that look like a job title (contain role word OR all title-case words)
+            _is_role = bool(_re.search(_ROLE_WORDS, _line, _re.IGNORECASE))
+            _is_title_case = bool(_re.match(r'^([A-Z][a-z]+ ?)+$', _line))
+            if (_is_role or _is_title_case) and 4 < len(_line) < 80:
+                _cand = _clean_title(_line)
+                if 4 < len(_cand) < 75 and not _re.search(r'\d{4}', _cand):
+                    title_hint = _cand
                     break
+
+        # ── STRATEGY 2: explicit label patterns ───────────────────────────────
+        if not title_hint:
+            _label_patterns = [
+                r'(?:job title|position title|opening|opportunity|vacancy)[:\s]+([^\n|,]{4,70})',
+                r'^(?:role|position|title)[:\s]+([^\n]{4,60})',
+                r'(?:we(?:\'re| are) (?:hiring|looking for|seeking))(?: an?| for)?\s+([A-Za-z][A-Za-z /\-\(\)]{4,60})',
+                r'(?:looking for(?: an?)?|hiring(?: an?)?|seeking(?: an?)?|need(?:ing)?(?: an?)?)\s+([A-Za-z][A-Za-z /\-\(\)]{4,60})',
+                r'\bas an?\s+([A-Za-z][A-Za-z /\-]{4,60})',
+                r'for(?: the)?\s+([A-Za-z][A-Za-z /\-]{4,55})\s+(?:position|role|opening)',
+                r'^((?:[A-Za-z]+ ){0,4}' + _ROLE_WORDS + r'(?:[A-Za-z /\-]*)?)\s*$',
+                r'([A-Za-z][A-Za-z /\-]{2,50}\s+' + _ROLE_WORDS + r')',
+                r'^(.{5,79}' + _ROLE_WORDS + r'.{0,30})$',
+            ]
+            for _pat in _label_patterns:
+                _m = _re.search(_pat, jd_text[:3000], _re.IGNORECASE | _re.MULTILINE)
+                if _m:
+                    _raw = _clean_title(_m.group(1))
+                    if 4 < len(_raw) < 75:
+                        title_hint = _raw
+                        break
+
+        print(f"[TitleExtract] hint='{title_hint}' | JD start: {repr(jd_text[:200])}")
 
         # Detect AI/ML/NLP in JD for the 12-reference cap instruction
         has_ai = bool(_re.search(r'\b(AI|ML|machine learning|NLP|LLM|deep learning|neural|GPT)\b',
@@ -402,6 +422,62 @@ Valid JSON only."""
 
     # Endpoints
     # --------------------------------------------------------------------------
+
+    @action(detail=False, methods=['post'], url_path='debug-title')
+    def debug_title(self, request):
+        """POST /api/automation/debug-title/ — returns what title would be extracted from JD text"""
+        jd_text = request.data.get('jd_text', '')
+        if not jd_text:
+            return Response({'error': 'jd_text required'}, status=400)
+        import re as _re
+        _ROLE_WORDS = r'(?:Developer|Engineer|Architect|Lead|Manager|Analyst|Specialist|Consultant|Designer|Scientist|Administrator|Director|Programmer|Technician|Coordinator|Intern|Associate)'
+
+        def _clean_title(raw):
+            raw = raw.strip().strip('.,;:()|–—-')
+            raw = _re.split(r'\s+(?:with\b|to join|who\b|that\b|\bto\b|\band\b)', raw, flags=_re.IGNORECASE)[0].strip()
+            return raw.strip('.,;:()|–—-')
+
+        title_hint = ''
+        strategy_used = ''
+        _first_lines = [l.strip() for l in jd_text.splitlines()[:20] if l.strip()]
+        for _line in _first_lines:
+            if len(_line) > 100 or len(_line) < 3:
+                continue
+            if _re.search(r'(?:company|about us|location|salary|benefits|responsibilities|requirements|qualifications|apply|experience|years|bachelor|degree|\$|http)', _line, _re.IGNORECASE):
+                continue
+            _is_role = bool(_re.search(_ROLE_WORDS, _line, _re.IGNORECASE))
+            _is_title_case = bool(_re.match(r'^([A-Z][a-z]+ ?)+$', _line))
+            if (_is_role or _is_title_case) and 4 < len(_line) < 80:
+                _cand = _clean_title(_line)
+                if 4 < len(_cand) < 75 and not _re.search(r'\d{4}', _cand):
+                    title_hint = _cand
+                    strategy_used = f'strategy1_line:{repr(_line)}'
+                    break
+        if not title_hint:
+            _label_patterns = [
+                (r'(?:job title|position title|opening|opportunity|vacancy)[:\s]+([^\n|,]{4,70})', 'label'),
+                (r'^(?:role|position|title)[:\s]+([^\n]{4,60})', 'role_label'),
+                (r'(?:we(?:\'re| are) (?:hiring|looking for|seeking))(?: an?| for)?\s+([A-Za-z][A-Za-z /\-\(\)]{4,60})', 'we_are_hiring'),
+                (r'(?:looking for(?: an?)?|hiring(?: an?)?|seeking(?: an?)?|need(?:ing)?(?: an?)?)\s+([A-Za-z][A-Za-z /\-\(\)]{4,60})', 'looking_for'),
+                (r'\bas an?\s+([A-Za-z][A-Za-z /\-]{4,60})', 'as_a'),
+                (r'for(?: the)?\s+([A-Za-z][A-Za-z /\-]{4,55})\s+(?:position|role|opening)', 'for_position'),
+                (r'^((?:[A-Za-z]+ ){0,4}' + _ROLE_WORDS + r'(?:[A-Za-z /\-]*)?)\s*$', 'standalone_line'),
+                (r'([A-Za-z][A-Za-z /\-]{2,50}\s+' + _ROLE_WORDS + r')', 'phrase_with_role'),
+                (r'^(.{5,79}' + _ROLE_WORDS + r'.{0,30})$', 'last_resort'),
+            ]
+            for _pat, _name in _label_patterns:
+                _m = _re.search(_pat, jd_text[:3000], _re.IGNORECASE | _re.MULTILINE)
+                if _m:
+                    _raw = _clean_title(_m.group(1))
+                    if 4 < len(_raw) < 75:
+                        title_hint = _raw
+                        strategy_used = f'strategy2_pat:{_name}'
+                        break
+        return Response({
+            'title_hint': title_hint,
+            'strategy': strategy_used,
+            'first_lines': _first_lines[:10],
+        })
 
     @action(detail=False, methods=['get'], url_path='base-content')
     def base_content(self, request):

@@ -241,14 +241,15 @@
   padding: 16px 16px 14px;
   cursor: pointer;
   overflow: hidden;
-  // Minecraft inventory panel borders
-  background: #232830;
-  border: 2px solid #000;
+  // Minecraft inventory panel borders — bright warm stone
+  background: #706050;
+  border: 3px solid #000;
   box-shadow:
-    inset -2px -2px 0 rgba(0,0,0,0.7),
-    inset 2px 2px 0 rgba(255,240,180,0.40),
-    0 4px 0 rgba(0,0,0,0.7);
+    inset -3px -3px 0 rgba(0,0,0,0.65),
+    inset 3px 3px 0 rgba(255,240,180,0.55),
+    0 5px 0 rgba(0,0,0,0.75);
   transition: all 0.12s ease;
+  animation: mc-block-drop 0.45s cubic-bezier(0.22,1,0.36,1) both;
 
   &:hover {
     transform: translateY(-3px);
@@ -300,7 +301,7 @@
   margin-bottom: 8px;
   line-height: 1.2;
   text-shadow: 3px 3px 0 rgba(0,0,0,0.8);
-  animation: countUp 0.4s both;
+  animation: mc-num-pop 0.5s cubic-bezier(0.22,1,0.36,1) both;
 }
 
 @keyframes countUp {
@@ -386,20 +387,21 @@
 
 // Chart card — Minecraft enchantment table / book panel style
 .chart-card {
-  background: #4A4438;
-  border: 2px solid #000;
+  background: #786856;
+  border: 3px solid #000;
   box-shadow:
-    inset -2px -2px 0 rgba(0,0,0,0.7),
-    inset 2px 2px 0 rgba(150,160,175,0.15),
-    0 4px 0 rgba(0,0,0,0.6);
+    inset -3px -3px 0 rgba(0,0,0,0.65),
+    inset 3px 3px 0 rgba(255,240,180,0.5),
+    0 5px 0 rgba(0,0,0,0.7);
   padding: 20px 20px 16px;
   transition: all 0.12s ease;
+  animation: mc-block-drop 0.45s cubic-bezier(0.22,1,0.36,1) both;
 
   &:hover {
     box-shadow:
-      inset -2px -2px 0 rgba(0,0,0,0.7),
-      inset 2px 2px 0 rgba(255,240,180,0.40),
-      0 6px 0 rgba(0,0,0,0.6);
+      inset -3px -3px 0 rgba(0,0,0,0.65),
+      inset 3px 3px 0 rgba(255,240,180,0.6),
+      0 7px 0 rgba(0,0,0,0.7);
   }
 }
 
@@ -463,13 +465,15 @@
 // ── Quick Actions — Minecraft Hotbar ──────────────────────────────────────────
 // The iconic 9-slot hotbar at the bottom
 .quick-actions {
-  background: #1a1c22;
-  border: 2px solid #000;
+  background: #706050;
+  border: 3px solid #000;
   box-shadow:
-    inset -2px -2px 0 rgba(0,0,0,0.7),
-    inset 2px 2px 0 rgba(150,160,175,0.15),
-    0 4px 0 rgba(0,0,0,0.6);
+    inset -3px -3px 0 rgba(0,0,0,0.65),
+    inset 3px 3px 0 rgba(255,240,180,0.5),
+    0 5px 0 rgba(0,0,0,0.7);
   padding: 16px 20px;
+  animation: mc-block-drop 0.45s cubic-bezier(0.22,1,0.36,1) both;
+  animation-delay: 480ms;
 }
 
 .quick-actions__title {
@@ -556,6 +560,31 @@
   }
 }
 
+// ── Stat card stagger — each card drops in with increasing delay ───────────────
+.stats-grid .stat-card:nth-child(1)  { animation-delay: 0ms;   }
+.stats-grid .stat-card:nth-child(2)  { animation-delay: 60ms;  }
+.stats-grid .stat-card:nth-child(3)  { animation-delay: 120ms; }
+.stats-grid .stat-card:nth-child(4)  { animation-delay: 180ms; }
+.stats-grid .stat-card:nth-child(5)  { animation-delay: 240ms; }
+.stats-grid .stat-card:nth-child(6)  { animation-delay: 300ms; }
+.stats-grid .stat-card:nth-child(7)  { animation-delay: 360ms; }
+.stats-grid .stat-card:nth-child(8)  { animation-delay: 420ms; }
+
+// Stat value pops in after its card
+.stats-grid .stat-card:nth-child(1) .stat-card__value  { animation-delay: 80ms;  }
+.stats-grid .stat-card:nth-child(2) .stat-card__value  { animation-delay: 140ms; }
+.stats-grid .stat-card:nth-child(3) .stat-card__value  { animation-delay: 200ms; }
+.stats-grid .stat-card:nth-child(4) .stat-card__value  { animation-delay: 260ms; }
+.stats-grid .stat-card:nth-child(5) .stat-card__value  { animation-delay: 320ms; }
+.stats-grid .stat-card:nth-child(6) .stat-card__value  { animation-delay: 380ms; }
+.stats-grid .stat-card:nth-child(7) .stat-card__value  { animation-delay: 440ms; }
+.stats-grid .stat-card:nth-child(8) .stat-card__value  { animation-delay: 500ms; }
+
+// Chart cards stagger
+.charts-row .chart-card:nth-child(1) { animation-delay: 180ms; }
+.charts-row .chart-card:nth-child(2) { animation-delay: 280ms; }
+.charts-row .chart-card:nth-child(3) { animation-delay: 380ms; }
+
 // ── Animations ────────────────────────────────────────────────────────────────
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(10px); }
@@ -563,9 +592,6 @@
 }
 
 .fade-in-up { animation: fadeInUp 0.4s ease both; }
-.stagger-1  { animation-delay: 60ms; }
-.stagger-2  { animation-delay: 120ms; }
-.stagger-3  { animation-delay: 180ms; }
 
 // ── Mobile ────────────────────────────────────────────────────────────────────
 @media (max-width: 768px) {
