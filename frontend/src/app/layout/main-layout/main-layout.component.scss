@@ -360,6 +360,10 @@
 // ── Main Content ──────────────────────────────────────────────────────────────
 // Matches the login page background exactly: sky → grass stripe → dirt → void
 .main-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 100%;
   background:
     linear-gradient(180deg,
       #5BA4CF  0%,
