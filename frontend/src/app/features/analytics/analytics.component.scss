@@ -60,7 +60,7 @@
     padding: 48px;
     justify-content: center;
     color: rgba(255,255,255,0.5);
-    background: #786856;
+    background: #3A3628;
     border: 2px solid #7A6855;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40));
     font-family: 'Press Start 2P', monospace;
@@ -74,7 +74,7 @@
 
 /* ── KPI Strip ───────────────────────────────────────── */
 .kpi-strip {
-    background: #786856;
+    background: #3A3628;
     border: 2px solid #7A6855;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
@@ -132,7 +132,7 @@
 }
 
 .chart-card {
-    background: #786856 !important;
+    background: #3A3628 !important;
     border: 2px solid #7A6855 !important;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6) !important;
@@ -194,7 +194,7 @@
 
 /* ── Vendor Table ────────────────────────────────────── */
 .table-card {
-    background: #786856 !important;
+    background: #3A3628 !important;
     border: 2px solid #7A6855 !important;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6) !important;
@@ -228,7 +228,7 @@
     font-weight: 400 !important;
     color: var(--mc-diamond,#44E8FF) !important;
     text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important;
-    background: #4A3C2E !important;
+    background: #3A3628 !important;
     letter-spacing: 0 !important;
     text-transform: uppercase;
     padding: 14px 16px !important;

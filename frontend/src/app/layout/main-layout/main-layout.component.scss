@@ -2,13 +2,13 @@
 // Looks like a Minecraft inventory title bar
 .main-toolbar {
   height: 56px;
-  background: #5C5040 !important;
-  border-bottom: 3px solid #000 !important;
-  // Classic MC 3D bottom edge
+  background: #3A3628 !important;
+  border-bottom: 4px solid #000 !important;
+  // Classic MC 3D bottom edge — matches login card depth
   box-shadow:
-    inset 0 -3px 0 rgba(0,0,0,0.7),
-    inset 0 3px 0 rgba(255,240,180,0.25),
-    0 3px 0 rgba(0,0,0,0.9) !important;
+    inset 0 -4px 0 rgba(0,0,0,0.7),
+    inset 0 4px 0 rgba(255,240,180,0.25),
+    0 4px 0 rgba(0,0,0,0.95) !important;
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -167,9 +167,17 @@
 }
 
 // ── Sidenav Container ─────────────────────────────────────────────────────────
+// Background matches the login page: sky → grass → stone → void gradient
+// with the alive particle layer sitting on top of it
 .sidenav-container {
   height: calc(100vh - 56px);
-  background-color: #2E2A1E;
+  background:
+    linear-gradient(180deg,
+      #1A3A5C  0%,
+      #1E3A5C  8%,
+      #2E2A1E 22%,
+      #2E2A1E 100%
+    );
   position: relative;
   overflow: hidden;
 }
@@ -398,12 +406,12 @@
 // Styled as the Minecraft inventory side panel
 .sidenav {
   width: 252px;
-  background: #5C5040 !important;
-  border-right: 3px solid #000 !important;
-  // 3D panel effect — right side shadow, left side highlight
+  background: #3A3628 !important;
+  border-right: 4px solid #000 !important;
+  // 3D panel — same depth as login card
   box-shadow:
-    inset -3px 0 0 rgba(0,0,0,0.7),
-    inset 3px 0 0 rgba(255,240,180,0.2) !important;
+    inset -4px 0 0 rgba(0,0,0,0.7),
+    inset 4px 0 0 rgba(255,240,180,0.25) !important;
   display: flex;
   flex-direction: column;
   overflow: hidden;

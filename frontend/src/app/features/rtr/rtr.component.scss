@@ -83,7 +83,7 @@
 
 /* ── Form Panel ──────────────────────────────────────── */
 .form-panel {
-    background: #786856;
+    background: #3A3628;
     border: 2px solid #7A6855;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
@@ -168,7 +168,7 @@
 
 /* ── Table View ──────────────────────────────────────── */
 .table-container {
-    background: #786856;
+    background: #3A3628;
     border: 2px solid #7A6855;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
@@ -180,7 +180,7 @@
         background: transparent !important;
 
         th {
-            background: #4A3C2E;
+            background: #3A3628;
             color: var(--mc-xp,#A0FF28) !important;
             font-family: 'Press Start 2P', monospace !important;
             font-size: 0.42rem !important;
@@ -203,7 +203,7 @@
 
 /* ── Vendor Groups ───────────────────────────────────── */
 .vendor-group {
-    background: #786856;
+    background: #3A3628;
     border: 2px solid #7A6855;
     box-shadow: var(--panel-shadow, inset -2px -2px 0 rgba(0,0,0,0.7), inset 2px 2px 0 rgba(255,240,180,0.40)),
                 0 4px 0 rgba(0,0,0,0.6);
@@ -213,7 +213,7 @@
 
     .vendor-header {
         padding: 18px 24px;
-        background: #4A3C2E;
+        background: #3A3628;
         display: flex;
         justify-content: space-between;
         align-items: center;

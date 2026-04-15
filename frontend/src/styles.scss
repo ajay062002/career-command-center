@@ -61,12 +61,12 @@ $mc-dark-theme: mat.define-dark-theme((
   --mc-sky:       #88D8FF;   // BRIGHT sky blue
   --mc-sand:      #FFCC44;   // BRIGHT sand/gold
 
-  // ── Minecraft GUI backgrounds — warm stone, visibly bright ──
+  // ── Minecraft GUI backgrounds — dark MC wood/stone like login card ──
   --mc-void:      #2E2A1E;   // warm dark background (body)
-  --mc-obsidian:  #3E3828;   // main bg — warm brown stone
-  --mc-stone:     #5C5446;   // panel bg — polished stone
-  --mc-cobble:    #786856;   // card bg — cobblestone BRIGHT
-  --mc-gui:       #9A8A70;   // raised surface — bright warm stone
+  --mc-obsidian:  #38332A;   // main bg — warm brown stone
+  --mc-stone:     #4A4236;   // panel bg — polished stone
+  --mc-cobble:    #3A3628;   // card bg — MC wood plank (matches login card)
+  --mc-gui:       #5C5040;   // raised surface — bright warm stone
 
   // ── Bright MC GUI border system ──
   --mc-border-outer: #000000;
@@ -187,9 +187,12 @@ a { text-decoration: none; }
 
 // ── Block Card (used by feature components) ───────────────────────────────────
 .block-card, .glass-card {
-  background: var(--mc-cobble);
-  border: 3px solid #000;
-  box-shadow: inset -3px -3px 0 rgba(0,0,0,0.6), inset 3px 3px 0 rgba(255,240,180,0.5), 0 4px 0 rgba(0,0,0,0.6);
+  background: #3A3628;
+  border: 4px solid #000;
+  box-shadow:
+    inset -4px -4px 0 rgba(0,0,0,0.7),
+    inset 4px 4px 0 rgba(255,240,180,0.35),
+    0 8px 0 rgba(0,0,0,0.9);
   border-radius: 0;
   transition: var(--t-normal);
 
@@ -306,11 +309,14 @@ a { text-decoration: none; }
   z-index: 1000;
 }
 
-// ── Material Card ─────────────────────────────────────────────────────────────
+// ── Material Card — matches login card: dark MC wood, deep 3D shadows ─────────
 .mat-mdc-card {
-  background: #786856 !important;
-  border: 2px solid #000 !important;
-  box-shadow: inset -3px -3px 0 rgba(0,0,0,0.6), inset 3px 3px 0 rgba(255,240,180,0.5) !important;
+  background: #3A3628 !important;
+  border: 4px solid #000 !important;
+  box-shadow:
+    inset -4px -4px 0 rgba(0,0,0,0.7),
+    inset 4px 4px 0 rgba(255,240,180,0.35),
+    0 8px 0 rgba(0,0,0,0.9) !important;
   border-radius: 0 !important;
 }
 
@@ -524,7 +530,39 @@ a { text-decoration: none; }
   padding: 32px;
   max-width: 1400px;
   margin: 0 auto;
-  animation: fadeInUp 0.4s both;
+  animation: mc-block-drop 0.4s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+// ── MC Section Wrapper — wraps every section page with login-card aesthetics ──
+// Gives each section the same "inventory panel" feel as the login card
+.mc-section-panel {
+  background: #3A3628;
+  border: 4px solid #000;
+  box-shadow:
+    inset -4px -4px 0 rgba(0,0,0,0.7),
+    inset 4px 4px 0 rgba(255,240,180,0.35),
+    0 8px 0 rgba(0,0,0,0.9);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+// ── MC Table Panel (for all data tables in sections) ──────────────────────────
+.mc-table-panel {
+  background: #3A3628;
+  border: 4px solid #000;
+  box-shadow:
+    inset -4px -4px 0 rgba(0,0,0,0.7),
+    inset 4px 4px 0 rgba(255,240,180,0.35),
+    0 8px 0 rgba(0,0,0,0.9);
+  overflow: hidden;
+}
+
+// ── MC Input slot — all form fields across sections ───────────────────────────
+.mc-input-slot {
+  background: #282420 !important;
+  border: 2px solid #7A6855 !important;
+  border-radius: 0 !important;
+  box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5) !important;
 }
 
 // ── Page Header ───────────────────────────────────────────────────────────────
