@@ -51,13 +51,6 @@
 
 <mat-sidenav-container class="sidenav-container">
 
-  <!-- ── Alive Minecraft Background ───────────────────────────────────── -->
-  <div class="mc-alive-bg" aria-hidden="true">
-    <div class="mc-bg-layer mc-bg-layer--orbs"></div>
-    <div class="mc-bg-layer mc-bg-layer--blocks"></div>
-    <div class="mc-bg-layer mc-bg-layer--stars"></div>
-  </div>
-
   <mat-sidenav #sidenav [mode]="sidenavMode" [opened]="sidenavOpened" class="sidenav">
 
     <!-- Nav Sections -->
@@ -170,6 +163,12 @@
   </mat-sidenav>
 
   <mat-sidenav-content class="main-content">
+    <!-- ── Alive Minecraft Background (inside content, not sidenav-container) -->
+    <div class="mc-alive-bg" aria-hidden="true">
+      <div class="mc-bg-layer mc-bg-layer--orbs"></div>
+      <div class="mc-bg-layer mc-bg-layer--blocks"></div>
+      <div class="mc-bg-layer mc-bg-layer--stars"></div>
+    </div>
     <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>
