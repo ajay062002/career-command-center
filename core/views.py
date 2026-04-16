@@ -944,8 +944,32 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if not self.request.user.is_authenticated:
             return models.User.objects.none()
+        if self.request.user.role == 'ROLE_ADMIN':
+            return models.User.objects.all()
         return models.User.objects.filter(id=self.request.user.id)
 
+    @action(detail=True, methods=['post'], url_path='change-password')
+    def change_password(self, request, pk=None):
+        if request.user.role != 'ROLE_ADMIN':
+            return Response({'detail': 'Admin only'}, status=status.HTTP_403_FORBIDDEN)
+        user = self.get_object()
+        new_password = request.data.get('new_password', '')
+        if not new_password or len(new_password) < 6:
+            return Response({'detail': 'Password must be at least 6 characters'}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
+        return Response({'detail': f'Password updated for {user.username}'})
+
+    @action(detail=True, methods=['put', 'patch'], url_path='toggle_role')
+    def toggle_role(self, request, pk=None):
+        if request.user.role != 'ROLE_ADMIN':
+            return Response({'detail': 'Admin only'}, status=status.HTTP_403_FORBIDDEN)
+        user = self.get_object()
+        if user.id == request.user.id:
+            return Response({'detail': 'Cannot change own role'}, status=status.HTTP_400_BAD_REQUEST)
+        user.role = 'ROLE_ADMIN' if user.role == 'ROLE_USER' else 'ROLE_USER'
+        user.save()
+        return Response(UserSerializer(user).data)
 
 class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
