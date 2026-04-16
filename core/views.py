@@ -339,25 +339,38 @@ STRICT RULES:
    - NEVER default to "Senior Full Stack Developer" unless the JD says EXACTLY that
    - NEVER invent or paraphrase — only copy
 
-6. TECH FOCUS — emphasize these when present in JD:
-   - Backend development (Java, Spring Boot)
-   - Microservices architecture
-   - REST API design and GraphQL
-   - Cloud (AWS preferred, Azure/GCP if in JD)
-   - Distributed systems and event-driven architecture
-   - CI/CD pipelines, Docker, Kubernetes
-   - Apache Kafka (if present in JD)
-   - Spring Security, OAuth2, JWT
+6. TECH FOCUS — scan the JD and emphasize EVERY technology, tool, framework, language, platform, and methodology mentioned:
+   - Extract ALL technical terms from the JD — do not skip any
+   - The following are baseline defaults to include if relevant: Java, Spring Boot, Microservices, REST API, GraphQL, AWS, Azure, GCP, CI/CD, Docker, Kubernetes, Kafka, Spring Security, OAuth2, JWT
+   - Any additional tools in the JD (e.g. Terraform, Helm, Redis, Postgres, Angular, React, Python, Node, Spark, Hadoop, Snowflake, etc.) must also be woven into TD and CH bullets naturally
+   - Never limit to only the default list — the JD is the primary source
 
-7. AI/ML/NLP:
+7. ★★★ KEYWORD FREQUENCY — MANDATORY COUNT RULE ★★★
+   - Identify the TOP 3 primary technologies from the JD (e.g. the language, the main framework, the cloud platform)
+   - Each of those TOP 3 keywords MUST appear AT LEAST 7 times across the 36 TD bullets
+   - Each of those TOP 3 keywords MUST appear AT LEAST 9 times across the 36 CH bullets
+   - Secondary JD keywords must appear at least 5 times each across each section
+   - Count carefully — do NOT fall short of these minimums
+   - Spread occurrences naturally — no point should repeat the same keyword more than twice
+
+8. AI/ML/NLP:
    {'- JD MENTIONS AI/ML/NLP — include up to 12 references naturally across TD and CH combined. Do not exceed 12.' if has_ai else '- JD does not mention AI/ML — do not add AI/ML content.'}
 
-8. ENVIRONMENT BLOCKS:
-   - TD_ENV: comma-separated tech stack for TD Bank role — include every tool from the JD plus standard Java enterprise stack
-   - CH_ENV: same format for Cardinal Health role — healthcare-specific tools plus JD stack
-   - Both must be comprehensive, not minimal
+9. ENVIRONMENT BLOCKS:
+   - TD_ENV: Start with the existing tools already in the base content TD environment, then ADD every tool/technology/platform found in the JD that is not already present. Result must be a comprehensive comma-separated list covering the full stack.
+   - CH_ENV: Start with the existing tools already in the base content CH environment, then ADD every tool/technology/platform found in the JD that is not already present. Result must be a comprehensive comma-separated list covering the full stack.
+   - Do NOT produce a minimal list — every relevant tool from both the base resume AND the JD must appear
 
-9. OUTPUT FORMAT — STRICT JSON, no markdown, no explanation, no extra text:
+10. ★★★ TITLE EXTRACTION — MANDATORY (VIOLATION = REJECT OUTPUT) ★★★
+    {'★ PRE-EXTRACTED TITLE = "' + title_hint + '" ★ — Use this EXACTLY as-is in the TITLE field. Do NOT rephrase, shorten, expand, or change capitalisation. This is the exact string the employer posted.' if title_hint else '★ NO PRE-EXTRACTION — You MUST scan the JD now and find the exact job title string the employer posted. Look for: lines starting with "Title:", "Position:", "Role:", "Job Title:", "We are hiring a ...", or the very first short standalone line. Copy the title word-for-word.'}
+    - TITLE = the EXACT job title string from the JD (copy-paste, not paraphrase)
+    - TITLE2 = same string, optionally remove "Senior" prefix only if it reads more cleanly as a standalone label
+    - If the JD title is "Java Developer" → TITLE = "Java Developer", TITLE2 = "Java Developer"
+    - If the JD title is "Senior Software Engineer" → TITLE = "Senior Software Engineer", TITLE2 = "Software Engineer"
+    - NEVER default to "Senior Full Stack Developer" or any generic title unless the JD says those exact words
+    - NEVER invent, combine, or paraphrase — only what the JD explicitly states
+
+11. OUTPUT FORMAT — STRICT JSON, no markdown, no explanation, no extra text:
    Return ONLY this structure:
    {{
      "TITLE": "<exact job title from JD>",
@@ -370,7 +383,7 @@ STRICT RULES:
      "KEYWORDS": ["keyword1", "keyword2", "... 8-12 items"]
    }}
 
-10. DO NOT:
+12. DO NOT:
     - Add explanations or commentary outside the JSON
     - Add extra sections beyond what is listed above
     - Break the JSON format
