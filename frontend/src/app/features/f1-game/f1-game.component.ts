@@ -97,9 +97,27 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   }
 
   private buildScene() {
-    // Clear existing meshes
+    // Clear existing meshes to prevent WebGL memory leaks on track change
     while(this.scene.children.length > 2) { 
-      this.scene.remove(this.scene.children[2]); 
+      const obj = this.scene.children[2] as any;
+      
+      // Traverse group meshes and release geometry/material from GPU
+      if (obj.traverse) {
+        obj.traverse((child: any) => {
+          if (child.geometry) {
+            child.geometry.dispose();
+          }
+          if (child.material) {
+            if (Array.isArray(child.material)) {
+              child.material.forEach((m: any) => m.dispose());
+            } else {
+              child.material.dispose();
+            }
+          }
+        });
+      }
+      
+      this.scene.remove(obj); 
     }
 
     // Lego Floor Baseplate
@@ -235,7 +253,7 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     const track = this.tracks[this.currentTrackIndex];
     this.player = {
       id: 0, x: track.waypoints[0].x, y: track.waypoints[0].y, angle: 0, speed: 0, lap: 0,
-      steeringAngle: 0, tireWear: 1.0, health: 100
+      steeringAngle: 0, tireWear: 1.0, health: 100, targetWP: 1
     };
     this.aiCars = this.teams.slice(1).map((team, i) => ({
       id: i + 1, x: track.waypoints[0].x - 60, y: track.waypoints[0].y + (i+1)*40, 
@@ -276,20 +294,54 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     this.checkCollisions();
   }
 
+  private checkWaypoint(car: any) {
+    const track = this.tracks[this.currentTrackIndex];
+    if (car.targetWP !== undefined) {
+      const target = track.waypoints[car.targetWP];
+      const dx = target.x - car.x, dy = target.y - car.y;
+      if (Math.sqrt(dx*dx + dy*dy) < 180) {
+        car.targetWP = (car.targetWP + 1) % track.waypoints.length;
+        if (car.targetWP === 1) {
+          car.lap++;
+          if (car.id === 0 && car.lap >= this.totalLaps) {
+            this.gamePhase = 'finished';
+          }
+        }
+      }
+    }
+  }
+
   private updateCar(car: any, input: any, dt: number) {
-    const accel = 600, friction = 0.98, turn = 3.5;
+    const isDestroyed = car.health <= 0;
+    const accel = isDestroyed ? 0 : 600;
+    const friction = 0.98;
+    const turn = isDestroyed ? 0 : 3.5;
+
     if (input.ArrowUp || input.w) car.speed += accel * dt;
     if (input.ArrowDown || input.s) car.speed -= accel * dt * 0.7;
     car.speed *= friction;
+    
+    if (isDestroyed) car.speed *= 0.9; // quickly halt if destroyed
+
     if (Math.abs(car.speed) > 10) {
       if (input.ArrowLeft || input.a) car.angle -= turn * dt * (car.speed / 400);
       if (input.ArrowRight || input.d) car.angle += turn * dt * (car.speed / 400);
     }
+    
     const nextX = car.x + Math.cos(car.angle) * car.speed * dt;
     const nextY = car.y + Math.sin(car.angle) * car.speed * dt;
-    if (this.onTrack(nextX, nextY)) { car.x = nextX; car.y = nextY; }
-    else { car.speed *= -0.5; car.health -= 2; }
+    if (this.onTrack(nextX, nextY)) { 
+      car.x = nextX; car.y = nextY; 
+    } else { 
+      car.speed *= -0.5; 
+      car.health -= 5;
+    }
+    
+    car.health = Math.max(0, car.health);
     car.tireWear -= Math.abs(car.speed) * 0.000005;
+    car.tireWear = Math.max(0, car.tireWear);
+
+    this.checkWaypoint(car);
   }
 
   private onTrack(x: number, y: number): boolean {
@@ -304,7 +356,9 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     const track = this.tracks[this.currentTrackIndex];
     const target = track.waypoints[car.targetWP];
     const dx = target.x - car.x, dy = target.y - car.y;
-    if (Math.sqrt(dx*dx+dy*dy) < 120) car.targetWP = (car.targetWP + 1) % track.waypoints.length;
+    
+    this.checkWaypoint(car);
+    
     car.angle += (Math.atan2(dy, dx) - car.angle) * 3 * dt;
     car.speed = 340;
     car.x += Math.cos(car.angle)*car.speed*dt;

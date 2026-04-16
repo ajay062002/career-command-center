@@ -305,6 +305,13 @@ class AutomationViewSet(viewsets.ViewSet):
         # Claude must derive TITLE solely from the JD — the existing title biases the output.
         base_for_prompt = {k: v for k, v in base_content.items() if k not in ('TITLE', 'TITLE2')}
 
+        # Capture current ENV values to inject explicitly into the prompt
+        current_td_env = base_content.get('TD_ENV', '')
+        current_ch_env = base_content.get('CH_ENV', '')
+
+        # First 8 lines of JD for title hint context
+        jd_first_lines = '\n'.join([l.strip() for l in jd_text.splitlines()[:8] if l.strip()])
+
         prompt = f"""Act as a senior resume writer and ATS optimization expert.
 
 Generate a highly tailored resume in JSON format based on the given Job Description (JD).
@@ -352,19 +359,27 @@ STRICT RULES:
 8. AI/ML/NLP:
    {'- JD MENTIONS AI/ML/NLP — include up to 12 references naturally across TD and CH combined. Do not exceed 12.' if has_ai else '- JD does not mention AI/ML — do not add AI/ML content.'}
 
-9. ENVIRONMENT BLOCKS:
-   - TD_ENV: Start with the existing tools already in the base content TD environment, then ADD every tool/technology/platform found in the JD that is not already present. Result must be a comprehensive comma-separated list covering the full stack.
-   - CH_ENV: Start with the existing tools already in the base content CH environment, then ADD every tool/technology/platform found in the JD that is not already present. Result must be a comprehensive comma-separated list covering the full stack.
-   - Do NOT produce a minimal list — every relevant tool from both the base resume AND the JD must appear
+9. ★★★ ENVIRONMENT BLOCKS — BUILD ON EXISTING, ADD FROM JD ★★★
+   CURRENT TD_ENV (you MUST keep ALL of these, then append JD tools):
+   {current_td_env}
+
+   CURRENT CH_ENV (you MUST keep ALL of these, then append JD tools):
+   {current_ch_env}
+
+   - TD_ENV output = everything in CURRENT TD_ENV above + every additional tool/technology/platform/language found in the JD not already listed
+   - CH_ENV output = everything in CURRENT CH_ENV above + every additional tool/technology/platform/language found in the JD not already listed
+   - Do NOT drop any tool from the current list — only ADD, never remove
+   - Result must be a long comprehensive comma-separated list, not a short minimal one
 
 10. ★★★ TITLE EXTRACTION — MANDATORY (VIOLATION = REJECT OUTPUT) ★★★
-    {'★ PRE-EXTRACTED TITLE = "' + title_hint + '" ★ — Use this EXACTLY as-is in the TITLE field. Do NOT rephrase, shorten, expand, or change capitalisation. This is the exact string the employer posted.' if title_hint else '★ NO PRE-EXTRACTION — You MUST scan the JD now and find the exact job title string the employer posted. Look for: lines starting with "Title:", "Position:", "Role:", "Job Title:", "We are hiring a ...", or the very first short standalone line. Copy the title word-for-word.'}
-    - TITLE = the EXACT job title string from the JD (copy-paste, not paraphrase)
+    {'★★ PRE-EXTRACTED TITLE = "' + title_hint + '" ★★ — Copy this string EXACTLY into the TITLE field. Do NOT rephrase, shorten, expand, or change capitalisation. This is the exact string the employer posted.' if title_hint else f'★★ NO PRE-EXTRACTION — Read these first lines of the JD carefully and find the job title:\\n{jd_first_lines}\\n\\nLook for: a short standalone line, or a line after "Title:", "Position:", "Role:", "Job Title:", "We are hiring", "Looking for". Copy the title word-for-word from the JD.'}
+    - TITLE = the EXACT job title string from the JD — backend role → backend title, frontend role → frontend title, fullstack → fullstack
     - TITLE2 = same string, optionally remove "Senior" prefix only if it reads more cleanly as a standalone label
-    - If the JD title is "Java Developer" → TITLE = "Java Developer", TITLE2 = "Java Developer"
-    - If the JD title is "Senior Software Engineer" → TITLE = "Senior Software Engineer", TITLE2 = "Software Engineer"
-    - NEVER default to "Senior Full Stack Developer" or any generic title unless the JD says those exact words
-    - NEVER invent, combine, or paraphrase — only what the JD explicitly states
+    - Examples: "Java Backend Developer" → TITLE="Java Backend Developer", TITLE2="Java Backend Developer"
+                "Senior React Developer" → TITLE="Senior React Developer", TITLE2="React Developer"
+                "Full Stack Engineer" → TITLE="Full Stack Engineer", TITLE2="Full Stack Engineer"
+    - NEVER output "Senior Full Stack Developer" unless those exact words appear in the JD
+    - NEVER invent, guess, or combine — only copy from the JD
 
 11. OUTPUT FORMAT — STRICT JSON, no markdown, no explanation, no extra text:
    Return ONLY this structure:
