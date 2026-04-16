@@ -312,6 +312,17 @@ class AutomationViewSet(viewsets.ViewSet):
         # First 8 lines of JD for title hint context
         jd_first_lines = '\n'.join([l.strip() for l in jd_text.splitlines()[:8] if l.strip()])
 
+        # Pre-compute rule 10 title instruction (avoids backslash-in-fstring syntax error)
+        if title_hint:
+            _title_rule = f'\u2605\u2605 PRE-EXTRACTED TITLE = "{title_hint}" \u2605\u2605 — Copy this string EXACTLY into the TITLE field. Do NOT rephrase, shorten, expand, or change capitalisation. This is the exact string the employer posted.'
+        else:
+            _title_rule = (
+                f'\u2605\u2605 NO PRE-EXTRACTION — Read these first lines of the JD carefully and find the job title:\n'
+                f'{jd_first_lines}\n\n'
+                'Look for: a short standalone line, or a line after "Title:", "Position:", "Role:", "Job Title:", '
+                '"We are hiring", "Looking for". Copy the title word-for-word from the JD.'
+            )
+
         prompt = f"""Act as a senior resume writer and ATS optimization expert.
 
 Generate a highly tailored resume in JSON format based on the given Job Description (JD).
@@ -372,7 +383,7 @@ STRICT RULES:
    - Result must be a long comprehensive comma-separated list, not a short minimal one
 
 10. ★★★ TITLE EXTRACTION — MANDATORY (VIOLATION = REJECT OUTPUT) ★★★
-    {'★★ PRE-EXTRACTED TITLE = "' + title_hint + '" ★★ — Copy this string EXACTLY into the TITLE field. Do NOT rephrase, shorten, expand, or change capitalisation. This is the exact string the employer posted.' if title_hint else f'★★ NO PRE-EXTRACTION — Read these first lines of the JD carefully and find the job title:\\n{jd_first_lines}\\n\\nLook for: a short standalone line, or a line after "Title:", "Position:", "Role:", "Job Title:", "We are hiring", "Looking for". Copy the title word-for-word from the JD.'}
+    {_title_rule}
     - TITLE = the EXACT job title string from the JD — backend role → backend title, frontend role → frontend title, fullstack → fullstack
     - TITLE2 = same string, optionally remove "Senior" prefix only if it reads more cleanly as a standalone label
     - Examples: "Java Backend Developer" → TITLE="Java Backend Developer", TITLE2="Java Backend Developer"
@@ -428,8 +439,11 @@ Valid JSON only."""
             # regardless of what Claude returned — this is the authoritative title
             if title_hint:
                 result['TITLE'] = title_hint
-                # TITLE2: drop "Senior " prefix if present, otherwise same
                 result['TITLE2'] = _re.sub(r'^Senior\s+', '', title_hint, flags=_re.IGNORECASE).strip() or title_hint
+            # Safety net: if Claude returned a known generic default and we have JD lines, warn
+            _bad_defaults = {'senior full stack developer', 'full stack developer', 'software engineer', 'senior software engineer'}
+            if result.get('TITLE', '').strip().lower() in _bad_defaults and not title_hint:
+                print(f"[TitleWarn] Claude returned generic title '{result.get('TITLE')}' — title_hint was empty, JD start: {repr(jd_text[:300])}")
             return result
         except Exception as e:
             print(f"[Claude Error] {e}")
