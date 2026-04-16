@@ -7,7 +7,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import * as THREE from 'three';
 
 /* ═══════════════════════════════════════════════════════
-   LEGO F1 GP (Advanced 3D WebGL Engine)
+   LEGO F1 GP (Grand Prix Edition)
+   Smarter AI, Larger Tracks, Pit Stops, and No Holes.
    ═══════════════════════════════════════════════════════ */
 
 interface F1Team { id: number; name: string; c1: number; c2: number; c3: number; }
@@ -31,9 +32,10 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   math = Math;
 
   totalLaps = 3;
-  trackWidth = 180;
+  trackWidth = 280; // WIDER TRACK
+  trackScale = 1.6; // LONGER TRACKS
   
-  tracks: F1Track[] = [
+  rawTracks: F1Track[] = [
     { name: 'Silverstone GP', biome: 'grassland', waypoints: [{x:150, y:150}, {x:2000, y:150}, {x:2000, y:1000}, {x:150, y:1000}, {x:150, y:150}] },
     { name: 'Monaco GP', biome: 'night', waypoints: [{x:200, y:200}, {x:800, y:120}, {x:1400, y:250}, {x:1300, y:550}, {x:500, y:730}, {x:150, y:450}, {x:200, y:200}] },
     { name: 'Monza', biome: 'grassland', waypoints: [{x:100, y:100}, {x:2800, y:100}, {x:2900, y:500}, {x:2800, y:900}, {x:100, y:900}, {x:100, y:100}] },
@@ -41,6 +43,8 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     { name: 'Spa-Francorchamps', biome: 'grassland', waypoints: [{x:150, y:150}, {x:800, y:50}, {x:1500, y:50}, {x:2500, y:400}, {x:2200, y:1200}, {x:1000, y:1400}, {x:300, y:800}, {x:150, y:150}] },
     { name: 'Interlagos', biome: 'grassland', waypoints: [{x:150, y:100}, {x:1000, y:50}, {x:1200, y:500}, {x:600, y:600}, {x:1000, y:1000}, {x:150, y:900}, {x:150, y:100}] }
   ];
+  
+  tracks: F1Track[] = [];
   currentTrackIndex = 0;
 
   teams: F1Team[] = [
@@ -56,21 +60,31 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     { id: 9, name: 'Haas', c1: 0xffffff, c2: 0x111111, c3: 0xe60000 }
   ];
   
-  selectedTeamId = 0; // The team the player drives for
+  selectedTeamId = 0;
 
   biomes: any = {
     grassland: { ground: 0x1DA15C, sky: 0x3B82F6, ambient: 0xffffff, dIntensity: 1.0 },
-    night: { ground: 0x222222, sky: 0x050510, ambient: 0xffffff, dIntensity: 0.3 },
+    night: { ground: 0x111111, sky: 0x020205, ambient: 0xffffff, dIntensity: 0.25 },
     desert: { ground: 0xD2B48C, sky: 0xFFA07A, ambient: 0xffeebb, dIntensity: 0.9 }
   };
 
-  player: any = { health: 100, tireWear: 1.0, lap: 0, speed: 0 };
+  player: any = { health: 100, tireWear: 100, lap: 0, speed: 0, pitting: false };
   aiCars: any[] = [];
   gamePhase: 'start' | 'racing' | 'finished' = 'start';
   countdown = 3;
   lastTime = 0;
 
-  constructor() { this.resetGameLogic(); }
+  constructor() { 
+    this.scaleTracks();
+    this.resetGameLogic(); 
+  }
+
+  private scaleTracks() {
+    this.tracks = this.rawTracks.map(t => ({
+      ...t,
+      waypoints: t.waypoints.map(w => ({ x: w.x * this.trackScale, y: w.y * this.trackScale }))
+    }));
+  }
 
   ngAfterViewInit() {
     this.init3D();
@@ -86,20 +100,17 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  // --- 3D SETUP ---
   private init3D() {
     const canvas = this.canvasRef.nativeElement;
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setSize(1400, 750);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(55, 1400 / 750, 1, 4000);
+    this.camera = new THREE.PerspectiveCamera(55, 1400 / 750, 1, 6000);
   }
 
   private buildScene() {
-    // Prevent WebGL memory leaks
     while(this.scene.children.length > 0) { 
       const obj = this.scene.children[0] as any;
       if (obj.traverse) {
@@ -118,79 +129,69 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     const biome = this.biomes[track.biome];
 
     this.scene.background = new THREE.Color(biome.sky); 
-    this.scene.fog = new THREE.Fog(biome.sky, 500, 2000);
+    this.scene.fog = new THREE.Fog(biome.sky, 800, 3000);
 
-    const ambientLight = new THREE.AmbientLight(biome.ambient, 0.5);
+    const ambientLight = new THREE.AmbientLight(biome.ambient, 0.4);
     this.scene.add(ambientLight);
 
     const dirLight = new THREE.DirectionalLight(0xffffff, biome.dIntensity);
-    dirLight.position.set(500, 1000, 500);
+    dirLight.position.set(500, 1200, 500);
     dirLight.castShadow = true;
-    dirLight.shadow.camera.top = 2500;
-    dirLight.shadow.camera.bottom = -2500;
-    dirLight.shadow.camera.left = -2500;
-    dirLight.shadow.camera.right = 2500;
-    dirLight.shadow.camera.near = 0.1;
-    dirLight.shadow.camera.far = 4000;
+    dirLight.shadow.camera.top = 4000;
+    dirLight.shadow.camera.bottom = -4000;
+    dirLight.shadow.camera.left = -4000;
+    dirLight.shadow.camera.right = 4000;
     dirLight.shadow.mapSize.width = 2048;
     dirLight.shadow.mapSize.height = 2048;
     this.scene.add(dirLight);
 
-    // Floor Baseplate
-    const groundGeo = new THREE.BoxGeometry(6000, 10, 6000);
-    const groundMat = new THREE.MeshStandardMaterial({ color: biome.ground, roughness: 0.9, metalness: 0 }); 
+    // Ground
+    const groundGeo = new THREE.BoxGeometry(10000, 10, 10000);
+    const groundMat = new THREE.MeshStandardMaterial({ color: biome.ground, roughness: 0.95 }); 
     const ground = new THREE.Mesh(groundGeo, groundMat);
-    ground.position.set(1000, -5, 1000);
+    ground.position.set(1500, -5, 1000);
     ground.receiveShadow = true;
     this.scene.add(ground);
 
     // Track Assembly
-    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9 });
-    const kerbRed = new THREE.MeshStandardMaterial({ color: 0xD01012, roughness: 0.4 }); 
-    const kerbWhite = new THREE.MeshStandardMaterial({ color: 0xF4F4F4, roughness: 0.4 }); 
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x242424, roughness: 0.9 });
+    const kerbRed = new THREE.MeshStandardMaterial({ color: 0xD01012, roughness: 0.5 }); 
+    const kerbWhite = new THREE.MeshStandardMaterial({ color: 0xFDFDFD, roughness: 0.5 }); 
 
     for(let i=0; i<track.waypoints.length; i++) {
         const p1 = track.waypoints[i];
         const p2 = track.waypoints[(i+1)%track.waypoints.length];
-        const dx = p2.x - p1.x;
-        const dy = p2.y - p1.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        const angle = Math.atan2(dy, dx);
+        const dx = p2.x - p1.x, dy = p2.y - p1.y;
+        const dist = Math.sqrt(dx*dx + dy*dy), angle = Math.atan2(dy, dx);
         
         const road = new THREE.Group();
-        
-        const roadMesh = new THREE.Mesh(new THREE.BoxGeometry(dist + this.trackWidth, 2, this.trackWidth), asphaltMat);
+        const roadMesh = new THREE.Mesh(new THREE.BoxGeometry(dist + this.trackWidth, 1.5, this.trackWidth), asphaltMat);
         roadMesh.receiveShadow = true;
         road.add(roadMesh);
 
         // Kerbs
-        const numKerbs = Math.floor(dist / 40);
+        const numKerbs = Math.floor(dist / 60);
         for(let k=0; k<numKerbs; k++) {
             const mat = k % 2 === 0 ? kerbRed : kerbWhite;
-            const kerb1 = new THREE.Mesh(new THREE.BoxGeometry(40, 4, 12), mat);
-            kerb1.position.set(-dist/2 + k*40 + 20, 1, this.trackWidth/2 + 6);
-            kerb1.castShadow = true; kerb1.receiveShadow = true;
-            road.add(kerb1);
-
-            const kerb2 = new THREE.Mesh(new THREE.BoxGeometry(40, 4, 12), mat);
-            kerb2.position.set(-dist/2 + k*40 + 20, 1, -this.trackWidth/2 - 6);
-            kerb2.castShadow = true; kerb2.receiveShadow = true;
-            road.add(kerb2);
+            const k1 = new THREE.Mesh(new THREE.BoxGeometry(60, 3, 20), mat);
+            k1.position.set(-dist/2 + k*60 + 30, 0.8, this.trackWidth/2 + 10);
+            k1.castShadow = true; road.add(k1);
+            const k2 = new THREE.Mesh(new THREE.BoxGeometry(60, 3, 20), mat);
+            k2.position.set(-dist/2 + k*60 + 30, 0.8, -this.trackWidth/2 - 10);
+            k2.castShadow = true; road.add(k2);
         }
 
-        road.position.set(p1.x + dx/2, 1, p1.y + dy/2);
+        road.position.set(p1.x + dx/2, 0.8, p1.y + dy/2);
         road.rotation.y = -angle;
         this.scene.add(road);
     }
 
-    // Spawn Player
+    // Spawn
     this.carMeshes = {};
     const playerTeam = this.teams.find(t => t.id === this.selectedTeamId) || this.teams[0];
-    const pMesh = this.createAdvancedLegoCar(playerTeam.c1, playerTeam.c2, playerTeam.c3);
-    this.scene.add(pMesh);
-    this.carMeshes[0] = pMesh;
+    this.carMeshes[0] = this.createAdvancedLegoCar(playerTeam.c1, playerTeam.c2, playerTeam.c3);
+    this.scene.add(this.carMeshes[0]);
 
-    // Spawn AI
     this.aiCars.forEach(ai => {
         const m = this.createAdvancedLegoCar(ai.c1, ai.c2, ai.c3);
         this.scene.add(m);
@@ -200,118 +201,50 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
 
   private createAdvancedLegoCar(c1: number, c2: number, c3: number): THREE.Group {
     const car = new THREE.Group();
-    const mat1 = new THREE.MeshStandardMaterial({ color: c1, roughness: 0.1, metalness: 0.2 }); // Glossy Plastic
+    const mat1 = new THREE.MeshStandardMaterial({ color: c1, roughness: 0.1, metalness: 0.2 });
     const mat2 = new THREE.MeshStandardMaterial({ color: c2, roughness: 0.1, metalness: 0.2 });
     const mat3 = new THREE.MeshStandardMaterial({ color: c3, roughness: 0.1, metalness: 0.2 });
     const black = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
-    const helmetMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.2 });
 
     const addBlock = (w:number, h:number, d:number, mat:any, x:number, y:number, z:number) => {
       const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
-      mesh.position.set(x, y, z);
-      mesh.castShadow = true; mesh.receiveShadow = true;
-      car.add(mesh);
-    };
-    const addStuds = (w:number, d:number, mat:any, xBase:number, yBase:number, zBase:number) => {
-      const studGeom = new THREE.CylinderGeometry(1.2, 1.2, 1.5, 8);
-      const cols = Math.floor(w/5); const rows = Math.floor(d/5);
-      for(let i=0; i<cols; i++) {
-        for(let j=0; j<rows; j++) {
-          const stud = new THREE.Mesh(studGeom, mat);
-          stud.position.set(xBase - w/2 + 2.5 + i*5, yBase, zBase - d/2 + 2.5 + j*5);
-          stud.castShadow = true; car.add(stud);
-        }
-      }
+      mesh.position.set(x, y, z); mesh.castShadow = true; mesh.receiveShadow = true; car.add(mesh);
     };
 
-    // Central Chassis
-    addBlock(40, 6, 12, mat1, 0, 5, 0);       
-    addBlock(20, 5, 8, mat2, 30, 4.5, 0);     // Nose cone
-    addStuds(10, 8, mat2, 35, 7, 0);          // Nose studs
-
-    // Front Wing (Wide multi-plane)
-    addBlock(6, 2, 30, mat1, 40, 3, 0);       // Main plane
-    addBlock(4, 1.5, 30, mat3, 38, 4.5, 0);   // Upper plane
-    addBlock(6, 6, 2, black, 40, 5, 16);      // Left Endplate
-    addBlock(6, 6, 2, black, 40, 5, -16);     // Right Endplate
-    addStuds(6, 30, mat1, 40, 4.5, 0);
-
-    // Sidepods (Thick aerodynamic boxes on side)
-    addBlock(18, 6, 8, mat1, 0, 5, 10);       // Left pod
-    addBlock(18, 6, 8, mat1, 0, 5, -10);      // Right pod
-    addBlock(16, 4, 8, mat2, 0, 10, 10);      // Left pod intake/cover
-    addBlock(16, 4, 8, mat2, 0, 10, -10);     // Right pod intake/cover
+    addBlock(40, 6, 12, mat1, 0, 5, 0); // Chassis
+    addBlock(20, 5, 8, mat2, 30, 4.5, 0); // Nose
+    addBlock(6, 2, 40, mat1, 40, 3, 0); // Front Wing
+    addBlock(18, 6, 8, mat1, 0, 5, 10); // L Pod
+    addBlock(18, 6, 8, mat1, 0, 5, -10); // R Pod
+    addBlock(16, 8, 8, mat2, -10, 10, 0); // Engine
+    addBlock(8, 2, 35, mat1, -22, 16, 0); // Rear Wing
+    addBlock(10, 1, 10, black, 10, 14, 0); // Halo
     
-    // Engine Cover / Airbox
-    addBlock(16, 8, 8, mat2, -10, 10, 0);
-    addBlock(10, 6, 4, mat3, -10, 17, 0);     // Top airbox intake
-    
-    // Rear Wing (Complex)
-    addBlock(8, 2, 30, mat1, -22, 15, 0);     // Main plane
-    addBlock(6, 1.5, 30, mat2, -20, 17, 0);   // DRS flap
-    addBlock(12, 14, 2, black, -21, 10, 15);  // Left endplate
-    addBlock(12, 14, 2, black, -21, 10, -15); // Right endplate
-    addBlock(4, 10, 6, black, -16, 9, 0);     // Central support pillar
-    addStuds(8, 30, mat1, -22, 16, 0);
-
-    // Cockpit & Halo
-    addBlock(12, 2, 8, black, 10, 9, 0);      // Cockpit hole
-    
-    const helmet = new THREE.Mesh(new THREE.BoxGeometry(4,4,4), helmetMat); // Driver helmet
-    helmet.position.set(10, 11, 0); helmet.castShadow = true;
-    car.add(helmet);
-
-    const haloMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
-    const haloFront = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 6), haloMat);
-    haloFront.position.set(16, 11, 0); haloFront.castShadow = true; car.add(haloFront);
-    const haloRing = new THREE.Mesh(new THREE.BoxGeometry(10, 1, 10), haloMat);
-    haloRing.position.set(10, 14, 0); haloRing.castShadow = true; car.add(haloRing);
-
     // Wheels
-    const tireGeom = new THREE.CylinderGeometry(7, 7, 7, 24);
-    tireGeom.rotateX(Math.PI / 2);
-    const wheelsPos = [
-      { x: 26, z: 14 }, { x: 26, z: -14 },
-      { x: -16, z: 14 }, { x: -16, z: -14 }
-    ];
-    wheelsPos.forEach(p => {
-      const w = new THREE.Mesh(tireGeom, black);
-      w.position.set(p.x, 7, p.z);
-      w.castShadow = true; w.receiveShadow = true;
-      car.add(w);
-      // Rims
-      const rim = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 7.2, 16), mat2);
-      rim.position.set(p.x, 7, p.z); rim.rotateX(Math.PI / 2);
-      car.add(rim);
+    const tireG = new THREE.CylinderGeometry(7.5, 7.5, 8, 24); tireG.rotateX(Math.PI/2);
+    [{x:26,z:16},{x:26,z:-16},{x:-16,z:16},{x:-16,z:-16}].forEach(p => {
+        const w = new THREE.Mesh(tireG, black); w.position.set(p.x, 7.5, p.z);
+        w.castShadow = true; car.add(w);
     });
 
-    car.scale.set(0.8, 0.8, 0.8);
+    car.scale.set(0.9, 0.9, 0.9);
     return car;
   }
 
-  // --- LOGIC ---
-  resetGame() {
-    this.resetGameLogic();
-    if(this.scene) {
-        this.buildScene();
-    }
-  }
+  resetGame() { this.resetGameLogic(); if(this.scene) this.buildScene(); }
 
   resetGameLogic() {
     const track = this.tracks[this.currentTrackIndex];
-    const sx = track.waypoints[0].x;
-    const sy = track.waypoints[0].y;
+    const sx = track.waypoints[0].x, sy = track.waypoints[0].y;
     
     this.player = {
-      id: 0, x: sx + 40, y: sy - 20, angle: 0, speed: 0, lap: 0,
-      steeringAngle: 0, tireWear: 1.0, health: 100, targetWP: 1, invuln: 0
+      id: 0, x: sx + 60, y: sy - 40, angle: 0, speed: 0, lap: 0,
+      steeringAngle: 0, tireWear: 100, health: 100, targetWP: 1, invuln: 0, pitting: false
     };
     
-    // Filter out the player's team, then assign AI to the remaining grid
     const remainingTeams = this.teams.filter(t => t.id !== this.selectedTeamId);
-    
     this.aiCars = remainingTeams.map((team, i) => ({
-      id: team.id, x: sx - (i * 70) - 40, y: sy + (i % 2 === 0 ? 40 : -40), 
+      id: team.id, x: sx - (i * 90) - 80, y: sy + (i % 2 === 0 ? 60 : -60), 
       angle: 0, speed: 0, lap: 0, targetWP: 1, c1: team.c1, c2: team.c2, c3: team.c3, health: 100, invuln: 0
     }));
     
@@ -324,21 +257,8 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   onTeamChange(event: any) { this.selectedTeamId = +event.target.value; this.resetGame(); }
 
   private keys: { [key: string]: boolean } = {};
-
-  @HostListener('window:keydown', ['$event']) 
-  onKeyDown(e: KeyboardEvent) { 
-    this.keys[e.key] = true; 
-    this.keys[e.key.toLowerCase()] = true; 
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
-      e.preventDefault(); 
-    }
-  }
-
-  @HostListener('window:keyup', ['$event']) 
-  onKeyUp(e: KeyboardEvent) { 
-    this.keys[e.key] = false; 
-    this.keys[e.key.toLowerCase()] = false;
-  }
+  @HostListener('window:keydown', ['$event']) onKeyDown(e: KeyboardEvent) { this.keys[e.key] = true; this.keys[e.key.toLowerCase()] = true; if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault(); }
+  @HostListener('window:keyup', ['$event']) onKeyUp(e: KeyboardEvent) { this.keys[e.key] = false; this.keys[e.key.toLowerCase()] = false; }
 
   private startGameLoop() {
     const loop = (time: number) => {
@@ -369,13 +289,11 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     if (car.targetWP !== undefined) {
       const target = track.waypoints[car.targetWP];
       const dx = target.x - car.x, dy = target.y - car.y;
-      if (Math.sqrt(dx*dx + dy*dy) < 180) { // Large buffer so AI definitely hit it
+      if (Math.sqrt(dx*dx + dy*dy) < 300) { // Larger waypoint trigger for larger scale
         car.targetWP = (car.targetWP + 1) % track.waypoints.length;
         if (car.targetWP === 1) {
           car.lap++;
-          if (car.id === 0 && car.lap >= this.totalLaps) {
-            this.gamePhase = 'finished';
-          }
+          if (car.id === 0 && car.lap >= this.totalLaps) this.gamePhase = 'finished';
         }
       }
     }
@@ -384,38 +302,48 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   private updateCar(car: any, input: any, dt: number) {
     if (car.invuln > 0) car.invuln -= dt;
 
+    const track = this.tracks[this.currentTrackIndex];
     const isDestroyed = car.health <= 0;
     
-    // --- MASSIVE SPEED BOOST ---
-    const accel = isDestroyed ? 0 : 1200; 
-    const friction = 0.97;
-    const turn = isDestroyed ? 0 : 4.4;
+    // --- PIT STOP CHECK ---
+    const distToStart = Math.sqrt((car.x - track.waypoints[0].x)**2 + (car.y - track.waypoints[0].y)**2);
+    car.pitting = distToStart < 400 && Math.abs(car.speed) < 200;
+    
+    if (car.pitting) {
+        car.health = Math.min(100, car.health + 20 * dt);
+        car.tireWear = Math.min(100, car.tireWear + 20 * dt);
+        car.speed *= 0.95; // Slow down in pits
+    }
+
+    // --- MEGA SPEED BOOST (800+ KM/H) ---
+    const accel = isDestroyed ? 0 : 2200; 
+    const friction = 0.985;
+    const turn = isDestroyed ? 0 : 4.8;
 
     if (input.ArrowUp || input.w) car.speed += accel * dt;
-    if (input.ArrowDown || input.s) car.speed -= accel * dt * 0.7;
+    if (input.ArrowDown || input.s) car.speed -= accel * dt * 0.8;
     car.speed *= friction;
     
-    if (isDestroyed) car.speed *= 0.9;
-
     if (Math.abs(car.speed) > 10) {
-      if (input.ArrowLeft || input.a) car.angle -= turn * dt * (car.speed / 600);
-      if (input.ArrowRight || input.d) car.angle += turn * dt * (car.speed / 600);
+      if (input.ArrowLeft || input.a) car.angle -= turn * dt * (car.speed / 1000);
+      if (input.ArrowRight || input.d) car.angle += turn * dt * (car.speed / 1000);
     }
     
     const nextX = car.x + Math.cos(car.angle) * car.speed * dt;
     const nextY = car.y + Math.sin(car.angle) * car.speed * dt;
+    
     if (this.onTrack(nextX, nextY)) { 
       car.x = nextX; car.y = nextY; 
     } else { 
-      car.speed *= -0.7; 
-      if (!isDestroyed && car.invuln <= 0) {
-        car.health -= 5;
-        car.invuln = 0.5;
-      }
+      // PUSH BACK LOGIC (Prevents holes)
+      car.speed *= -0.8; 
+      car.x -= Math.cos(car.angle) * 15;
+      car.y -= Math.sin(car.angle) * 15;
+      if (!isDestroyed && car.invuln <= 0) { car.health -= 8; car.invuln = 0.4; }
     }
     
     car.health = Math.max(0, car.health);
-    car.tireWear -= Math.abs(car.speed) * 0.000002;
+    car.tireWear -= Math.abs(car.speed) * 0.00001;
     car.tireWear = Math.max(0, car.tireWear);
 
     this.checkWaypoint(car);
@@ -423,28 +351,35 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
 
   private onTrack(x: number, y: number): boolean {
     const t = this.tracks[this.currentTrackIndex];
+    const hw = this.trackWidth / 2;
+    // Check Segments
     for (let i=0; i<t.waypoints.length; i++) {
-        if (this.distToSeg({x,y}, t.waypoints[i], t.waypoints[(i+1)%t.waypoints.length]) < this.trackWidth/2 - 5) return true;
+        if (this.distToSeg({x,y}, t.waypoints[i], t.waypoints[(i+1)%t.waypoints.length]) < hw - 10) return true;
+    }
+    // CHECK WAYPOINTS (PLUGS HOLES AT CORNERS)
+    for (const p of t.waypoints) {
+        if (Math.sqrt((p.x-x)**2 + (p.y-y)**2) < hw - 10) return true;
     }
     return false;
   }
 
   private updateAI(car: any, dt: number) {
     if (car.invuln > 0) car.invuln -= dt;
-    
     const track = this.tracks[this.currentTrackIndex];
-    let target = track.waypoints[car.targetWP];
-    let dx = target.x - car.x, dy = target.y - car.y;
-    
+    const target = track.waypoints[car.targetWP];
+    const dx = target.x - car.x, dy = target.y - car.y;
     this.checkWaypoint(car);
 
-    // AI Driving Line interpolation
-    car.angle += (Math.atan2(dy, dx) - car.angle) * 4 * dt;
+    // AI TRACK AWARENESS (Fix for going out of track)
+    const onTrack = this.onTrack(car.x, car.y);
+    const steeringForce = onTrack ? 5 : 12; // Steer harder if off-track
+    const targetAngle = Math.atan2(dy, dx);
     
-    const maxSpeed = 530; // Boosted AI
-    if (car.speed < maxSpeed) {
-      car.speed += 800 * dt;
-    }
+    car.angle += (targetAngle - car.angle) * steeringForce * dt;
+    
+    let maxSpeed = onTrack ? 680 : 300; 
+    if (car.speed < maxSpeed) car.speed += 900 * dt;
+    else if (car.speed > maxSpeed) car.speed *= 0.95;
     
     car.x += Math.cos(car.angle)*car.speed*dt;
     car.y += Math.sin(car.angle)*car.speed*dt;
@@ -453,57 +388,30 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   private checkCollisions(dt: number) {
     this.aiCars.forEach(ai => {
       const dx = this.player.x - ai.x, dy = this.player.y - ai.y;
-      if (Math.sqrt(dx*dx+dy*dy) < 55) {  // collision box adjusted for larger cars
-        if (this.player.invuln <= 0) {
-            this.player.health -= 5; 
-            this.player.invuln = 0.5;
-        }
-        const pushAngle = Math.atan2(dy, dx);
-        this.player.x += Math.cos(pushAngle) * 6;
-        this.player.y += Math.sin(pushAngle) * 6;
-        ai.x -= Math.cos(pushAngle) * 6;
-        ai.y -= Math.sin(pushAngle) * 6;
-        this.player.speed *= 0.8; 
-        ai.speed *= 0.8; 
+      if (Math.sqrt(dx*dx+dy*dy) < 60) { 
+        if (this.player.invuln <= 0) { this.player.health -= 10; this.player.invuln = 0.5; }
+        const pushA = Math.atan2(dy, dx);
+        this.player.x += Math.cos(pushA) * 10; this.player.y += Math.sin(pushA) * 10;
+        ai.x -= Math.cos(pushA) * 10; ai.y -= Math.sin(pushA) * 10;
+        this.player.speed *= 0.7; ai.speed *= 0.7; 
       }
     });
   }
 
   private render3D() {
     if(!this.renderer) return;
-
-    // Player Mesh
     const pMesh = this.carMeshes[0];
-    if(pMesh) {
-      pMesh.position.set(this.player.x, 2, this.player.y);
-      pMesh.rotation.y = -this.player.angle;
-    }
-
-    // AI Meshes
+    if(pMesh) { pMesh.position.set(this.player.x, 2, this.player.y); pMesh.rotation.y = -this.player.angle; }
     this.aiCars.forEach(ai => {
       const m = this.carMeshes[ai.id];
-      if(m) {
-        m.position.set(ai.x, 2, ai.y);
-        m.rotation.y = -ai.angle;
-      }
+      if(m) { m.position.set(ai.x, 2, ai.y); m.rotation.y = -ai.angle; }
     });
-
-    // Dynamic Follow Camera (Tweaked for higher speed)
-    const camDist = 200;
-    const camHeight = 90;
-    const targetX = this.player.x - Math.cos(this.player.angle) * camDist;
-    const targetZ = this.player.y - Math.sin(this.player.angle) * camDist;
-    
-    // Smooth camera tracking array
-    this.camera.position.x += (targetX - this.camera.position.x) * 0.12;
-    this.camera.position.z += (targetZ - this.camera.position.z) * 0.12;
-    this.camera.position.y += (camHeight - this.camera.position.y) * 0.1;
-
-    // Look slightly ahead of car
-    const lookX = this.player.x + Math.cos(this.player.angle) * 100;
-    const lookZ = this.player.y + Math.sin(this.player.angle) * 100;
-    this.camera.lookAt(lookX, 0, lookZ);
-
+    const cDist = 250, cHeight = 110;
+    const tX = this.player.x - Math.cos(this.player.angle) * cDist, tZ = this.player.y - Math.sin(this.player.angle) * cDist;
+    this.camera.position.x += (tX - this.camera.position.x) * 0.15;
+    this.camera.position.z += (tZ - this.camera.position.z) * 0.15;
+    this.camera.position.y += (cHeight - this.camera.position.y) * 0.1;
+    this.camera.lookAt(this.player.x + Math.cos(this.player.angle) * 120, 0, this.player.y + Math.sin(this.player.angle) * 120);
     this.renderer.render(this.scene, this.camera);
   }
 

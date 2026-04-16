@@ -5,21 +5,36 @@
       <span>LEGO <span>F1</span></span>
     </div>
     
-    <div class="telemetry-top">
-      <div class="t-item">
-        <span class="t-label">CURRENT LAP</span>
-        <span class="t-value">{{ (player?.lap || 0) + 1 }}<span>/{{ totalLaps }}</span></span>
+    <div class="telemetry-dashboard">
+      <div class="dash-item dash-speed">
+        <div class="digital-speed">{{ math.round(player?.speed || 0) }}</div>
+        <div class="unit">KM/H</div>
+        <div class="speed-bar" [style.width.%]="(player?.speed / 900) * 100"></div>
       </div>
-      <div class="t-divider"></div>
-      <div class="t-item">
-        <span class="t-label">VELOCITY</span>
-        <span class="t-value">{{ math.round(player?.speed || 0) }}<span>KM/H</span></span>
+
+      <div class="dash-item dash-info">
+        <div class="condition-row">
+          <mat-icon [style.color]="player?.health > 30 ? '#00ff00' : '#ff0000'">security</mat-icon>
+          <div class="bar-bg"><div class="bar-fill health" [style.width.%]="player?.health"></div></div>
+          <span class="pct">{{ math.round(player?.health) }}%</span>
+        </div>
+        <div class="condition-row">
+          <mat-icon [style.color]="player?.tireWear > 30 ? '#ffaa00' : '#ff0000'">settings_input_component</mat-icon>
+          <div class="bar-bg"><div class="bar-fill tires" [style.width.%]="player?.tireWear"></div></div>
+          <span class="pct">{{ math.round(player?.tireWear) }}%</span>
+        </div>
       </div>
+    </div>
+
+    <!-- PITTING NOTIFICATION -->
+    <div class="pit-overlay" *ngIf="player?.pitting">
+       <mat-icon>build</mat-icon>
+       <span>PIT STOP IN PROGRESS: SERVICING CAR...</span>
     </div>
 
     <div class="controls">
       <select (change)="onTrackChange($event)" class="circuit-picker">
-        <option *ngFor="let t of tracks; let i = index" [value]="i">{{ t.name }}</option>
+        <option *ngFor="let t of rawTracks; let i = index" [value]="i">{{ t.name }}</option>
       </select>
       <select (change)="onTeamChange($event)" class="circuit-picker">
         <option *ngFor="let t of teams" [value]="t.id">{{ t.name }}</option>
