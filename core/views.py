@@ -301,6 +301,10 @@ class AutomationViewSet(viewsets.ViewSet):
         has_ai = bool(_re.search(r'\b(AI|ML|machine learning|NLP|LLM|deep learning|neural|GPT)\b',
                                   jd_text[:6000], _re.IGNORECASE))
 
+        # Strip TITLE/TITLE2 from base_content so Claude cannot anchor on the existing title.
+        # Claude must derive TITLE solely from the JD — the existing title biases the output.
+        base_for_prompt = {k: v for k, v in base_content.items() if k not in ('TITLE', 'TITLE2')}
+
         prompt = f"""Act as a senior resume writer and ATS optimization expert.
 
 Generate a highly tailored resume in JSON format based on the given Job Description (JD).
@@ -383,7 +387,8 @@ STRICT RULES:
     - Use bullet characters (•, -, *) inside point text
 
 BASE CONTENT POOL (use as inspiration and starting material — expand and rewrite to reach 36 points each):
-{json.dumps(base_content, indent=2)[:9000]}
+NOTE: TITLE is intentionally excluded from this pool. You MUST derive TITLE from the JD only (see rule 10).
+{json.dumps(base_for_prompt, indent=2)[:9000]}
 
 JOB DESCRIPTION:
 {jd_text[:6000]}
