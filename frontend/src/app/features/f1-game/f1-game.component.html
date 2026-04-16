@@ -21,6 +21,9 @@
       <select (change)="onTrackChange($event)" class="circuit-picker">
         <option *ngFor="let t of tracks; let i = index" [value]="i">{{ t.name }}</option>
       </select>
+      <select (change)="onTeamChange($event)" class="circuit-picker">
+        <option *ngFor="let t of teams" [value]="t.id">{{ t.name }}</option>
+      </select>
       <button mat-fab extended (click)="resetGame()" class="reboot-btn">
         <mat-icon>restart_alt</mat-icon> REBOOT ENGINE
       </button>
