@@ -329,15 +329,7 @@ STRICT RULES:
    - Remaining points = tightly tailored to this specific JD
    - Every point 2-3 sentences, senior tone, ATS-rich with JD keywords
 
-5. ★★★ TITLE — MANDATORY RULE (VIOLATION = REJECT OUTPUT) ★★★
-   {'★ EXTRACTED TITLE = "' + title_hint + '" ★ — Copy this EXACTLY into the TITLE field. Do NOT rephrase, do NOT add words, do NOT change capitalisation. This is the title the employer posted.' if title_hint else '— No pre-extraction match. Scan the JD yourself: find the exact job title string the employer posted (e.g. "Full Stack Developer", "Java Backend Engineer", "Senior Software Engineer"). Copy it word-for-word.'}
-   - TITLE must be the EXACT string from the JD — nothing more, nothing less
-   - TITLE2 = same title, optionally drop "Senior" prefix if it reads cleaner
-   - Examples: JD says "Full Stack Developer" → TITLE = "Full Stack Developer"
-               JD says "Java Backend Engineer" → TITLE = "Java Backend Engineer"
-               JD says "Senior Software Engineer" → TITLE = "Senior Software Engineer"
-   - NEVER default to "Senior Full Stack Developer" unless the JD says EXACTLY that
-   - NEVER invent or paraphrase — only copy
+5. TITLE — see rule 10 for full mandatory title instructions.
 
 6. TECH FOCUS — scan the JD and emphasize EVERY technology, tool, framework, language, platform, and methodology mentioned:
    - Extract ALL technical terms from the JD — do not skip any
