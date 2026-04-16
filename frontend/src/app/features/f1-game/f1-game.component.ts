@@ -4,10 +4,11 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import * as THREE from 'three';
 
 /* ═══════════════════════════════════════════════════════
-   MINECRAFT GP (3D F1 Engine Restored)
-   Physics-based racing with Minecraft pixel-art aesthetic
+   LEGO F1 GP (3D WebGL Engine)
+   Physics-based racing with Lego block aesthetic
    ═══════════════════════════════════════════════════════ */
 
 @Component({
@@ -19,8 +20,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 })
 export class F1GameComponent implements AfterViewInit, OnDestroy {
   @ViewChild('gameCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
-  private ctx!: CanvasRenderingContext2D;
+  
+  private scene!: THREE.Scene;
+  private camera!: THREE.PerspectiveCamera;
+  private renderer!: THREE.WebGLRenderer;
   private animationId!: number;
+  private carMeshes: { [id: number]: THREE.Group } = {};
   math = Math;
 
   totalLaps = 3;
@@ -33,9 +38,9 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   currentTrackIndex = 0;
 
   teams = [
-    { name: 'Red Bull', c1: '#0600ef', c2: '#fcd700' },
-    { name: 'Mercedes', c1: '#00d2be', c2: '#ffffff' },
-    { name: 'Ferrari', c1: '#dc0000', c2: '#ffffff' }
+    { name: 'Red Bull', c1: 0x0600ef, c2: 0xfcd700 },
+    { name: 'Mercedes', c1: 0x00d2be, c2: 0xffffff },
+    { name: 'Ferrari', c1: 0xdc0000, c2: 0xffffff }
   ];
 
   player: any = { health: 100, tireWear: 1.0, lap: 5, speed: 0 };
@@ -44,16 +49,189 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   countdown = 3;
   lastTime = 0;
 
-  constructor() { this.resetGame(); }
+  constructor() { this.resetGameLogic(); }
 
   ngAfterViewInit() {
-    this.ctx = this.canvasRef.nativeElement.getContext('2d')!;
+    this.init3D();
+    this.buildScene();
     this.startGameLoop();
   }
 
-  ngOnDestroy() { cancelAnimationFrame(this.animationId); }
+  ngOnDestroy() { 
+    cancelAnimationFrame(this.animationId); 
+    if (this.renderer) {
+      this.renderer.dispose();
+      this.renderer.forceContextLoss();
+    }
+  }
 
+  // --- 3D SETUP ---
+  private init3D() {
+    const canvas = this.canvasRef.nativeElement;
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    this.renderer.setSize(1400, 750);
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0x3B82F6); // bright sky blue
+    this.scene.fog = new THREE.Fog(0x3B82F6, 400, 1500);
+
+    this.camera = new THREE.PerspectiveCamera(55, 1400 / 750, 1, 3000);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    this.scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    dirLight.position.set(500, 1000, 500);
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.top = 2000;
+    dirLight.shadow.camera.bottom = -2000;
+    dirLight.shadow.camera.left = -2000;
+    dirLight.shadow.camera.right = 2000;
+    dirLight.shadow.camera.near = 0.1;
+    dirLight.shadow.camera.far = 3000;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    this.scene.add(dirLight);
+  }
+
+  private buildScene() {
+    // Clear existing meshes
+    while(this.scene.children.length > 2) { 
+      this.scene.remove(this.scene.children[2]); 
+    }
+
+    // Lego Floor Baseplate
+    const groundGeo = new THREE.BoxGeometry(4000, 10, 4000);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x1DA15C, roughness: 0.9, metalness: 0 }); // Lego Green
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.position.set(700, -5, 375);
+    ground.receiveShadow = true;
+    this.scene.add(ground);
+
+    // Track
+    const track = this.tracks[this.currentTrackIndex];
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9 });
+    const kerbRed = new THREE.MeshStandardMaterial({ color: 0xD01012, roughness: 0.5 }); // Lego Red
+    const kerbWhite = new THREE.MeshStandardMaterial({ color: 0xF4F4F4, roughness: 0.5 }); // Lego White
+
+    for(let i=0; i<track.waypoints.length; i++) {
+        const p1 = track.waypoints[i];
+        const p2 = track.waypoints[(i+1)%track.waypoints.length];
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const angle = Math.atan2(dy, dx);
+        
+        const road = new THREE.Group();
+        
+        // Asphalt
+        const roadMesh = new THREE.Mesh(new THREE.BoxGeometry(dist + this.trackWidth, 2, this.trackWidth), asphaltMat);
+        roadMesh.receiveShadow = true;
+        road.add(roadMesh);
+
+        // Kerbs
+        const numKerbs = Math.floor(dist / 40);
+        for(let k=0; k<numKerbs; k++) {
+            const mat = k % 2 === 0 ? kerbRed : kerbWhite;
+            const kerb1 = new THREE.Mesh(new THREE.BoxGeometry(40, 4, 12), mat);
+            kerb1.position.set(-dist/2 + k*40 + 20, 1, this.trackWidth/2 + 6);
+            kerb1.castShadow = true; kerb1.receiveShadow = true;
+            road.add(kerb1);
+
+            const kerb2 = new THREE.Mesh(new THREE.BoxGeometry(40, 4, 12), mat);
+            kerb2.position.set(-dist/2 + k*40 + 20, 1, -this.trackWidth/2 - 6);
+            kerb2.castShadow = true; kerb2.receiveShadow = true;
+            road.add(kerb2);
+        }
+
+        road.position.set(p1.x + dx/2, 1, p1.y + dy/2);
+        road.rotation.y = -angle;
+        this.scene.add(road);
+    }
+
+    // Cars
+    this.carMeshes = {};
+    const pMesh = this.createLegoCar(this.teams[0].c1, this.teams[0].c2);
+    this.scene.add(pMesh);
+    this.carMeshes[0] = pMesh;
+
+    this.aiCars.forEach((ai, i) => {
+        const m = this.createLegoCar(ai.c1, ai.c2);
+        this.scene.add(m);
+        this.carMeshes[ai.id] = m;
+    });
+  }
+
+  private createLegoCar(c1: number, c2: number): THREE.Group {
+    const car = new THREE.Group();
+    // Shiny plastic lego bits
+    const mat1 = new THREE.MeshStandardMaterial({ color: c1, roughness: 0.15, metalness: 0.1 });
+    const mat2 = new THREE.MeshStandardMaterial({ color: c2, roughness: 0.15, metalness: 0.1 });
+    const black = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
+
+    const addBlock = (w:number, h:number, d:number, mat:any, x:number, y:number, z:number) => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
+      mesh.position.set(x, y, z);
+      mesh.castShadow = true; mesh.receiveShadow = true;
+      car.add(mesh);
+    };
+
+    // Stud Generator (little cylinders on top of blocks)
+    const addStuds = (w:number, d:number, mat:any, xBase:number, yBase:number, zBase:number) => {
+      const studGeom = new THREE.CylinderGeometry(1.5, 1.5, 1.5, 8);
+      const cols = Math.floor(w/6);
+      const rows = Math.floor(d/6);
+      for(let i=0; i<cols; i++) {
+        for(let j=0; j<rows; j++) {
+          const stud = new THREE.Mesh(studGeom, mat);
+          stud.position.set(xBase - w/2 + 3 + i*6, yBase, zBase - d/2 + 3 + j*6);
+          stud.castShadow = true;
+          car.add(stud);
+        }
+      }
+    };
+
+    // Main Chassis
+    addBlock(36, 6, 12, mat1, 0, 5, 0);       
+    addBlock(12, 6, 8, mat2, 24, 5, 0);     // Nose
+    addBlock(8, 2, 24, mat1, 30, 3, 0);     // Front Wing
+    addStuds(8, 24, mat1, 30, 4.5, 0);
+    
+    addBlock(14, 2, 28, mat1, -15, 14, 0);  // Rear wing
+    addStuds(14, 28, mat1, -15, 15.5, 0);
+
+    addBlock(4, 9, 8, black, -15, 9, 0);    // Rear support
+    addBlock(12, 8, 12, mat2, -2, 12, 0);   // Cockpit
+
+    // Wheels
+    const tireGeom = new THREE.CylinderGeometry(6, 6, 6, 16);
+    tireGeom.rotateX(Math.PI / 2);
+    const wheelsPos = [
+      { x: 20, z: 12 }, { x: 20, z: -12 },
+      { x: -12, z: 12 }, { x: -12, z: -12 }
+    ];
+    wheelsPos.forEach(p => {
+      const w = new THREE.Mesh(tireGeom, black);
+      w.position.set(p.x, 6, p.z);
+      w.castShadow = true; w.receiveShadow = true;
+      car.add(w);
+    });
+
+    car.scale.set(0.9, 0.9, 0.9);
+    return car;
+  }
+
+  // --- LOGIC ---
   resetGame() {
+    this.resetGameLogic();
+    if(this.scene) {
+        this.buildScene();
+    }
+  }
+
+  resetGameLogic() {
     const track = this.tracks[this.currentTrackIndex];
     this.player = {
       id: 0, x: track.waypoints[0].x, y: track.waypoints[0].y, angle: 0, speed: 0, lap: 0,
@@ -79,7 +257,7 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
       const dt = Math.min((time - this.lastTime) / 1000, 0.1);
       this.lastTime = time;
       this.update(dt);
-      this.draw();
+      this.render3D();
       this.animationId = requestAnimationFrame(loop);
     };
     this.animationId = requestAnimationFrame(loop);
@@ -140,67 +318,37 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private draw() {
-    this.ctx.fillStyle = '#1A1814'; // Canvas wrapper bg (bedrock black)
-    this.ctx.fillRect(0,0,1400,750);
-    this.drawTrack();
-    this.drawF1Car(this.player, '#44E8FF', '#00d2ff', true); // Car body player (diamond blue)
-    this.aiCars.forEach(ai => this.drawF1Car(ai, ai.c1, ai.c2, false));
-  }
+  private render3D() {
+    if(!this.renderer) return;
 
-  private drawTrack() {
-    const t = this.tracks[this.currentTrackIndex];
-    this.ctx.lineJoin = 'round'; this.ctx.lineCap = 'round';
-    
-    // Stadium Walls
-    this.ctx.strokeStyle = '#3A3628'; // MC wood
-    this.ctx.lineWidth = this.trackWidth + 80; this.ctx.beginPath();
-    this.ctx.moveTo(t.waypoints[0].x, t.waypoints[0].y); t.waypoints.forEach(w => this.ctx.lineTo(w.x,w.y));
-    this.ctx.closePath(); this.ctx.stroke();
-    // Wall Outlines
-    this.ctx.strokeStyle = '#000'; this.ctx.lineWidth = this.trackWidth + 84; this.ctx.stroke();
-
-    // Grass
-    this.ctx.strokeStyle = '#6AAA2A'; // Grass runoff (MC grass dark)
-    this.ctx.lineWidth = this.trackWidth + 60; this.ctx.beginPath();
-    this.ctx.moveTo(t.waypoints[0].x, t.waypoints[0].y); t.waypoints.forEach(w => this.ctx.lineTo(w.x,w.y));
-    this.ctx.closePath(); this.ctx.stroke();
-    
-    // Kerbs (alternating)
-    this.ctx.lineWidth = this.trackWidth + 10;
-    this.ctx.setLineDash([40, 40]);
-    this.ctx.strokeStyle = '#FF2244'; // MC redstone
-    this.ctx.stroke();
-    this.ctx.strokeStyle = '#F5F0E0'; // MC wool white
-    this.ctx.lineDashOffset = 40;
-    this.ctx.stroke();
-    this.ctx.setLineDash([]);
-    this.ctx.lineDashOffset = 0;
-
-    // Road
-    this.ctx.strokeStyle = '#2A2620'; // Asphalt (dark MC stone)
-    this.ctx.lineWidth = this.trackWidth; this.ctx.stroke();
-    
-    // Centre line dashes
-    this.ctx.strokeStyle = '#FFD020'; // Centre line (MC gold)
-    this.ctx.setLineDash([30,30]); this.ctx.lineWidth = 2; this.ctx.stroke(); this.ctx.setLineDash([]);
-  }
-
-  private drawF1Car(car: any, c1: string, c2: string, isP: boolean) {
-    this.ctx.save(); this.ctx.translate(car.x, car.y); this.ctx.rotate(car.angle);
-    this.ctx.fillStyle = c1; 
-    if(isP) { 
-      this.ctx.shadowBlur=15; 
-      this.ctx.shadowColor='#44E8FF'; 
+    // Sync models
+    const pMesh = this.carMeshes[0];
+    if(pMesh) {
+      pMesh.position.set(this.player.x, 2, this.player.y);
+      pMesh.rotation.y = -this.player.angle;
     }
-    this.ctx.beginPath(); this.ctx.moveTo(35,0); this.ctx.lineTo(10,8); this.ctx.lineTo(-20,12); this.ctx.lineTo(-25,0); this.ctx.lineTo(-20,-12); this.ctx.lineTo(10,-8); this.ctx.closePath(); this.ctx.fill();
-    this.ctx.fillStyle = c2; this.ctx.fillRect(-10,-10,15,20);
-    this.ctx.fillStyle = '#000'; this.ctx.fillRect(25,-14,8,28); this.ctx.fillRect(-30,-15,10,30);
+
+    this.aiCars.forEach(ai => {
+      const m = this.carMeshes[ai.id];
+      if(m) {
+        m.position.set(ai.x, 2, ai.y);
+        m.rotation.y = -ai.angle;
+      }
+    });
+
+    // Dynamic Follow Camera
+    const camDist = 180;
+    const camHeight = 80;
+    const targetX = this.player.x - Math.cos(this.player.angle) * camDist;
+    const targetZ = this.player.y - Math.sin(this.player.angle) * camDist;
     
-    this.ctx.font = 'bold 8px "Press Start 2P"'; 
-    this.ctx.fillStyle = '#fff'; 
-    this.ctx.fillText(isP ? 'P1' : 'AI', -5, 3);
-    this.ctx.restore();
+    this.camera.position.x += (targetX - this.camera.position.x) * 0.1;
+    this.camera.position.z += (targetZ - this.camera.position.z) * 0.1;
+    this.camera.position.y += (camHeight - this.camera.position.y) * 0.1;
+
+    this.camera.lookAt(this.player.x, 0, this.player.y);
+
+    this.renderer.render(this.scene, this.camera);
   }
 
   private distToSeg(p: any, v: any, w: any) {

@@ -1,21 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700&display=swap');
 
 .f1-stadium {
-    width: 100%; height: 100vh; background: #2E2A1E; // MC void
+    width: 100%; height: 100vh; background: #0055BF; // Lego Blue
     display: flex; flex-direction: column; overflow: hidden;
 }
 
 .top-nav {
-    background: #3A3628; // MC wood
+    background: #F2CD37; // Lego Yellow
     border-bottom: 4px solid #000;
-    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.7), inset 0 4px 0 rgba(255,240,180,0.25);
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3), inset 0 4px 0 rgba(255,255,255,0.4);
     padding: 15px 30px; display: flex; align-items: center; justify-content: space-between; z-index: 10;
 }
 
 .branding { display: flex; align-items: center; gap: 15px; }
-.branding mat-icon { color: #A0FF28; font-size: 32px; width: 32px; height: 32px; }
-.branding span { font-family: 'Press Start 2P', monospace; font-size: 1.1rem; color: #A0FF28; text-shadow: 2px 2px 0 #000; }
-.branding span span { color: #FFD020; }
+.branding mat-icon { color: #E3000B; font-size: 32px; width: 32px; height: 32px; }
+.branding span { font-family: 'Press Start 2P', monospace; font-size: 1.1rem; color: #E3000B; text-shadow: 2px 2px 0 #000; }
+.branding span span { color: #FFFFFF; }
 
 .telemetry-top { display: flex; align-items: center; gap: 30px; }
 .t-item { display: flex; flex-direction: column; }
@@ -26,9 +26,9 @@
 
 .controls { display: flex; gap: 15px; align-items: center; }
 .circuit-picker { 
-    background: #3A3628; border: 2px solid #000; color: #e8eaed; 
+    background: #E3000B; border: 2px solid #000; color: #fff; 
     font-family: 'Press Start 2P', monospace; font-size: 0.5rem; 
-    padding: 10px 15px; border-radius: 0; outline: none; 
+    padding: 10px 15px; border-radius: 0; outline: none; box-shadow: 2px 2px 0 #000;
 }
 
 .arena { flex: 1; position: relative; background: #000; cursor: crosshair; }
@@ -53,8 +53,8 @@
 .finish p { font-family: 'Press Start 2P', monospace; font-size: 0.8rem; color: #fff; margin-bottom: 30px; }
 
 .telemetry-footer { 
-    background: #3A3628; border-top: 4px solid #000;
-    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.7), inset 0 4px 0 rgba(255,240,180,0.25);
+    background: #F2CD37; border-top: 4px solid #000;
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3), inset 0 4px 0 rgba(255,255,255,0.4);
     padding: 20px 40px; display: flex; gap: 40px; 
 }
 
@@ -66,7 +66,7 @@
 .gauge-box { width: 100%; }
 .gauge-bar { width: 100%; height: 10px; background: #000; border-radius: 0; overflow: hidden; margin-bottom: 10px; border: 2px solid #000; }
 .fill { height: 100%; }
-.fill.health { background: #A0FF28; } // XP green
+.fill.health { background: #1DA15C; } // Lego Green
 .fill.tires { background: #FFD020; } // gold
 .labels { display: flex; justify-content: space-between; font-family: 'Press Start 2P', monospace; font-size: 0.4rem; color: rgba(255,255,255,0.5); }
 
