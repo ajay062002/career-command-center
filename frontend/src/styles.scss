@@ -466,9 +466,41 @@ a { text-decoration: none; }
 
 // ── Snackbar ──────────────────────────────────────────────────────────────────
 .mat-mdc-snack-bar-container {
-  --mdc-snackbar-container-color: var(--mc-stone) !important;
-  border: 2px solid #000 !important;
+  --mdc-snackbar-container-color: #1A1814 !important;
+  --mdc-snackbar-supporting-text-color: #F5F0E0 !important;
+  border: 3px solid var(--mc-diamond) !important;
   border-radius: 0 !important;
+  box-shadow:
+    inset -3px -3px 0 rgba(0,0,0,0.8),
+    inset 3px 3px 0 rgba(68,232,255,0.2),
+    0 6px 0 rgba(0,0,0,0.9) !important;
+
+  .mat-mdc-snack-bar-label {
+    color: #F5F0E0 !important;
+    font-family: var(--font-body) !important;
+    font-weight: 600 !important;
+  }
+
+  .mat-mdc-button {
+    color: var(--mc-diamond) !important;
+    font-weight: 700 !important;
+  }
+
+  // Success variant
+  &.success-snack {
+    --mdc-snackbar-container-color: #0A1E0A !important;
+    border-color: var(--mc-xp) !important;
+    box-shadow: inset -3px -3px 0 rgba(0,0,0,0.8), inset 3px 3px 0 rgba(160,255,40,0.15), 0 6px 0 rgba(0,0,0,0.9) !important;
+    .mat-mdc-snack-bar-label { color: var(--mc-xp) !important; }
+  }
+
+  // Error variant
+  &.error-snack {
+    --mdc-snackbar-container-color: #1E0A0A !important;
+    border-color: var(--mc-redstone) !important;
+    box-shadow: inset -3px -3px 0 rgba(0,0,0,0.8), inset 3px 3px 0 rgba(255,34,68,0.15), 0 6px 0 rgba(0,0,0,0.9) !important;
+    .mat-mdc-snack-bar-label { color: var(--mc-redstone) !important; }
+  }
 }
 
 // ── XP Bar — reusable progress style ─────────────────────────────────────────
