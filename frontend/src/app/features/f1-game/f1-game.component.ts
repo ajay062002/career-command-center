@@ -251,14 +251,21 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
 
   resetGameLogic() {
     const track = this.tracks[this.currentTrackIndex];
+    
+    // F1 Grid Position Layout
+    const sx = track.waypoints[0].x;
+    const sy = track.waypoints[0].y;
+    
     this.player = {
-      id: 0, x: track.waypoints[0].x, y: track.waypoints[0].y, angle: 0, speed: 0, lap: 0,
-      steeringAngle: 0, tireWear: 1.0, health: 100, targetWP: 1
+      id: 0, x: sx + 40, y: sy - 20, angle: 0, speed: 0, lap: 0,
+      steeringAngle: 0, tireWear: 1.0, health: 100, targetWP: 1, invuln: 0
     };
+    
     this.aiCars = this.teams.slice(1).map((team, i) => ({
-      id: i + 1, x: track.waypoints[0].x - 60, y: track.waypoints[0].y + (i+1)*40, 
-      angle: 0, speed: 0, lap: 0, targetWP: 1, c1: team.c1, c2: team.c2, health: 100
+      id: i + 1, x: sx - (i * 60) - 20, y: sy + (i % 2 === 0 ? 40 : -40), 
+      angle: 0, speed: 0, lap: 0, targetWP: 1, c1: team.c1, c2: team.c2, health: 100, invuln: 0
     }));
+    
     this.gamePhase = 'start';
     this.countdown = 3;
     this.lastTime = performance.now();
@@ -267,8 +274,21 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   onTrackChange(event: any) { this.currentTrackIndex = +event.target.value; this.resetGame(); }
 
   private keys: { [key: string]: boolean } = {};
-  @HostListener('window:keydown', ['$event']) onKeyDown(e: KeyboardEvent) { this.keys[e.key] = true; }
-  @HostListener('window:keyup', ['$event']) onKeyUp(e: KeyboardEvent) { this.keys[e.key] = false; }
+
+  @HostListener('window:keydown', ['$event']) 
+  onKeyDown(e: KeyboardEvent) { 
+    this.keys[e.key] = true; 
+    this.keys[e.key.toLowerCase()] = true; // Handle caps lock
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+      e.preventDefault(); // Stop window scrolling
+    }
+  }
+
+  @HostListener('window:keyup', ['$event']) 
+  onKeyUp(e: KeyboardEvent) { 
+    this.keys[e.key] = false; 
+    this.keys[e.key.toLowerCase()] = false;
+  }
 
   private startGameLoop() {
     const loop = (time: number) => {
@@ -291,7 +311,7 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
 
     this.updateCar(this.player, this.keys, dt);
     this.aiCars.forEach(ai => this.updateAI(ai, dt));
-    this.checkCollisions();
+    this.checkCollisions(dt);
   }
 
   private checkWaypoint(car: any) {
@@ -312,6 +332,8 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   }
 
   private updateCar(car: any, input: any, dt: number) {
+    if (car.invuln > 0) car.invuln -= dt;
+
     const isDestroyed = car.health <= 0;
     const accel = isDestroyed ? 0 : 600;
     const friction = 0.98;
@@ -321,7 +343,7 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     if (input.ArrowDown || input.s) car.speed -= accel * dt * 0.7;
     car.speed *= friction;
     
-    if (isDestroyed) car.speed *= 0.9; // quickly halt if destroyed
+    if (isDestroyed) car.speed *= 0.9;
 
     if (Math.abs(car.speed) > 10) {
       if (input.ArrowLeft || input.a) car.angle -= turn * dt * (car.speed / 400);
@@ -333,8 +355,11 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     if (this.onTrack(nextX, nextY)) { 
       car.x = nextX; car.y = nextY; 
     } else { 
-      car.speed *= -0.5; 
-      car.health -= 5;
+      car.speed *= -0.8; 
+      if (!isDestroyed && car.invuln <= 0) {
+        car.health -= 5;
+        car.invuln = 0.5;
+      }
     }
     
     car.health = Math.max(0, car.health);
@@ -353,6 +378,8 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
   }
 
   private updateAI(car: any, dt: number) {
+    if (car.invuln > 0) car.invuln -= dt;
+    
     const track = this.tracks[this.currentTrackIndex];
     const target = track.waypoints[car.targetWP];
     const dx = target.x - car.x, dy = target.y - car.y;
@@ -360,15 +387,37 @@ export class F1GameComponent implements AfterViewInit, OnDestroy {
     this.checkWaypoint(car);
     
     car.angle += (Math.atan2(dy, dx) - car.angle) * 3 * dt;
-    car.speed = 340;
+    
+    // Smooth AI acceleration instead of instant bulldozer 340 speed
+    const maxSpeed = 340;
+    if (car.speed < maxSpeed) {
+      car.speed += 400 * dt;
+    }
+    
     car.x += Math.cos(car.angle)*car.speed*dt;
     car.y += Math.sin(car.angle)*car.speed*dt;
   }
 
-  private checkCollisions() {
+  private checkCollisions(dt: number) {
     this.aiCars.forEach(ai => {
       const dx = this.player.x - ai.x, dy = this.player.y - ai.y;
-      if (Math.sqrt(dx*dx+dy*dy) < 45) { this.player.speed *= -0.7; this.player.health -= 5; ai.speed *= -0.7; }
+      if (Math.sqrt(dx*dx+dy*dy) < 45) { 
+        if (this.player.invuln <= 0) {
+            this.player.health -= 5; 
+            this.player.invuln = 0.5;
+        }
+        
+        // Push apart
+        const pushAngle = Math.atan2(dy, dx);
+        this.player.x += Math.cos(pushAngle) * 5;
+        this.player.y += Math.sin(pushAngle) * 5;
+        ai.x -= Math.cos(pushAngle) * 5;
+        ai.y -= Math.sin(pushAngle) * 5;
+
+        // Dampen speeds
+        this.player.speed *= 0.8; 
+        ai.speed *= 0.8; 
+      }
     });
   }
 
