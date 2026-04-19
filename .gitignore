@@ -65,3 +65,9 @@ build.log
 error.log
 frontend_error.log
 scraper.log
+
+# Generated outputs
+outputs/
+
+# Legacy backend
+backend/
