@@ -1,160 +1,115 @@
-<div align="center">
+# Career Command Center
 
-# 🚀 Career Command Center
+A full-stack job application tracker with an AI resume tailor. Track every application through the pipeline, get reminders, view analytics, and auto-rewrite your resume bullets to match any job description.
 
-### Your all-in-one career tracking dashboard
-
-[![Live Site](https://img.shields.io/badge/Live%20Site-ajaylive.com-0059B3?style=for-the-badge&logo=vercel&logoColor=white)](https://ajaylive.com)
-[![Angular](https://img.shields.io/badge/Angular-17-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io)
-[![Django](https://img.shields.io/badge/Django-5-092E20?style=for-the-badge&logo=django&logoColor=white)](https://djangoproject.com)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Render-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://render.com)
-[![Vercel](https://img.shields.io/badge/Frontend-Vercel-000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
-
-Track job applications, RTR requests, submissions, reminders, and study sessions — all in one place.
-
-**[➡️ View Live Site](https://ajaylive.com)**
-
-</div>
+Live at [ajaylive.com](https://ajaylive.com)
 
 ---
 
-## 📸 Screenshots
+## What it does
 
-> **Dashboard**
-
-![Dashboard](https://i.imgur.com/placeholder-dashboard.png)
-<!-- Replace with real screenshot: drag an image into this GitHub issue/PR edit box to get a URL, then paste here -->
-
-> **RTR Tracker**
-
-![RTR Tracker](https://i.imgur.com/placeholder-rtr.png)
-
-> **Submissions Pipeline**
-
-![Submissions](https://i.imgur.com/placeholder-submissions.png)
+- **Application tracking** — add jobs, move them through stages (Applied → Screened → Interview → Offer → Rejected), add notes and reminders
+- **RTR pipeline** — right-to-represent tracking for contract roles
+- **Analytics dashboard** — charts showing applications by status, activity over time, response rates
+- **AI resume tailor** — paste a job description, get your resume bullets rewritten to match it using the Anthropic API
+- **Resume builder** — generate a structured resume from your saved profile data
+- **Role-based access** — admin controls, token-based auth
 
 ---
 
-## ✨ Features
-
-| Feature | Description |
-|---------|-------------|
-| 📊 **Dashboard** | Stats overview — total jobs, RTRs, submissions, reminders at a glance |
-| 💼 **Jobs** | Track job applications with status, company, and notes |
-| 📋 **RTR Tracker** | Right-to-represent tracker with vendor grouping and push-to-submission |
-| 📤 **Submissions** | Full submission pipeline with status tracking |
-| 🔔 **Reminders** | Date-based reminder system with priority levels |
-| 📚 **Study** | Log study sessions and topics |
-| 📈 **Analytics** | Charts and trends across your job search |
-| 👤 **Profile** | Editable user profile with stats |
-| 🔐 **Admin** | User management portal (admin role only) |
-
----
-
-## 🛠 Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Angular 17 (standalone components, Angular Material) |
-| Backend | Django 5 + Django REST Framework |
-| Database | PostgreSQL (Render) |
-| Auth | Token-based (DRF Knox) |
-| Frontend host | Vercel |
-| Backend host | Render |
-| Domain | Namecheap → ajaylive.com |
+| Frontend | Angular 17 (TypeScript, RxJS, standalone components) |
+| Backend | Python, Django REST Framework |
+| Database | PostgreSQL |
+| Auth | DRF Token Authentication |
+| AI | Anthropic API (resume tailoring) |
+| Deployment | Railway |
 
 ---
 
-## 🚀 Local Development
+## Project Structure
 
-### Prerequisites
-- Node.js 18+
-- Python 3.11+
-- PostgreSQL (optional — SQLite works for quick dev)
-
-### 1. Clone
-
-```bash
-git clone https://github.com/ajay062002/career-command-center.git
-cd career-command-center
+```
+career-command-center/
+│
+├── frontend/                          # Angular 17 SPA
+│   └── src/app/
+│       ├── core/                      # Auth service, HTTP interceptor, guards
+│       ├── shared/                    # Reusable components, pipes
+│       └── features/
+│           ├── dashboard/             # Overview + stats
+│           ├── applications/          # Job application CRUD + pipeline
+│           ├── resume-builder/        # Resume editor + AI tailor
+│           ├── analytics/             # Charts and reports
+│           └── rtr/                   # RTR pipeline
+│
+└── backend/                           # Django REST Framework API
+    ├── core/
+    │   ├── views/
+    │   │   ├── auth.py                # login, logout, register, profile
+    │   │   ├── applications.py        # job CRUD, status updates
+    │   │   ├── analytics.py           # aggregation queries
+    │   │   ├── resume.py              # resume generation
+    │   │   └── ai_tailor.py          # Anthropic API integration
+    │   ├── models.py                  # User, Job, Application, Resume
+    │   ├── serializers.py
+    │   └── urls.py
+    └── config/
+        └── settings.py
 ```
 
-### 2. Backend
+---
 
+## Running Locally
+
+### Backend
 ```bash
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-
-# Install dependencies
+cd backend
 pip install -r requirements.txt
-
-# Create .env file
-SECRET_KEY=your-secret-key-here
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
-CORS_ALLOWED_ORIGINS=http://localhost:4200
-ADMIN_PASSWORD=admin123
-
-# Run migrations and seed admin user
+cp .env.example .env        # add DB_URL, SECRET_KEY, ANTHROPIC_API_KEY
 python manage.py migrate
-python manage.py seed
-
-# Start server (runs on http://localhost:8000)
 python manage.py runserver
 ```
 
-### 3. Frontend
-
+### Frontend
 ```bash
 cd frontend
 npm install
-ng serve    # runs on http://localhost:4200
+ng serve
 ```
 
-Login with: `admin` / whatever you set as `ADMIN_PASSWORD`
+Open [http://localhost:4200](http://localhost:4200)
 
 ---
 
-## ☁️ Production Deployment
+## Environment Variables
 
-### Backend → [Render.com](https://render.com)
-
-`render.yaml` handles everything. Set these env vars in Render dashboard:
-
-```
-SECRET_KEY          → random 50-char string
-DEBUG               → false
-ALLOWED_HOSTS       → api.ajaylive.com,career-command-center-api.onrender.com
-CORS_ALLOWED_ORIGINS → https://ajaylive.com,https://www.ajaylive.com
-DATABASE_URL        → from Render PostgreSQL add-on
-ADMIN_PASSWORD      → your secure password
-```
-
-### Frontend → [Vercel](https://vercel.com)
-
-Connect the GitHub repo. `frontend/vercel.json` handles build config + SPA routing automatically.
-
-### DNS (Namecheap)
-
-| Type | Host | Points to |
-|------|------|-----------|
-| A | `@` | `216.198.79.1` (Vercel) |
-| CNAME | `www` | Vercel DNS target |
-| CNAME | `api` | `career-command-center-api.onrender.com` |
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `SECRET_KEY` | Django secret key |
+| `ANTHROPIC_API_KEY` | For AI resume tailoring |
+| `ALLOWED_HOSTS` | Comma-separated allowed hosts |
 
 ---
 
-## ⚠️ Important Notes
+## API Endpoints
 
-- **Render free tier sleeps** after 15 min of inactivity — first request after sleep takes ~30 sec to wake up
-- **PostgreSQL on Render free tier expires April 26 2026** — upgrade or migrate the database before then
-- Admin account is auto-created on every deploy via `python manage.py seed` using the `ADMIN_PASSWORD` env var
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/login/` | Login, returns token |
+| POST | `/api/auth/register/` | Register |
+| GET/POST | `/api/jobs/` | List / create job applications |
+| PATCH | `/api/jobs/<id>/` | Update job status |
+| GET | `/api/analytics/` | Aggregated stats |
+| POST | `/api/tailor/` | AI resume tailoring |
+| GET/POST | `/api/resume/` | Resume data |
 
 ---
 
-<div align="center">
+## Source
 
-Built by **Ajay** · Live at **[ajaylive.com](https://ajaylive.com)**
-
-</div>
+[github.com/ajay062002/career-command-center](https://github.com/ajay062002/career-command-center)
